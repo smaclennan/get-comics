@@ -61,29 +61,6 @@
  */
 #define BUFSIZE		2048
 
-#ifdef COMICS_3
-#include <curl/curl.h>
-
-struct connection {
-	char *url;
-	char *host; // filled by read_config
-	char *regexp;
-	char *regfname;
-	int   regmatch;
-	int   matched;
-	char *outname;
-	char *base_href;
-	char *referer; // king features needs this
-	unsigned days; // bitmask
-	int optional;
-
-	CURL *curl;
-
-	FILE *out;
-
-	struct connection *next;
-};
-#else
 struct connection {
 	char *url;
 	char *host; // filled by read_config
@@ -121,7 +98,6 @@ struct connection {
 
 	struct connection *next;
 };
-#endif
 
 extern char *comics_dir;
 extern struct connection *comics;
