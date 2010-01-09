@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# configurable
+BASE=$HOME/comics
+#XML=/usr/share/get-comics/comics.xml
+#XML2=/usr/share/get-comics/comics-com.xml
+if false ; then
+  DIR=`date +%Y%m%d`
+else
+  DIR=today
+fi
+# end
+
+# For running from crontab
+mkdir -p $BASE/$DIR
+cd $BASE/$DIR || { echo "Problems with $BASE/$DIR"; exit 1; }
+
+if [ 1 -eq 1 ] ; then
+  rm -f *
+  get-comics -d. $XML 2> $BASE/probs.xml | tee $BASE/output
+fi
+
+if [ 0 -eq 1 ] ; then
+  get-comics -d. $XML2 2> $BASE/probs2.xml | tee $BASE/output2
+fi
+
+# Move any leftover html files
+rm -rf $BASE/debug
+mkdir -p $BASE/debug
+find -iname "*.htm*" -exec mv {} $BASE/debug \;
+
+cd $BASE
+
+cat<<EOF >index.html
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head><title>Comics for $DIR</title></head>
+<body>
+<center>
+<h1>Comics for $DIR</h1>
+
+EOF
+
+if [ -s output ] ; then
+  echo "<p><table><tr><td><pre>" >> index.html
+  cat output >> index.html
+  echo "</pre></table>" >> index.html
+  echo "" >> index.html
+fi
+if [ -s output2 ] ; then
+  echo "<p><table><tr><td><pre>" >> index.html
+  cat output2 >> index.html
+  echo "</pre></table>" >> index.html
+  echo "" >> index.html
+fi
+
+find $DIR \( -name "*.gif" -o -name "*.jpg" -o -name "*.png" \) |
+    sed 's/.*/<p><img src="&" alt="&">/' >> index.html
+
+cat<<EOF >>index.html
+
+<p><a href="http://yow/comics.html">Comics Page</a>
+</center>
+</body>
+</html>
+EOF
