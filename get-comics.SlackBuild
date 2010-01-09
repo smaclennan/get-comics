@@ -1,0 +1,39 @@
+#!/bin/sh
+# Created by Sean MacLennan
+
+CWD=`pwd`
+TMP=${TMP:-/tmp}
+PKG=$TMP/package-get-comics
+
+VERSION=0.4
+BUILD=1sam
+ARCH=i486
+
+[ ! -d $TMP ] || mkdir -p $TMP
+rm -rf $PKG
+mkdir -p $PKG
+
+make || exit 1
+
+make DESTDIR=$PKG PREFIX=/usr install || exit 1
+
+mv $PKG/usr/share/get-comics/comics.xml \
+   $PKG/usr/share/get-comics/comics.xml.new
+
+install -d $PKG/usr/doc/get-comics-$VERSION
+cp README COPYING get-comics.html get-today get-today-http \
+    $PKG/usr/doc/get-comics-$VERSION
+
+install -d $PKG/install
+cat $CWD/slack-desc > $PKG/install/slack-desc
+cat $CWD/doinst.sh > $PKG/install/doinst.sh
+
+# Build the package
+cd $PKG
+makepkg -l n -c n $TMP/get-comics-$VERSION-$ARCH-$BUILD.tgz
+
+# Clean up the extra stuff:
+if [ "$1" = "--cleanup" ]; then
+  rm -rf $TMP/get-comics-${VERSION}
+  rm -rf $PKG
+fi
