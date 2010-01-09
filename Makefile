@@ -11,9 +11,6 @@ all: 	get-comics get-comics.html
 get-comics: $(OBJS)
 	$(CC) $(CFLAGS) -o get-comics $(OBJS) $(LIBS)
 
-http: http.c
-	$(CC) $(CFLAGS) -DSTANDALONE -o http http.c
-
 *.o: get-comics.h
 
 get-comics.html: get-comics.1
