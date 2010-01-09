@@ -5,7 +5,7 @@ CWD=`pwd`
 TMP=${TMP:-/tmp}
 PKG=$TMP/package-get-comics
 
-VERSION=0.4
+VERSION=0.5
 BUILD=1sam
 ARCH=i486
 
