@@ -1,0 +1,22 @@
+GET-COMICS under WINDOWS
+------------------------
+
+Get-comics should compile and run natively under Windows 95 and up. It
+uses winsocks 2.
+
+To compile get-comics you need the libxml2 library for the config
+file.  Igor Zlatkovic provides binary packages for the libxml2 library
+for Windows. You need to download the libxml2 library and the iconv
+library (see links below). He has other libraries associated with
+libxml2, but these are the only ones necessary for get-comics. I used
+libxml2 2.5.7 and iconv 1.8.
+
+Once you install the libxml2 library, get-comics should just
+compile.
+
+Links:
+------
+
+Main libxml2 page: http://xmlsoft.org/
+
+Igor Zlatkovic's page: http://www.zlatkovic.com/projects/libxml/
