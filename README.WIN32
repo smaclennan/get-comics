@@ -9,7 +9,7 @@ file.  Igor Zlatkovic provides binary packages for the libxml2 library
 for Windows. You need to download the libxml2 library and the iconv
 library (see links below). He has other libraries associated with
 libxml2, but these are the only ones necessary for get-comics. I used
-libxml2 2.5.7 and iconv 1.8.
+libxml2 2.5.7, 2.7.6 and iconv 1.8, 1.9.2.
 
 Once you install the libxml2 library, get-comics should just
 compile.

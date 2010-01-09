@@ -27,7 +27,7 @@ static void win32_cleanup(void)
 }
 
 
-int win32_init()
+void win32_init(void)
 {
 	int rc;
 	WSADATA data;
@@ -38,6 +38,4 @@ int win32_init()
 	}
 
 	atexit(win32_cleanup);
-
-	return 0;
 }

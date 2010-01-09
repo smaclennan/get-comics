@@ -45,7 +45,7 @@ char *must_strdup(char *old)
 	return new;
 }
 
-static inline char *must_xml_strdup(xmlChar *old)
+static char *must_xml_strdup(xmlChar *old)
 {
 	return must_strdup((char*)old);
 }
@@ -206,6 +206,7 @@ int read_config(char *fname)
 
 	if(verbose) printf("Reading %s\n", fname);
 
+#ifndef _WIN32
 	if(run_m4) {
 		FILE *in;
 		int out, n, len;
@@ -241,6 +242,7 @@ int read_config(char *fname)
 
 		fname = tmpname;
 	}
+#endif
 
 	LIBXML_TEST_VERSION;
 
@@ -419,7 +421,7 @@ void randomize_comics(void)
 	struct connection tmp;
 	int i, n;
 
-	srand(time(0));
+	srand((unsigned)time(0));
 
 	for(i = 0; i < n_comics; ++i) {
 		n = (rand() >> 3) % n_comics;

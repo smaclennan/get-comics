@@ -164,4 +164,14 @@ int build_request(struct connection *conn);
 #define close closesocket
 #define read(s, b, n)  recv(s, b, n, 0)
 #define write(s, b, n) send(s, b, n, 0)
+
+typedef int socklen_t;
+
+#define unlink _unlink
+#define strdup _strdup
+#define chdir _chdir
+#define stricmp _stricmp
+
+/* from win32.c */
+void win32_init(void);
 #endif
