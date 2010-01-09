@@ -1,0 +1,246 @@
+<?xml version="1.0"?>
+<comics:Configuration xmlns:comics="http://seanm.ca/">
+
+<!-- The comics in this file tend to be grouped by provider. Because
+of this, a given provider tends to get hit all at once. This causes
+connections to fail even though the comic exists (throttling?). By
+randomizing the comics, we lessen this problem.  -->
+<randomize>1</randomize>
+
+<!-- For slow links it helps to limit the number of threads. This
+helps reduce the number of timeouts. -->
+<threads>4</threads>
+
+<!-- ucomics.com -->
+
+<comic> <!-- Bound and Gagged -->
+  <url>http://images.ucomics.com/comics/tmbou/%Y/tmbou%y%m%d.gif</url>
+</comic>
+<comic> <!-- Closer to Home -->
+  <url>http://images.ucomics.com/comics/cl/%Y/cl%y%m%d.gif</url>
+</comic>
+<comic> <!-- Duplex -->
+  <url>http://images.ucomics.com/comics/dp/%Y/dp%y%m%d.gif</url>
+</comic>
+<comic> <!-- Lio -->
+  <url>http://images.ucomics.com/comics/lio/%Y/lio%y%m%d.gif</url>
+</comic>
+<comic> <!-- Loose Parts -->
+  <url>http://images.ucomics.com/comics/tmloo/%Y/tmloo%y%m%d.gif</url>
+</comic>
+<comic> <!-- Quigmans -->
+  <url>http://images.ucomics.com/comics/tmqui/%Y/tmqui%y%m%d.gif</url>
+  <days>Xmtwtfs</days>
+</comic>
+<comic> <!-- Red Meat -->
+  <url>http://www.redmeat.com/redmeat/current/index-1.gif</url>
+  <days>XXXXXfX</days>
+</comic>
+<comic> <!-- Tom the Dancing Bug -->
+  <url>http://images.ucomics.com/comics/td/%Y/td%y%m%d.gif</url>
+  <days>XXXXXXs</days>
+</comic>
+<comic> <!-- The 5th Wave -->
+  <url>http://images.ucomics.com/comics/fw/%Y/fw%y%m%d.gif</url>
+  <days>sXXXXXX</days>
+</comic>
+
+<!-- Independents -->
+
+<comic> <!-- Aislin -->
+  <url>http://www.montrealgazette.com/opinion/editorial-cartoons/index.html</url>
+  <regexp>http://.*/editorial-cartoons/[0-9]+\.(gif|jpg|bin)</regexp>
+  <output>aislin.jpg</output>
+  <days>Xmtwtfs</days>
+</comic>
+<comic><!-- Biff -->
+  <url>http://www.thebookofbiff.com</url>
+  <regexp>http://www.thebookofbiff.com/comics/.*\.png</regexp>
+  <days>XmtwtfX</days>
+</comic>
+<comic><!-- Diesel Sweeites -->
+  <url>http://www.dieselsweeties.com/</url>
+  <regexp>/h?strips/[^.]+.(png|gif)</regexp>
+</comic>
+<comic> <!-- Freefall -->
+  <url>http://freefall.purrsia.com/</url>
+  <days>XmXwXfX</days>
+  <regexp>/ff[0-9]+/f[vc][0-9]+\.(gif|png)</regexp>
+</comic>
+<comic><!-- Girls With Slingshots -->
+  <url>http://www.daniellecorsetto.com/gws.html</url>
+  <regexp>images/gws/GWS[0-9]+\.jpg</regexp>
+</comic>
+<comic> <!-- Kevin and Kell -->
+  <url>http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.gif</url>
+</comic>
+<comic> <!-- PVP -->
+  <url>http://www.pvponline.com/</url>
+  <regexp>http://www.pvponline.com/comics/pvp[0-9]+[a-z]*\.(gif|png)</regexp>
+  <output>pvp.gif</output>
+</comic>
+<comic><!-- Questionable Content -->
+  <url>http://www.questionablecontent.net</url>
+  <regexp>http://www.questionablecontent.net/comics/[0-9]*\.png</regexp>
+  <output>questionable.png</output>
+  <days>XmtwtfX</days>
+</comic>
+<comic><!-- Something Happens -->
+  <url>http://somethinghappens.net/comics/sh%Y%m%d.gif</url>
+  <days>XXXwXXX</days>
+</comic>
+<!-- Something Positive -->
+  <!-- http://www.somethingpositive.net/arch/sp%m%d%Y.gif -->
+<comic> <!-- Userfriendly -->
+  <url>http://www.userfriendly.org/static/</url>
+  <regexp>/cartoons/archives/[^/]+/xuf[0-9]+\.gif</regexp>
+</comic>
+<comic><!-- Wapsi Square -->
+  <url>http://wapsisquare.com/</url>
+  <regexp>comics/[0-9-]+_?[a-z-]+\.(gif|jpg)</regexp>
+  <output>wapsi.jpg</output>
+</comic>
+
+<!-- keenspace -->
+
+<comic> <!-- Antihero for Hire -->
+  <url>http://www.antiheroforhire.com/</url>
+  <regexp>/comics/afh[0-9]+a\.(gif|jpg|png)</regexp>
+  <days>XmXwXfX</days>
+</comic>
+<comic> <!-- College Roomies From Hell -->
+  <url>http://www.crfh.net/</url>
+  <regexp>2009/crfh[0-9]+[ab]?\.(jpg|png)</regexp>
+</comic>
+<comic><!-- The Devil's Panties -->
+  <url>http://devilspanties.keenspot.com/</url>
+  <regexp>/comics/[0-9]+[ab]?\.jpg</regexp>
+  <referer>url</referer>
+  <output>devilspanties.jpg</output>
+</comic>
+<comic> <!-- GPF -->
+  <url>http://www.gpf-comics.com/</url>
+  <regexp>/comics/gpf[^.]+\.(gif|jpg|png)</regexp>
+  <days>XmXwXwX</days>
+</comic>
+<comic> <!-- Out There -->
+  <url>http://www.outtherecomic.com/comics/%Y%m%d.gif</url>
+  <output>out-there.gif</output>
+  <days>Xmtwtfs</days>
+</comic>
+<comic> <!-- Sinfest -->
+  <url>http://www.sinfest.net/comikaze/comics/%Y-%m-%d.gif</url>
+  <output>sinfest.gif</output>
+</comic>
+<comic><!-- Sorcery 101 -->
+  <url>http://www.sorcery101.net/</url>
+  <regexp>/comics/20[0-9]+\.jpg</regexp>
+  <output>sorcery101.jpg</output>
+</comic>
+<comic><!-- Two Lumps -->
+  <url>http://www.twolumps.net/comics/%Y%m%d.jpg</url>
+  <output>twolumps.jpg</output>
+  <days>XmXwXfX</days>
+</comic>
+<comic> <!-- Ubersoft Help Desk -->
+  <url>http://www.ubersoft.net/files/comics/hd/hd%Y%m%d.png</url>
+  <days>XmtwtfX</days>
+</comic>
+
+<!-- comics.com -->
+
+<comic> <!-- Brevity -->
+  <url>http://comics.com/brevity/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>brevity.gif</output>
+</comic>
+<comic> <!-- Committed -->
+  <url>http://comics.com/committed/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>committed.gif</output>
+</comic>
+<comic> <!-- Dilbert -->
+  <url>http://dilbert.com/</url>
+  <regexp>http://dilbert.com/dyn/str_strip/[0-9/]*.strip.gif</regexp>
+  <output>dilbert.gif</output>
+  <days>Xmtwtfs</days>
+</comic>
+<comic> <!-- Dilbert - Sunday -->
+  <url>http://dilbert.com/</url>
+  <regexp>http://dilbert.com/dyn/str_strip/[0-9/]*.strip.sunday.gif</regexp>
+  <output>dilbert.gif</output>
+  <days>sXXXXXX</days>
+</comic>
+<comic> <!-- Drabble -->
+  <url>http://comics.com/drabble/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>drabble.gif</output>
+</comic>
+<comic> <!-- F-minus -->
+  <url>http://comics.com/f_minus/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>f_minus.gif</output>
+</comic>
+<comic> <!-- Frank and Ernest -->
+  <url>http://comics.com/frank&amp;ernest/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>franknernest.gif</output>
+</comic>
+<comic> <!-- Free Range -->
+  <url>http://comics.com/free_range/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>free-range.gif</output>
+</comic>
+<comic> <!-- Herman -->
+  <url>http://comics.com/herman/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>herman.gif</output>
+</comic>
+<comic><!-- Moderately Confused -->
+  <url>http://comics.com/moderately_confused/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>moderatlyconfused.gif</output>
+  <days>mtwtfsX</days>
+</comic>
+<comic> <!-- Monty -->
+  <url>http://comics.com/monty/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>monty.gif</output>
+</comic>
+<comic> <!-- Natural Selection -->
+  <url>http://comics.com/natural_selection/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>naturalselection.gif</output>
+</comic>
+<comic> <!-- Off the Mark -->
+  <url>http://comics.com/off_the_mark/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>offthemark.gif</output>
+</comic>
+<comic> <!-- Reality Check -->
+  <url>http://comics.com/reality_check/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>realitycheck.gif</output>
+</comic>
+<comic> <!-- Rubes -->
+  <url>http://comics.com/rubes/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>rubes.gif</output>
+</comic>
+<comic> <!-- Speed Bump -->
+  <url>http://comics.com/speed_bump/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>speedbump.gif</output>
+</comic>
+<comic> <!-- Strange Brew -->
+  <url>http://comics.com/strange_brew/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>strangebrew.gif</output>
+</comic>
+<comic><!-- Working Daze -->
+  <url>http://comics.com/working_daze/</url>
+  <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
+  <output>working_daze.gif</output>
+</comic>
+
+</comics:Configuration>
