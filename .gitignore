@@ -1,3 +1,4 @@
+*.o
 get-comics
 http
 get-comics.html
