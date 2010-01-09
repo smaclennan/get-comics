@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# configurable
+BASE=$HOME/public_html/comics
+#XML=/usr/share/get-comics/comics.xml
+if false ; then
+  DIR=`date +%Y%m%d`
+else
+  DIR=today
+fi
+# end
+
+# For running from crontab
+cd $BASE
+
+mkdir -p $DIR
+cd $DIR || { echo "Problems with $DIR"; exit 1; }
+
+if [ 1 -eq 1 ] ; then
+  rm -f *
+  get-comics -d. $XML 2> $BASE/probs.xml | tee $BASE/output
+fi
+
+cd $BASE
+
+cat<<EOF >index.html
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head><title>Comics for $DIR</title></head>
+<body>
+<center>
+<h1>Comics for $DIR</h1>
+
+EOF
+
+if [ -s output ] ; then
+  echo "<p><table><tr><td><pre>" >> index.html
+  cat output >> index.html
+  echo "</pre></table>" >> index.html
+  echo "" >> index.html
+fi
+
+ls $DIR/*.gif $DIR/*.png $DIR/*.jpg | sed 's/.*/<p><img src="&" alt="&">/' >> index.html
+
+cat<<EOF >>index.html
+
+<p><a href="http://yow/comics.html">Comics Page</a>
+</center>
+</body>
+</html>
+EOF
