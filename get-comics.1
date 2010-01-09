@@ -1,0 +1,180 @@
+.TH GET-COMICS "1" "October 2002" "get-comics" "get-comics"
+.SH NAME
+get-comics \- download comics from the net
+.SH SYNOPSIS
+.B get-comics
+[\fI-kv\fR] 
+[\fI-d directory\fR] 
+[\fI-p proxy\fR] 
+[\fI-t threads\fR]
+[\fI-x failed_xml_file\fR]
+[\fIxml_file\fR]
+.br
+.B get-today
+.SH DESCRIPTION
+.PP
+get-comics is a program to batch download comics from the net. It was
+written to automagically download comics every day while I was on
+vacation and computerless.
+.PP
+get-comics uses an xml file to describe how to download the comics.
+.PP
+get-today is a small shell script that puts all the days comics in a
+subdirectory based on the date. It then builds an index.html of the
+comics. It is here as a sample only.
+.SH OPTIONS
+.TP
+\fB\-d directory\fR
+where to download the comics to. Overrides the xml file. Defaults to
+$HOME/comics.
+.TP
+\fB\-k\fR
+keep the downloaded index files. Usually these are deleted. Useful
+for debugging.
+.TP
+\fB\-p proxy[:port]\fR
+proxy and optional port (defaults to 3128). Overrides the xml file.
+.TP
+\fB\-t threads\fR
+number of download threads
+.TP
+\fB\-v\fR
+increase verbosity
+.TP
+\fB\-x xml_failed_file\fR
+put the failed xml in a file.
+.TP
+\fBxml_file\fR
+alternate xml file to use. Defaults to get-comics.xml
+.SH "HOW IT WORKS"
+.PP
+get-comics reads the xml file and downloads the comics. It can
+download more than one comic at a time. The default
+is to limit to 10 concurrent connections, but the \fB\-t threads\fR option
+can be used to override this.
+.PP
+The comics are divided into two types: direct download and
+two-stage download. Direct download corresponds to comics with a fixed
+or date based URL. All URLs are passed through
+.IR strftime ,
+with the current time so that all
+.IR strftime ,
+format characters work.
+.PP
+Two-stage downloads are for non-fixed URLs. First, the comics page is
+downloaded. A regular expression (see
+.BR regex (7))
+is applied to the page and the result is the comic to download.
+.SH "XML FORMAT"
+.PP
+The xml file is very powerful. The sample \fIget-comics.xml\fR file has a lot of
+examples, some fairly complex.
+.PP
+HTML style comments \fB<!-- -->\fR can be placed almost anywhere
+except within tags that expect values.
+.PP
+The following two lines (or something like them) must be at the top of
+the xml file. \fBWarning\fR: I am not an expert on XML. I am pretty
+sure I should have something different for the xmlns:comics parameter,
+but what I describe here works.
+.PP
+.B <?xml version="1.0"?>
+.br
+.B <comics:Configuration xmlns:comics="http://seanm.ca/">
+.PP
+And the following closing tag is needed at the bottom:
+.PP
+.B </comics:Configuration>
+.SH "Top Level Tags"
+.PP
+The following tags are general and are overridden by the command line
+options:
+.TP
+.B <directory>
+specifies the directory to put the comics in.
+.TP
+.B <threads>
+specifies the maximum number of threads to create at one time.
+.TP
+.B <proxy>
+specifies the proxy and an optional port.
+.TP
+.B <timeout>
+specifies the maximum time to wait for a read in milliseconds
+.TP
+.B <comic>
+this tag starts a comic.
+.SH "Comic Tags"
+.TP
+.B <url>
+specifies an URL. Either the comic URL for direct comics, or the index
+page for two-stage comics. The URL is processed through \fIstrftime\fR
+before being used.
+.TP
+.B <regexp>
+for two-stage comics only, this is the regular expression used to try
+to match the comic in the index page.
+.TP
+.B <regmatch>
+if you want to match only a sub-expression of the regular expression,
+put the sub-expression number here. get-comics will store up to three sub-expressions.
+.TP
+.B <days>
+some comics are only available on certain days of the week. The days
+tag has the following format: \fB<days>smtwtfs</days>\fR. i.e. the
+days of the week starting with Sunday. If a certain day should not be
+downloaded, replace it's letter with an X. For example, to download
+comics on Monday, Wednesday, and Friday only:
+\fB<days>XmXwXfX</days>\fR.
+.TP
+.B <output>
+sometimes the file name of the comic will clash with other comics. For
+example, two comics may use the date as the file name. To keep the
+comics from overwriting each other, a unique output file name can be
+specified with this tag.
+.TP
+.B <href>
+sometimes the URL from the regular expression is not good enough to
+specify the entire URL. In this case, you can specify a path to
+prepend with the \fB<href>\fR tag.
+.TP
+.B <optional>
+get-comics complains about comics that it cannot download. Sometimes,
+you expect it to fail often and don't want a warning. The
+\fB<optional>\fR tag tells get-comics not to complain if it cannot
+download the file. Use this flag with caution!
+.IP
+.B <referer>
+Some pages must see a referer to work. You can specify the referer
+here. You can also specify \fBurl\fR and the value from the
+\fB<url>\fR tag will be used.
+.SH "A NOTE ABOUT PROXIES"
+.PP
+get-comics supports accessing the comics via a proxy. There are three
+ways to specify the proxy:
+.PP
+1) The \fB\-p\fR command line option.
+.br
+2) The xml file \fB<proxy>\fR tag.
+.br
+3) The \fBCOMICS_PROXY\fR environment variable.
+.PP
+All proxies are specified as an url with an optional port:
+\fB<url>:<port>\fR. The default port is the squid proxy default: 3128.
+.PP
+The three methods above are listed in order of priority. i.e. The
+command line option overrides the proxy tag which overrides the
+environment variable.
+.SH "SEE ALSO"
+.BR strftime (3),
+.BR regex (7),
+.BR get-comics.xml
+.SH AUTHOR
+Written by Sean MacLennan
+.SH "REPORTING BUGS"
+Report bugs to <comics@seanm.ca>.
+.SH COPYRIGHT
+Copyright \(co 2002 Sean MacLennan
+.br
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
