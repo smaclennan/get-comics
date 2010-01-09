@@ -10,29 +10,32 @@ the comics daily and save them. I had problems getting emacs to
 startup and run reliably, so I quickly wrote the first get-comics.
 
 
-get-comics
-----------
+First get-comics
+----------------
 
-Get-comics is a multi-threaded app that is driven by an xml file to
-download comics. I wrote it multi-threaded because I needed it
-fast. This was basically a prototype. It works, but it tends to swamp
-my proxy server.
+The first get-comics was a multi-threaded app that was driven by an
+xml file to download comics. I wrote it multi-threaded because I
+needed it fast. This was basically a prototype. It worked, but it
+tended to swamp the proxy server I used at the time.
 
 
-get-comics2
------------
-
-Get-comics2 is a single threaded version of get-comics. Rather than
-spawning a thread per connection, it handles all the connections in a
-single thread using the `select' call. I find this version much more
-reliable than the multi-threaded version. It also has lower resource
-usage.
-
-get-comics-3
+get-comics 2
 ------------
 
-Get-comics3 uses libcurl. I am finding that libcurl hangs too
-often. But I am hoping a later version will be more robust.
+The second version of get-comics is a single threaded version. Rather
+than spawning a thread per connection, it handles all the connections
+in a single thread using the `select' call. I find this version much
+more reliable than the multi-threaded version. It also has lower
+resource usage.
+
+This is the current version.
+
+get-comics 3
+------------
+
+The third version of get-comics used libcurl. I found that libcurl
+hangs too often. Since the second version has been reliable for years,
+I basically dropped this version in favour of the second version.
 
 
 Documentation
