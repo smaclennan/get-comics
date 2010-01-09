@@ -444,7 +444,7 @@ static int read_chunkblock(struct connection *conn)
 	size_t bytes;
 
 	bytes = conn->endp - conn->curp;
-	if (bytes > conn->length)
+	if (bytes > (size_t)conn->length)
 		bytes = conn->length;
 
 	if (bytes > 0) {
