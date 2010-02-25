@@ -49,7 +49,8 @@ helps reduce the number of timeouts. -->
 
 <comic> <!-- Aislin -->
   <url>http://www.montrealgazette.com/opinion/editorial-cartoons/index.html</url>
-  <regexp>http://.*/editorial-cartoons/[0-9]+\.(gif|jpg|bin)</regexp>
+  <regexp>src=\"([0-9]+\.bin)\"</regexp>
+  <regmatch>1</regmatch>
   <output>aislin.jpg</output>
   <days>Xmtwtfs</days>
 </comic>
@@ -85,10 +86,11 @@ helps reduce the number of timeouts. -->
   <output>questionable.png</output>
   <days>XmtwtfX</days>
 </comic>
-<comic><!-- Something Happens -->
-  <url>http://somethinghappens.net/comics/sh%Y%m%d.gif</url>
-  <days>XXXwXXX</days>
-</comic>
+<!-- comic --><!-- Something Happens -->
+<!-- On hiatus -->
+  <!-- url>http://somethinghappens.net/comics/sh%Y%m%d.gif</url -->
+  <!-- days>XXXwXXX</days -->
+<!-- /comic -->
 <!-- Something Positive -->
   <!-- http://www.somethingpositive.net/arch/sp%m%d%Y.gif -->
 <comic> <!-- Userfriendly -->
@@ -99,6 +101,7 @@ helps reduce the number of timeouts. -->
   <url>http://wapsisquare.com/</url>
   <regexp>comics/[0-9-]+_?[a-z-]+\.(gif|jpg)</regexp>
   <output>wapsi.jpg</output>
+  <days>XmtwtfX</days>
 </comic>
 
 <!-- keenspace -->
@@ -110,7 +113,7 @@ helps reduce the number of timeouts. -->
 </comic>
 <comic> <!-- College Roomies From Hell -->
   <url>http://www.crfh.net/</url>
-  <regexp>2009/crfh[0-9]+[ab]?\.(jpg|png)</regexp>
+  <regexp>2010/crfh[0-9]+[ab]?\.(jpg|png)</regexp>
 </comic>
 <comic><!-- The Devil's Panties -->
   <url>http://devilspanties.keenspot.com/</url>
@@ -124,7 +127,7 @@ helps reduce the number of timeouts. -->
   <days>XmXwXwX</days>
 </comic>
 <comic> <!-- Out There -->
-  <url>http://www.outtherecomic.com/comics/%Y%m%d.gif</url>
+  <url>http://outthere.keenspace.com/comics/%Y%m%d.gif</url>
   <output>out-there.gif</output>
   <days>Xmtwtfs</days>
 </comic>
@@ -134,7 +137,7 @@ helps reduce the number of timeouts. -->
 </comic>
 <comic><!-- Sorcery 101 -->
   <url>http://www.sorcery101.net/</url>
-  <regexp>/comics/20[0-9]+\.jpg</regexp>
+  <regexp>/comics/sorcery101/20[0-9]+\.jpg</regexp>
   <output>sorcery101.jpg</output>
 </comic>
 <comic><!-- Two Lumps -->
