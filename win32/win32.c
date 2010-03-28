@@ -20,19 +20,17 @@
 
 #include "../get-comics.h"
 
-
 static void win32_cleanup(void)
 {
 	WSACleanup();
 }
 
-
 void win32_init(void)
 {
-	int rc;
 	WSADATA data;
 
-	if((rc = WSAStartup(2, &data))) {
+	int rc = WSAStartup(2, &data);
+	if (rc) {
 		printf("WSAStartup failed %d\n", rc);
 		exit(1);
 	}
