@@ -16,7 +16,7 @@ helps reduce the number of timeouts. -->
 <comic> <!-- Bound and Gagged -->
   <url>http://images.ucomics.com/comics/tmbou/%Y/tmbou%y%m%d.gif</url>
 </comic>
-<comic> <!-- Close to Home -->
+<comic> <!-- Closer to Home -->
   <url>http://images.ucomics.com/comics/cl/%Y/cl%y%m%d.gif</url>
 </comic>
 <comic> <!-- Duplex -->
@@ -57,13 +57,11 @@ helps reduce the number of timeouts. -->
 <comic><!-- Biff -->
   <url>http://www.thebookofbiff.com</url>
   <regexp>http://www.thebookofbiff.com/comics/.*\.png</regexp>
-  <output>biff</output>
   <days>XmtwtfX</days>
 </comic>
 <comic><!-- Diesel Sweeites -->
   <url>http://www.dieselsweeties.com/</url>
   <regexp>/h?strips/[^.]+.(png|gif)</regexp>
-  <output>diesel</output>
 </comic>
 <comic> <!-- Freefall -->
   <url>http://freefall.purrsia.com/</url>
@@ -80,12 +78,12 @@ helps reduce the number of timeouts. -->
 <comic> <!-- PVP -->
   <url>http://www.pvponline.com/</url>
   <regexp>http://www.pvponline.com/comics/pvp[0-9]+[a-z]*\.(gif|png)</regexp>
-  <output>pvp</output>
+  <output>pvp.gif</output>
 </comic>
 <comic><!-- Questionable Content -->
   <url>http://www.questionablecontent.net</url>
   <regexp>http://www.questionablecontent.net/comics/[0-9]*\.png</regexp>
-  <output>questionable</output>
+  <output>questionable.png</output>
   <days>XmtwtfX</days>
 </comic>
 <!-- comic --><!-- Something Happens -->
@@ -102,13 +100,8 @@ helps reduce the number of timeouts. -->
 <comic><!-- Wapsi Square -->
   <url>http://wapsisquare.com/</url>
   <regexp>comics/[0-9-]+_?[a-z-]+\.(gif|jpg)</regexp>
-  <output>wapsi</output>
+  <output>wapsi.jpg</output>
   <days>XmtwtfX</days>
-</comic>
-<comic><!-- xkcd -->
-  <url>http://xkcd.com/</url>
-  <regexp>http://imgs.xkcd.com/comics/[^.]*\.(jpg|png)</regexp>
-  <output>xkcd</output>
 </comic>
 
 <!-- keenspace -->
@@ -126,7 +119,7 @@ helps reduce the number of timeouts. -->
   <url>http://devilspanties.keenspot.com/</url>
   <regexp>/comics/[0-9]+[ab]?\.jpg</regexp>
   <referer>url</referer>
-  <output>devilspanties</output>
+  <output>devilspanties.jpg</output>
 </comic>
 <comic> <!-- GPF -->
   <url>http://www.gpf-comics.com/</url>
@@ -134,22 +127,22 @@ helps reduce the number of timeouts. -->
   <days>XmXwXwX</days>
 </comic>
 <comic> <!-- Out There -->
-  <url>http://outthere.keenspot.com/comics/%Y%m%d.gif</url>
-  <output>out-there</output>
+  <url>http://outthere.keenspace.com/comics/%Y%m%d.gif</url>
+  <output>out-there.gif</output>
   <days>Xmtwtfs</days>
 </comic>
 <comic> <!-- Sinfest -->
   <url>http://www.sinfest.net/comikaze/comics/%Y-%m-%d.gif</url>
-  <output>sinfest</output>
+  <output>sinfest.gif</output>
 </comic>
 <comic><!-- Sorcery 101 -->
   <url>http://www.sorcery101.net/</url>
   <regexp>/comics/sorcery101/20[0-9]+\.jpg</regexp>
-  <output>sorcery101</output>
+  <output>sorcery101.jpg</output>
 </comic>
 <comic><!-- Two Lumps -->
   <url>http://www.twolumps.net/comics/%Y%m%d.jpg</url>
-  <output>twolumps</output>
+  <output>twolumps.jpg</output>
   <days>XmXwXfX</days>
 </comic>
 <comic> <!-- Ubersoft Help Desk -->
@@ -162,95 +155,95 @@ helps reduce the number of timeouts. -->
 <comic> <!-- Brevity -->
   <url>http://comics.com/brevity/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>brevity</output>
+  <output>brevity.gif</output>
 </comic>
 <comic> <!-- Committed -->
   <url>http://comics.com/committed/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>committed</output>
+  <output>committed.gif</output>
 </comic>
 <comic> <!-- Dilbert -->
   <url>http://dilbert.com/</url>
   <regexp>http://dilbert.com/dyn/str_strip/[0-9/]*.strip.gif</regexp>
-  <output>dilbert</output>
+  <output>dilbert.gif</output>
   <days>Xmtwtfs</days>
 </comic>
 <comic> <!-- Dilbert - Sunday -->
   <url>http://dilbert.com/</url>
   <regexp>http://dilbert.com/dyn/str_strip/[0-9/]*.strip.sunday.gif</regexp>
-  <output>dilbert</output>
+  <output>dilbert.gif</output>
   <days>sXXXXXX</days>
 </comic>
 <comic> <!-- Drabble -->
   <url>http://comics.com/drabble/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>drabble</output>
+  <output>drabble.gif</output>
 </comic>
 <comic> <!-- F-minus -->
   <url>http://comics.com/f_minus/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>f_minus</output>
+  <output>f_minus.gif</output>
 </comic>
 <comic> <!-- Frank and Ernest -->
   <url>http://comics.com/frank&amp;ernest/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>franknernest</output>
+  <output>franknernest.gif</output>
 </comic>
 <comic> <!-- Free Range -->
   <url>http://comics.com/free_range/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>free-range</output>
+  <output>free-range.gif</output>
 </comic>
 <comic> <!-- Herman -->
   <url>http://comics.com/herman/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>herman</output>
+  <output>herman.gif</output>
 </comic>
 <comic><!-- Moderately Confused -->
   <url>http://comics.com/moderately_confused/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>moderatlyconfused</output>
+  <output>moderatlyconfused.gif</output>
   <days>mtwtfsX</days>
 </comic>
 <comic> <!-- Monty -->
   <url>http://comics.com/monty/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>monty</output>
+  <output>monty.gif</output>
 </comic>
 <comic> <!-- Natural Selection -->
   <url>http://comics.com/natural_selection/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>naturalselection</output>
+  <output>naturalselection.gif</output>
 </comic>
 <comic> <!-- Off the Mark -->
   <url>http://comics.com/off_the_mark/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>offthemark</output>
+  <output>offthemark.gif</output>
 </comic>
 <comic> <!-- Reality Check -->
   <url>http://comics.com/reality_check/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>realitycheck</output>
+  <output>realitycheck.gif</output>
 </comic>
 <comic> <!-- Rubes -->
   <url>http://comics.com/rubes/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>rubes</output>
+  <output>rubes.gif</output>
 </comic>
 <comic> <!-- Speed Bump -->
   <url>http://comics.com/speed_bump/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>speedbump</output>
+  <output>speedbump.gif</output>
 </comic>
 <comic> <!-- Strange Brew -->
   <url>http://comics.com/strange_brew/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>strangebrew</output>
+  <output>strangebrew.gif</output>
 </comic>
 <comic><!-- Working Daze -->
   <url>http://comics.com/working_daze/</url>
   <regexp>http://[a-z0-9.]*\.com/dyn/str_strip/[0-9/]*.full.gif</regexp>
-  <output>working_daze</output>
+  <output>working_daze.gif</output>
 </comic>
 
 </comics:Configuration>

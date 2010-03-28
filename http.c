@@ -22,7 +22,7 @@
  */
 
 #ifdef _WIN32
-// #define errno WSAGetLastError()
+/* #define errno WSAGetLastError() */
 #define EINPROGRESS WSAEWOULDBLOCK
 #endif
 
