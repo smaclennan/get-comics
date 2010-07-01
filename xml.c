@@ -150,14 +150,6 @@ static void add_referer(struct connection **conn, xmlChar *referer)
 }
 
 
-static void add_optional(struct connection **conn, xmlChar *optional)
-{
-	if (*conn == NULL)
-		*conn = new_comic();
-	(*conn)->optional = strtol((char *)optional, 0, 0);
-}
-
-
 static void parse_comic(xmlDocPtr doc, xmlNodePtr cur)
 {
 	struct connection *new = NULL;
@@ -185,8 +177,6 @@ static void parse_comic(xmlDocPtr doc, xmlNodePtr cur)
 			add_base_href(&new, str);
 		else if (strcmp(name, "referer") == 0)
 			add_referer(&new, str);
-		else if (strcmp(name, "optional") == 0)
-			add_optional(&new, str);
 		else
 			printf("Unexpected entry %s\n", name);
 	}
@@ -413,9 +403,6 @@ int write_comic(struct connection *conn)
 	write_tag("output", conn->outname);
 	write_tag("href", conn->base_href);
 	write_tag("referer", conn->referer);
-	/* bitmask not needed? */
-	if (conn->optional)
-		fputs("  <optional>1</optional>\n", wfp);
 	fputs("</comic>\n", wfp);
 
 	return 0;

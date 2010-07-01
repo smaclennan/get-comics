@@ -72,7 +72,6 @@ struct connection {
 	char *base_href;
 	char *referer; /* king features needs this */
 	unsigned days; /* bitmask */
-	int optional;
 
 	int sock;
 	int connected;
