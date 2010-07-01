@@ -1,6 +1,6 @@
 /*
- * getopt.h - implementation of getopt for incomplete systems
- * Copyright (C) 2003 Sean MacLennan <seanm@seanm.ca>
+ * getopt.h - getopt() for windows
+ * Copyright (C) 1998-2007 Sean MacLennan
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,60 +18,61 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef _GETOPT_H
-#define _GETOPT_H
+#ifndef GETOPT_H
+#define GETOPT_H
 
+#ifdef _WIN32
 #include <string.h>
 
-char *optarg = NULL;
-int   optind = 0;
-int   opterr = 0;
 
-/*
- * I don't like defining functions in include files, but this is
- * usually only used in one file and it makes the porting easier.
- */
-static int getopt(int argc, char * const argv[], const char *optstring)
+int optind = 1;
+char *optarg;
+
+int getopt(int argc, char *argv[], const char *optstring)
 {
-	static int index;
-	char f, *p;
+	static char *argptr;
+	char arg, *p;
 
-	if(optind == 0) { optind = 1; index = 1; }
 	optarg = NULL;
 
-	if(optind >= argc) return -1;
-
-	if(*argv[optind] != '-') return -1;
-
-	f = argv[optind][index];
-	if(f == '-' && index == 1) {
+	if (argptr && !*argptr) {
 		++optind;
-		return -1;
+		argptr = NULL;
 	}
 
-	if((p = strchr(optstring, f)) == NULL) return '?';
+	if (!argptr) {
+		if (optind >= argc)
+			return -1;
 
-	if(*(p + 1) == ':') {
-		if(argv[optind][index + 1]) {
-			optarg = argv[optind] + index + 1;
+		argptr = argv[optind];
+		if (*argptr++ != '-')
+			return -1;
+		if (strcmp(argptr, "-") == 0) {
 			++optind;
-			index = 1;
-		} else {
+			return -1;
+		}
+		if (*argptr == '\0')
+			return -1;
+	}
+
+	arg = *argptr++;
+	p = strchr(optstring, arg);
+	if (p == NULL)
+		return '?';
+
+	if (*(p + 1) == ':') {
+		if (*argptr) {
+			optarg = argptr;
+			argptr = NULL;
 			++optind;
-			index = 1;
-			if(optind >= argc) return '?';
+		} else if (++optind >= argc)
+			return '?';
+		else
 			optarg = argv[optind];
-			++optind;
-		}
-	} else {
-		++index;
-		if(!argv[optind][index]) {
-			++optind;
-			index = 1;
-		}
 	}
 
-	return f;
+	return arg;
 }
+#endif
 
 #endif
