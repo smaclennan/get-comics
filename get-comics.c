@@ -173,6 +173,7 @@ int close_connection(struct connection *conn)
 {
 	if (conn->sock != -1) {
 		++gotit;
+		conn->gotit = 1;
 		--outstanding;
 		if (verbose > 1)
 			printf("Closed %s (%d)\n", conn->url, outstanding);
@@ -442,6 +443,15 @@ int main(int argc, char *argv[])
 	}
 
 	printf("Got %d of %d (%d skipped)\n", gotit, n_comics, skipped);
+
+	/* Dump the missed comics */
+	for (conn = comics; conn; conn = conn->next)
+		if (!conn->gotit) {
+			if (conn->outname)
+				printf("  %s (%s)\n", conn->url, conn->outname);
+			else
+				printf("  %s\n", conn->url);
+		}
 
 	return 0;
 }
