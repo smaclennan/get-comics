@@ -422,17 +422,13 @@ int read_reply(struct connection *conn)
 		conn->cstate = CS_DIGITS;
 		NEXT_STATE(conn, read_file_chunked);
 		conn->length = 0; /* paranoia */
-		if (conn->curp < conn->endp)
-			return read_file_chunked(conn);
-	} else if (conn->length == 0) {
+	} else if (conn->length == 0)
 		NEXT_STATE(conn, read_file_unsized);
-		if (conn->curp < conn->endp)
-			return read_file_unsized(conn);
-	} else {
+	else
 		NEXT_STATE(conn, read_file);
-		if (conn->curp < conn->endp)
-			return read_file(conn);
-	}
+
+	if (conn->curp < conn->endp)
+		return conn->func(conn);
 
 	return 0;
 }
@@ -463,7 +459,9 @@ static int read_chunkblock(struct connection *conn)
 			conn->length = 0;
 			conn->cstate = CS_START_CR;
 			NEXT_STATE(conn, read_file_chunked);
-			return read_file_chunked(conn);
+			if (conn->endp > conn->curp)
+				return read_file_chunked(conn);
+			return 0;
 		}
 	} else {
 		printf("Read chunk file problems %d for %s\n",
@@ -548,7 +546,6 @@ int read_file_chunked(struct connection *conn)
 	if (conn->length > 0) {
 		if (verbose > 2)
 			printf("Chunk %x = %d\n", conn->length, conn->length);
-
 		NEXT_STATE(conn, read_chunkblock);
 		return read_chunkblock(conn);
 	}
