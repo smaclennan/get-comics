@@ -1,6 +1,9 @@
 CFLAGS += -O3 -Wall -g
 
-OBJS := get-comics.o http.o xml.o
+# Comment in to enable the log_* functions
+#CFLAGS += -DLOGGING
+
+OBJS := get-comics.o http.o xml.o log.o
 
 # For libxml2
 CFLAGS += -I/usr/include/libxml2

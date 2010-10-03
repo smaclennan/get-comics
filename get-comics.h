@@ -61,6 +61,13 @@
  */
 #define BUFSIZE		2048
 
+struct log {
+	char **events;
+	int n_events;
+	int max_events;
+	int failed;
+};
+
 struct connection {
 	char *url;
 	char *host; /* filled by read_config */
@@ -95,6 +102,10 @@ struct connection {
 	} cstate; /* chunk state */
 	int (*func)(struct connection *conn);
 #define NEXT_STATE(c, f)  ((c)->func = (f))
+
+#ifdef LOGGING
+	struct log log;
+#endif
 
 	struct connection *next;
 };
@@ -133,6 +144,12 @@ char *get_proxy(void);
 int write_request(struct connection *conn);
 int read_reply(struct connection *conn);
 int build_request(struct connection *conn);
+
+/* export from log.c */
+void log_add(struct connection *conn, char *fmt, ...);
+void log_want_dump(struct connection *conn);
+void log_dump(struct connection *conn);
+void log_clear(struct connection *conn);
 
 #ifdef _WIN32
 /* We only use read/write/close on sockets */
