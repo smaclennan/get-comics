@@ -33,12 +33,12 @@ struct connection *comics;
 int n_comics;
 
 
-struct connection *head;
-int outstanding;
+static struct connection *head;
+static int outstanding;
 
 static int gotit;
 
-int unlink_index = 1;
+static int unlink_index = 1;
 int verbose;
 int thread_limit = THREAD_LIMIT;
 int randomize;
@@ -55,7 +55,7 @@ static void user_command(void);
 static void dump_outstanding(int sig);
 
 
-char *find_regexp(struct connection *conn)
+static char *find_regexp(struct connection *conn)
 {
 	FILE *fp;
 	regex_t regex;
@@ -111,7 +111,7 @@ char *find_regexp(struct connection *conn)
 }
 
 
-int start_next_comic()
+static int start_next_comic(void)
 {
 	while (head && outstanding < thread_limit) {
 		if (build_request(head) == 0) {
@@ -250,7 +250,7 @@ int process_html(struct connection *conn)
 }
 
 
-int timeout_connections()
+static int timeout_connections(void)
 {
 	int i;
 	time_t timeout = time(NULL) - read_timeout;
@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
 			randomize = 1;
 			break;
 		case 't':
-			thread_limit = strtol(optarg, 0, 0);
+			thread_limit = strtol(optarg, NULL, 0);
 			threads_set = 1;
 			break;
 		case 'v':
@@ -462,7 +462,7 @@ static void dump_outstanding(int sig)
 {
 	struct connection *conn;
 	struct tm *atime;
-	time_t now = time(0);
+	time_t now = time(NULL);
 
 	atime = localtime(&now);
 	printf("\nTotal %d Outstanding: %d @ %2d:%02d:%02d\n",

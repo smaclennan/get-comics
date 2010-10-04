@@ -12,12 +12,12 @@ static unsigned wday;
 
 int run_m4;
 int skipped;
-int write_failed = 1;
+static int write_failed = 1;
 
 
 static void randomize_comics(void);
 
-static struct connection *new_comic()
+static struct connection *new_comic(void)
 {
 	struct connection *new;
 
@@ -115,7 +115,7 @@ static void add_regmatch(struct connection **conn, xmlChar *regmatch)
 
 	if (*conn == NULL)
 		*conn = new_comic();
-	match = strtol((char *)regmatch, 0, 0);
+	match = strtol((char *)regmatch, NULL, 0);
 	if (match >= MATCH_DEPTH)
 		printf("<regmatch> %d too big.\n", match);
 	else
@@ -296,15 +296,15 @@ int read_config(char *fname)
 				comics_dir = must_strdup(str);
 		} else if (strcmp(name, "threads") == 0) {
 			if (!threads_set)
-				thread_limit = strtol(str, 0, 0);
+				thread_limit = strtol(str, NULL, 0);
 		} else if (strcmp(name, "proxy") == 0)
 			set_proxy(str);
 		else if (strcmp(name, "timeout") == 0)
-			read_timeout = strtol(str, 0, 0);
+			read_timeout = strtol(str, NULL, 0);
 		else if (strcmp(name, "randomize") == 0)
-			randomize = strtol(str, 0, 0);
+			randomize = strtol(str, NULL, 0);
 		else if (strcmp(name, "write-failed") == 0)
-			write_failed = strtol(str, 0, 0);
+			write_failed = strtol(str, NULL, 0);
 		else
 			printf("Unexpected element '%s'\n", name);
 	}
@@ -431,11 +431,11 @@ static void swap_comics(int i, int n)
 	memcpy(&comics[i], &tmp, sizeof(struct connection));
 }
 
-void randomize_comics(void)
+static void randomize_comics(void)
 {
 	int i, n;
 
-	srand((unsigned)time(0));
+	srand((unsigned)time(NULL));
 
 	for (i = 0; i < n_comics; ++i) {
 		n = (rand() >> 3) % n_comics;

@@ -53,7 +53,7 @@ void set_proxy(char *proxystr)
 	p = strrchr(proxystr, ':');
 	if (p) {
 		*p++ = '\0';
-		proxy_port = strtol(p, 0, 10);
+		proxy_port = strtol(p, NULL, 10);
 	}
 
 	proxy = must_strdup(proxystr);
@@ -63,7 +63,7 @@ void set_proxy(char *proxystr)
 }
 
 
-char *get_proxy()
+char *get_proxy(void)
 {
 	char *p;
 	int len;
@@ -192,7 +192,7 @@ int build_request(struct connection *conn)
 		if (p) {
 			/* port specified */
 			*p++ = '\0';
-			port = strtol(p, 0, 10);
+			port = strtol(p, NULL, 10);
 		} else
 			port = 80;
 
@@ -316,7 +316,7 @@ int read_reply(struct connection *conn)
 		return 1;
 	}
 
-	status = strtol(conn->buf + 9, 0, 10);
+	status = strtol(conn->buf + 9, NULL, 10);
 
 	switch (status) {
 	case 200: /* OK */
@@ -326,7 +326,7 @@ int read_reply(struct connection *conn)
 		p = strstr(conn->buf, "Content-Length:");
 		if (!p)
 			p = strstr(conn->buf, "Content-length:");
-		conn->length = p ? strtol(p + 15, 0, 10) : 0;
+		conn->length = p ? strtol(p + 15, NULL, 10) : 0;
 
 		p = strstr(conn->buf, "Transfer-Encoding:");
 		if (p) {
@@ -485,7 +485,7 @@ static int read_chunkblock(struct connection *conn)
 
 
 /* State function */
-int read_file_chunked(struct connection *conn)
+static int read_file_chunked(struct connection *conn)
 {
 	if (conn->curp >= conn->endp) {
 		if (verbose > 1)
@@ -561,7 +561,7 @@ int read_file_chunked(struct connection *conn)
 
 
 /* State function */
-int read_file_unsized(struct connection *conn)
+static int read_file_unsized(struct connection *conn)
 {
 	size_t bytes;
 
@@ -587,7 +587,7 @@ int read_file_unsized(struct connection *conn)
 
 
 /* State function */
-int read_file(struct connection *conn)
+static int read_file(struct connection *conn)
 {
 	size_t bytes;
 

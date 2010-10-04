@@ -1,5 +1,9 @@
 #!/bin/sh
 
+echo "Running sparse on files..."
+sparse -I/usr/include/libxml2 *.[ch]
+
+echo "Running checkpatch on files..."
 for f in *.[ch]; do
     checkpatch --file $f | fgrep -q "no obvious style problems" || echo "$f"
 done
