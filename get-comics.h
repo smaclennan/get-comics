@@ -124,8 +124,9 @@ extern int run_m4;
 void my_perror(char *str);
 #define perror(s)	Do not use
 
-int fail_connection(struct connection *conn);
 int close_connection(struct connection *conn);
+int fail_connection(struct connection *conn);
+int fail_redirect(struct connection *conn);
 int release_connection(struct connection *conn);
 int process_html(struct connection *conn);
 

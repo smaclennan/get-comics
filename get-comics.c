@@ -184,7 +184,7 @@ int close_connection(struct connection *conn)
 }
 
 
-/* Normal way to close connection */
+/* Abnormal way to close connection */
 int fail_connection(struct connection *conn)
 {
 	if (conn->sock != -1) {
@@ -196,6 +196,21 @@ int fail_connection(struct connection *conn)
 		printf("Multiple Closes: %s\n", conn->url);
 	log_clear(conn);
 	return release_connection(conn);
+}
+
+
+/* Fail a redirect. We have already released the connection. */
+int fail_redirect(struct connection *conn)
+{
+	if (conn->sock == -1) {
+		write_comic(conn);
+		--outstanding;
+		if (verbose > 1)
+			printf("Failed redirect %s (%d)\n", conn->url, outstanding);
+	} else
+		printf("Failed redirect not closed: %s\n", conn->url);
+	log_clear(conn);
+	return 0;
 }
 
 

@@ -367,7 +367,11 @@ int read_reply(struct connection *conn)
 					printf("Out of memory\n");
 					return 1;
 				}
-				return build_request(conn);
+
+				/* This will cause a bogus Multiple
+				 * Closes error if it fails. */
+				if (build_request(conn))
+					return fail_redirect(conn);
 			}
 		}
 		printf("%s: %d with no new location\n", conn->host, status);
