@@ -155,6 +155,7 @@ int release_connection(struct connection *conn)
 		}
 		conn->sock = -1;
 	}
+	openssl_close(conn);
 
 	if (conn->out) {
 		fclose(conn->out);
@@ -179,6 +180,7 @@ int close_connection(struct connection *conn)
 			printf("Closed %s (%d)\n", conn->url, outstanding);
 	} else
 		printf("Multiple Closes: %s\n", conn->url);
+	openssl_close(conn);
 	log_clear(conn);
 	return release_connection(conn);
 }
@@ -194,6 +196,7 @@ int fail_connection(struct connection *conn)
 			printf("Failed %s (%d)\n", conn->url, outstanding);
 	} else
 		printf("Multiple Closes: %s\n", conn->url);
+	openssl_close(conn);
 	log_clear(conn);
 	return release_connection(conn);
 }
@@ -209,19 +212,9 @@ int fail_redirect(struct connection *conn)
 			printf("Failed redirect %s (%d)\n", conn->url, outstanding);
 	} else
 		printf("Failed redirect not closed: %s\n", conn->url);
+	openssl_close(conn);
 	log_clear(conn);
 	return 0;
-}
-
-char *is_http(char *p)
-{
-	if (strncmp(p, "http://", 7) == 0)
-		return p + 7;
-#ifdef WANT_SSL
-	if (strncmp(p, "https://", 8) == 0)
-		return p + 8;
-#endif
-	return NULL;
 }
 
 int process_html(struct connection *conn)
@@ -294,7 +287,12 @@ static void read_conn(struct connection *conn)
 	int n;
 
 	time(&conn->access);
-	n = read(conn->sock, conn->curp, conn->rlen);
+#ifdef WANT_SSL
+	if (conn->ssl)
+		n = openssl_read(conn);
+	else
+#endif
+		n = read(conn->sock, conn->curp, conn->rlen);
 	if (n >= 0) {
 		if (verbose > 1)
 			printf("+ Read %d\n", n);

@@ -102,6 +102,7 @@ static int connect_socket(struct connection *conn, char *hostname, int port)
 		my_perror("socket");
 		return -1;
 	}
+	conn->sock = sock;
 
 #ifdef _WIN32
 	optval = 1;
@@ -138,10 +139,17 @@ static int connect_socket(struct connection *conn, char *hostname, int port)
 			close(sock);
 			return -1;
 		}
-	} else
+	} else {
 		conn->connected = 1;
+#ifdef WANT_SSL
+		if (is_https(conn->url))
+			if (openssl_connect(conn)) {
+				fail_connection(conn);
+				return -1;
+			}
+#endif
+	}
 
-	conn->sock = sock;
 	set_writable(sock);
 	return 0;
 }
@@ -153,9 +161,8 @@ int build_request(struct connection *conn)
 
 	conn->bufn = sizeof(conn->buf) - 1;
 
-	url = conn->url;
-
-	if (!is_http(url)) {
+	url = is_http(conn->url);
+	if (!url) {
 #ifdef WANT_SSL
 		printf("Only http/https supported\n");
 #else
@@ -163,8 +170,6 @@ int build_request(struct connection *conn)
 #endif
 		return 1;
 	}
-
-	url += 7;
 
 	p = strchr(url, '/');
 	if (p) {
@@ -188,22 +193,16 @@ int build_request(struct connection *conn)
 			free(host);
 			return 1;
 		}
-#ifdef WANT_SSL
-		if (conn->ssl)
-			sprintf(conn->buf, "GET https://%s %s %s\r\n", host, url, http);
-		else
-#endif
-			sprintf(conn->buf, "GET http://%s %s %s\r\n", host, url, http);
+		sprintf(conn->buf, "GET http://%s %s %s\r\n", host, url, http);
 	} else {
-		int port;
+		int port = is_https(conn->url) ? 443 : 80;
 
 		p = strchr(host, ':');
 		if (p) {
 			/* port specified */
 			*p++ = '\0';
 			port = strtol(p, NULL, 10);
-		} else
-			port = 80;
+		}
 
 		if (connect_socket(conn, host, port)) {
 			printf("Connection failed to %s\n", host);
@@ -239,8 +238,16 @@ static int check_connect(struct connection *conn)
 	if (getsockopt(conn->sock, SOL_SOCKET, SO_ERROR,
 		       (char *)&so_error, &optlen))
 		so_error = errno ? errno : EINVAL;
-	else if (so_error == 0)
+	else if (so_error == 0) {
 		conn->connected = 1;
+
+#ifdef WANT_SSL
+		if (is_https(conn->url))
+			if (openssl_connect(conn))
+				return -1;
+#endif
+	}
+
 	return so_error;
 }
 
@@ -259,7 +266,12 @@ int write_request(struct connection *conn)
 		}
 	}
 
-	n = write(conn->sock, conn->curp, conn->length);
+#ifdef WANT_SSL
+	if (conn->ssl)
+		n = openssl_write(conn);
+	else
+#endif
+		n = write(conn->sock, conn->curp, conn->length);
 
 	if (n == conn->length) {
 		if (verbose > 2)

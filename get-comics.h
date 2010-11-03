@@ -108,7 +108,7 @@ struct connection {
 #endif
 
 #ifdef WANT_SSL
-	SSL *ssl;
+	void *ssl;
 #endif
 
 	struct connection *next;
@@ -125,6 +125,22 @@ extern int read_timeout;
 extern int randomize;
 extern int run_m4;
 
+static inline char *is_http(char *p)
+{
+	if (strncmp(p, "http://", 7) == 0)
+		return p + 7;
+#ifdef WANT_SSL
+	if (strncmp(p, "https://", 8) == 0)
+		return p + 8;
+#endif
+	return NULL;
+}
+
+static inline int is_https(char *p)
+{
+	return strncmp(p, "https://", 8) == 0;
+}
+
 void my_perror(char *str);
 #define perror(s)	Do not use
 
@@ -133,7 +149,6 @@ int fail_connection(struct connection *conn);
 int fail_redirect(struct connection *conn);
 int release_connection(struct connection *conn);
 int process_html(struct connection *conn);
-char *is_http(char *p);
 
 int set_readable(int sock);
 int set_writable(int sock);
@@ -156,6 +171,12 @@ void log_add(struct connection *conn, char *fmt, ...);
 void log_want_dump(struct connection *conn);
 void log_dump(struct connection *conn);
 void log_clear(struct connection *conn);
+
+/* export from openssl.c */
+int openssl_connect(struct connection *conn);
+int openssl_read(struct connection *conn);
+int openssl_write(struct connection *conn);
+void openssl_close(struct connection *conn);
 
 #ifdef _WIN32
 /* We only use read/write/close on sockets */

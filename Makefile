@@ -3,11 +3,19 @@ CFLAGS += -O3 -Wall -g
 # Comment in to enable the log_* functions
 #CFLAGS += -DLOGGING
 
-OBJS := get-comics.o http.o xml.o log.o
+# Comment in to enable https via openssl
+CFLAGS += -DWANT_SSL
+
+OBJS := get-comics.o http.o xml.o log.o openssl.o
 
 # For libxml2
 CFLAGS += -I/usr/include/libxml2
 LIBS += -lxml2
+
+# Optionaly add openssl
+ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
+LIBS += -lssl
+endif
 
 all: 	get-comics get-comics.html
 
