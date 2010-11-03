@@ -70,8 +70,9 @@ static void add_url(struct connection **conn, xmlChar *xurl)
 		(*conn)->url = must_strdup(outurl);
 
 		/* isolate the host from original url */
-		if (strncmp(url, "http://", 7) == 0)
-			e = strchr(url + 7, '/');
+		e = is_http(url);
+		if (e)
+			e = strchr(e, '/');
 		else
 			e = strchr(url + 1, '/');
 		if (e)

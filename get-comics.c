@@ -213,6 +213,16 @@ int fail_redirect(struct connection *conn)
 	return 0;
 }
 
+char *is_http(char *p)
+{
+	if (strncmp(p, "http://", 7) == 0)
+		return p + 7;
+#ifdef WANT_SSL
+	if (strncmp(p, "https://", 8) == 0)
+		return p + 8;
+#endif
+	return NULL;
+}
 
 int process_html(struct connection *conn)
 {
@@ -236,7 +246,7 @@ int process_html(struct connection *conn)
 	/* For the writer we need to know if url was modified */
 	conn->matched = 1;
 
-	if (strncmp(p, "http://", 7) == 0)
+	if (is_http(p))
 		/* fully rooted */
 		conn->url = strdup(p);
 	else {

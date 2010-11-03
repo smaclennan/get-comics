@@ -155,8 +155,12 @@ int build_request(struct connection *conn)
 
 	url = conn->url;
 
-	if (strncmp(url, "http://", 7)) {
+	if (!is_http(url)) {
+#ifdef WANT_SSL
+		printf("Only http/https supported\n");
+#else
 		printf("Only http supported\n");
+#endif
 		return 1;
 	}
 
@@ -184,7 +188,12 @@ int build_request(struct connection *conn)
 			free(host);
 			return 1;
 		}
-		sprintf(conn->buf, "GET http://%s %s %s\r\n", host, url, http);
+#ifdef WANT_SSL
+		if (conn->ssl)
+			sprintf(conn->buf, "GET https://%s %s %s\r\n", host, url, http);
+		else
+#endif
+			sprintf(conn->buf, "GET http://%s %s %s\r\n", host, url, http);
 	} else {
 		int port;
 

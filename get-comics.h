@@ -107,6 +107,10 @@ struct connection {
 	struct log log;
 #endif
 
+#ifdef WANT_SSL
+	SSL *ssl;
+#endif
+
 	struct connection *next;
 };
 
@@ -129,6 +133,7 @@ int fail_connection(struct connection *conn);
 int fail_redirect(struct connection *conn);
 int release_connection(struct connection *conn);
 int process_html(struct connection *conn);
+char *is_http(char *p);
 
 int set_readable(int sock);
 int set_writable(int sock);
