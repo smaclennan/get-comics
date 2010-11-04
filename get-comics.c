@@ -111,23 +111,9 @@ static char *find_regexp(struct connection *conn)
 }
 
 
-static int start_next_comic(int https)
+static int start_next_comic(void)
 {
 	while (head && outstanding < thread_limit) {
-#ifdef WANT_SSL
-		if (is_https(head->url)) {
-			if (!https) {
-				/* skip it */
-				head = head->next;
-				continue;
-			}
-		} else if (https) {
-			/* skip it */
-			head = head->next;
-			continue;
-		}
-#endif
-
 		if (build_request(head) == 0) {
 			if (head->sock + 1 > nfds)
 				nfds = head->sock + 1;
@@ -322,75 +308,12 @@ static void read_conn(struct connection *conn)
 	}
 }
 
-static void read_comics(int https)
-{
-	int n;
-	struct timeval timeout, cur_timeout;
-	struct connection *conn;
-
-	cur_timeout.tv_sec = 0;
-	cur_timeout.tv_usec = 250000;
-
-	head = comics;
-
-	/* start one */
-	start_next_comic(https);
-
-	while (head || outstanding) {
-		fd_set reads, writes;
-
-		/* Windows considers it an error to have reads and
-		 * writes empty. Make sure we always have a file to
-		 * process. */
-		if (outstanding == 0) {
-			if (!start_next_comic(https)) {
-				printf("PROBLEMS!\n");
-				/* head and outstanding should now be null */
-				continue;
-			}
-		}
-
-		memcpy(&reads, &readfds, sizeof(reads));
-		memcpy(&writes, &writefds, sizeof(writes));
-		memcpy(&timeout, &cur_timeout, sizeof(timeout));
-		n = select(nfds, &reads, &writes, NULL, &timeout);
-		if (n < 0) {
-			my_perror("select");
-			continue;
-		}
-
-		if (n == 0) {
-			if (!start_next_comic(https)) {
-				/* Once we have all the comics
-				 * started, start checking for
-				 * timeouts. We also increase the
-				 * timeout period. */
-				timeout_connections();
-				cur_timeout.tv_sec  = 1;
-				cur_timeout.tv_usec = 0;
-			}
-			continue;
-		}
-
-		if (FD_ISSET(1, &reads))
-			user_command();
-
-		for (conn = comics; conn; conn = conn->next) {
-			if (conn->sock == -1)
-				continue;
-			if (FD_ISSET(conn->sock, &writes)) {
-				time(&conn->access);
-				write_request(conn);
-			} else if (FD_ISSET(conn->sock, &reads))
-				read_conn(conn);
-		}
-	}
-}
-
 int main(int argc, char *argv[])
 {
 	char *env;
 	int i;
+	int n;
+	struct timeval timeout, cur_timeout;
 	struct connection *conn;
 
 	while ((i = getopt(argc, argv, "d:kp:rt:vx:")) != -1)
@@ -443,6 +366,7 @@ int main(int argc, char *argv[])
 	/* Build the linked list - do after randomizing */
 	for (i = 0; i < n_comics - 1; ++i)
 		comics[i].next = &comics[i + 1];
+	head = comics;
 
 	/* set_proxy will not use this if proxy already set */
 	env = getenv("COMICS_PROXY");
@@ -484,19 +408,64 @@ int main(int argc, char *argv[])
 
 	FD_ZERO(&readfds);
 	FD_ZERO(&writefds);
+	cur_timeout.tv_sec = 0;
+	cur_timeout.tv_usec = 250000;
 
 	/* Add stdin */
 	FD_SET(1, &readfds);
 
-	/* Read all the http comics first since they can be read
-	 * non-blocking. */
-	read_comics(0);
+	/* start one */
+	start_next_comic();
 
-#ifdef WANT_SSL
-	/* Read all the https comics one at a time */
-	thread_limit = 1;
-	read_comics(1);
-#endif
+	while (head || outstanding) {
+		fd_set reads, writes;
+
+		/* Windows considers it an error to have reads and
+		 * writes empty. Make sure we always have a file to
+		 * process. */
+		if (outstanding == 0) {
+			if (!start_next_comic()) {
+				printf("PROBLEMS!\n");
+				/* head and outstanding should now be null */
+				continue;
+			}
+		}
+
+		memcpy(&reads, &readfds, sizeof(reads));
+		memcpy(&writes, &writefds, sizeof(writes));
+		memcpy(&timeout, &cur_timeout, sizeof(timeout));
+		n = select(nfds, &reads, &writes, NULL, &timeout);
+		if (n < 0) {
+			my_perror("select");
+			continue;
+		}
+
+		if (n == 0) {
+			if (!start_next_comic()) {
+				/* Once we have all the comics
+				 * started, start checking for
+				 * timeouts. We also increase the
+				 * timeout period. */
+				timeout_connections();
+				cur_timeout.tv_sec  = 1;
+				cur_timeout.tv_usec = 0;
+			}
+			continue;
+		}
+
+		if (FD_ISSET(1, &reads))
+			user_command();
+
+		for (conn = comics; conn; conn = conn->next) {
+			if (conn->sock == -1)
+				continue;
+			if (FD_ISSET(conn->sock, &writes)) {
+				time(&conn->access);
+				write_request(conn);
+			} else if (FD_ISSET(conn->sock, &reads))
+				read_conn(conn);
+		}
+	}
 
 	printf("Got %d of %d (%d skipped)\n", gotit, n_comics, skipped);
 
