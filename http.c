@@ -80,6 +80,23 @@ char *get_proxy(void)
 	return p;
 }
 
+static int tcp_connected(struct connection *conn)
+{
+	set_writable(conn->sock);
+
+#ifdef WANT_SSL
+	if (is_https(conn->url)) {
+		if (openssl_connect(conn)) {
+			fail_connection(conn);
+			return -1;
+		}
+	} else
+#endif
+		conn->connected = 1;
+
+	return 0;
+}
+
 static int connect_socket(struct connection *conn, char *hostname, int port)
 {
 	struct sockaddr_in sock_name;
@@ -131,6 +148,8 @@ static int connect_socket(struct connection *conn, char *hostname, int port)
 		if (errno == EINPROGRESS) {
 			if (verbose > 1)
 				printf("Connection deferred\n");
+			set_writable(sock);
+			return 0;
 		} else {
 			char errstr[100];
 
@@ -139,19 +158,8 @@ static int connect_socket(struct connection *conn, char *hostname, int port)
 			close(sock);
 			return -1;
 		}
-	} else {
-		conn->connected = 1;
-#ifdef WANT_SSL
-		if (is_https(conn->url))
-			if (openssl_connect(conn)) {
-				fail_connection(conn);
-				return -1;
-			}
-#endif
-	}
-
-	set_writable(sock);
-	return 0;
+	} else
+		return tcp_connected(conn);
 }
 
 
@@ -234,7 +242,7 @@ int build_request(struct connection *conn)
 void check_connect(struct connection *conn)
 {
 	int so_error;
-	socklen_t optlen = 4;
+	socklen_t optlen = sizeof(so_error);
 
 #ifdef WANT_SSL
 	if (conn->ssl) {
@@ -246,18 +254,9 @@ void check_connect(struct connection *conn)
 #endif
 
 	if (getsockopt(conn->sock, SOL_SOCKET, SO_ERROR,
-		       (char *)&so_error, &optlen))
-		so_error = errno ? errno : EINVAL;
-	else if (so_error == 0) {
-#ifdef WANT_SSL
-		if (is_https(conn->url)) {
-			/* start the openssl_connection */
-			if (openssl_connect(conn))
-				fail_connection(conn);
-		} else
-#endif
-			conn->connected = 1;
-	}
+		       (char *)&so_error, &optlen) == 0 &&
+	    so_error == 0)
+		tcp_connected(conn);
 }
 
 
