@@ -5,8 +5,6 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 
-#include <fcntl.h> /* SAM FIXME */
-
 /* Application-wide SSL context. This is common to all SSL
  * connections.  */
 static SSL_CTX *ssl_ctx;
@@ -50,66 +48,100 @@ static int openssl_init()
 	return 0;
 }
 
+int openssl_check_connect(struct connection *conn)
+{
+	int ret = SSL_connect(conn->ssl);
+	if (ret <= 0)
+		switch (SSL_get_error(conn->ssl, ret)) {
+		case SSL_ERROR_WANT_READ:
+			set_readable(conn->sock);
+			return 0;
+		case SSL_ERROR_WANT_WRITE:
+			set_writable(conn->sock);
+			return 0;
+		default:
+			printf("Not read or write\n");
+			return 1;
+		}
+
+	conn->connected = 1;
+
+	set_writable(conn->sock);
+
+	return 0;
+}
+
 /* Returns an opaque ssl context */
 int openssl_connect(struct connection *conn)
 {
 	SSL *ssl;
-	int optval;
 
 	if (openssl_init())
 		return 1;
-
-	/* SSL connection must be blocking */
-	optval = fcntl(conn->sock, F_GETFL, 0);
-	if (optval == -1 || fcntl(conn->sock, F_SETFL, optval & ~O_NONBLOCK)) {
-		my_perror("fcntl O_NONBLOCK");
-		return 1;
-	}
 
 	ssl = SSL_new(ssl_ctx);
 	if (!ssl)
 		goto error;
 
-	if (!SSL_set_fd(ssl, conn->sock))
-		goto error;
-	SSL_set_connect_state(ssl);
-	if (SSL_connect(ssl) <= 0 || ssl->state != SSL_ST_OK)
-		goto error;
-
 	conn->ssl = ssl;
 
-	return 0;
+	if (!SSL_set_fd(ssl, conn->sock))
+		goto error;
+
+	SSL_set_connect_state(ssl);
+
+	return openssl_check_connect(conn);
 
 error:
 	printf ("SSL handshake failed.\n");
 	print_errors();
-	if (ssl)
-		SSL_free(ssl);
 	return 1;
 }
 
 int openssl_read(struct connection *conn)
 {
-	int n;
+	int n, err;
 
 	do
 		n = SSL_read(conn->ssl, conn->curp, conn->rlen);
-	while (n == -1 &&
-	       SSL_get_error(conn->ssl, n) == SSL_ERROR_SYSCALL &&
+	while (n < 0 &&
+	       (err = SSL_get_error(conn->ssl, n)) == SSL_ERROR_SYSCALL &&
 	       errno == EINTR);
+
+	if (n < 0)
+		switch (err) {
+		case SSL_ERROR_WANT_READ:
+			return -EAGAIN;
+		case SSL_ERROR_WANT_WRITE:
+			return -EAGAIN;
+		default:
+			printf("Not read or write\n");
+			break;
+		}
 
 	return n;
 }
 
 int openssl_write(struct connection *conn)
 {
-	int n;
+	int n, err;
 
 	do
 		n = SSL_write(conn->ssl, conn->curp, conn->length);
-	while (n == -1 &&
-	       SSL_get_error(conn->ssl, n) == SSL_ERROR_SYSCALL &&
+	while (n < 0 &&
+	       (err = SSL_get_error(conn->ssl, n)) == SSL_ERROR_SYSCALL &&
 	       errno == EINTR);
+
+	if (n < 0)
+		switch (err) {
+		case SSL_ERROR_WANT_READ:
+			return -EAGAIN;
+		case SSL_ERROR_WANT_WRITE:
+			return -EAGAIN;
+		default:
+			printf("Not read or write\n");
+			break;
+		}
 
 	return n;
 }

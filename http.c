@@ -230,46 +230,49 @@ int build_request(struct connection *conn)
 }
 
 
-static int check_connect(struct connection *conn)
+/* This should only be called if conn->connected == 0 */
+void check_connect(struct connection *conn)
 {
 	int so_error;
 	socklen_t optlen = 4;
+
+#ifdef WANT_SSL
+	if (conn->ssl) {
+		/* Wait for openssl connection to connect */
+		if (openssl_check_connect(conn))
+			fail_connection(conn);
+		return;
+	}
+#endif
 
 	if (getsockopt(conn->sock, SOL_SOCKET, SO_ERROR,
 		       (char *)&so_error, &optlen))
 		so_error = errno ? errno : EINVAL;
 	else if (so_error == 0) {
-		conn->connected = 1;
-
 #ifdef WANT_SSL
-		if (is_https(conn->url))
+		if (is_https(conn->url)) {
+			/* start the openssl_connection */
 			if (openssl_connect(conn))
-				return -1;
+				fail_connection(conn);
+		} else
 #endif
+			conn->connected = 1;
 	}
-
-	return so_error;
 }
 
 
-int write_request(struct connection *conn)
+void write_request(struct connection *conn)
 {
-	int err;
 	size_t n;
 
-	if (!conn->connected) {
-		err = check_connect(conn);
-		if (err) {
-			printf("%s: %s\n", conn->url, strerror(err));
-			fail_connection(conn);
-			return 1;
-		}
-	}
-
 #ifdef WANT_SSL
-	if (conn->ssl)
+	if (conn->ssl) {
 		n = openssl_write(conn);
-	else
+		/* openssl_write can return -EAGAIN if the SSL
+		 * connection needs a read or write. */
+		if (n == -EAGAIN)
+			return;
+	} else
 #endif
 		n = write(conn->sock, conn->curp, conn->length);
 
@@ -283,11 +286,7 @@ int write_request(struct connection *conn)
 		conn->curp = conn->buf;
 		conn->rlen = conn->bufn;
 		NEXT_STATE(conn, read_reply);
-
-		return 0;
-	}
-
-	if (n > 0) {
+	} else if (n > 0) {
 		printf("HMMM, COULDN'T WRITE IN ONE GO\n"); /* SAM DBG */
 		conn->length -= n;
 		conn->curp += n;
@@ -295,8 +294,6 @@ int write_request(struct connection *conn)
 		printf("Write request error\n");
 		fail_connection(conn);
 	}
-
-	return 1;
 }
 
 

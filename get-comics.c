@@ -288,9 +288,13 @@ static void read_conn(struct connection *conn)
 
 	time(&conn->access);
 #ifdef WANT_SSL
-	if (conn->ssl)
+	if (conn->ssl) {
 		n = openssl_read(conn);
-	else
+		/* openssl_read can return -EAGAIN if the SSL
+		 * connection needs a read or write. */
+		if (n == -EAGAIN)
+			return;
+	} else
 #endif
 		n = read(conn->sock, conn->curp, conn->rlen);
 	if (n >= 0) {
@@ -460,10 +464,18 @@ int main(int argc, char *argv[])
 			if (conn->sock == -1)
 				continue;
 			if (FD_ISSET(conn->sock, &writes)) {
-				time(&conn->access);
-				write_request(conn);
-			} else if (FD_ISSET(conn->sock, &reads))
-				read_conn(conn);
+				if (!conn->connected)
+					check_connect(conn);
+				else {
+					time(&conn->access);
+					write_request(conn);
+				}
+			} else if (FD_ISSET(conn->sock, &reads)) {
+				if (!conn->connected)
+					check_connect(conn);
+				else
+					read_conn(conn);
+			}
 		}
 	}
 

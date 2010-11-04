@@ -159,10 +159,11 @@ void set_failed(char *fname);
 int write_comic(struct connection *conn);
 char *must_strdup(char *str);
 
-/* export from http2.c */
+/* export from http.c */
 void set_proxy(char *proxystr);
 char *get_proxy(void);
-int write_request(struct connection *conn);
+void check_connect(struct connection *conn);
+void write_request(struct connection *conn);
 int read_reply(struct connection *conn);
 int build_request(struct connection *conn);
 
@@ -174,6 +175,7 @@ void log_clear(struct connection *conn);
 
 /* export from openssl.c */
 int openssl_connect(struct connection *conn);
+int openssl_check_connect(struct connection *conn);
 int openssl_read(struct connection *conn);
 int openssl_write(struct connection *conn);
 void openssl_close(struct connection *conn);
