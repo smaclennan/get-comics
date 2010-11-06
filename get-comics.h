@@ -90,7 +90,7 @@ struct connection {
 	int  bufn;
 	int  rlen;
 	char *curp; /* for chunking */
-	char *endp; /* SAM BYTES? for chunking */
+	char *endp; /* for chunking */
 	int  length; /* content length if available */
 	enum {
 		CS_NONE,

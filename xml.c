@@ -415,7 +415,6 @@ int write_comic(struct connection *conn)
 void my_perror(char *str)
 {
 #ifdef _WIN32
-	/* SAM FIX */
 	printf("%s: error %d\n", str, WSAGetLastError());
 #else
 	printf("%s: %s\n", str, strerror(errno));

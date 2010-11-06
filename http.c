@@ -18,7 +18,7 @@
  *   - assumes the reply header < buffersize
  *     - largest header I have seen < 500 bytes
  *   - does not handle compressed data
- *   - only supports http
+ *   - rudimentary https support
  */
 
 #ifdef _WIN32
@@ -139,11 +139,9 @@ static int connect_socket(struct connection *conn, char *hostname, int port)
 
 	memset(&sock_name, 0, sizeof(sock_name));
 	sock_name.sin_family = AF_INET;
-	/* SAM memcpy */
 	sock_name.sin_addr.s_addr = *(unsigned *)host->h_addr_list[0];
 	sock_name.sin_port = htons((short)port);
 
-	/* SAM We could set a timeout to try again on certain errors */
 	if (connect(sock, (struct sockaddr *)&sock_name, sizeof(sock_name))) {
 		if (errno == EINPROGRESS) {
 			if (verbose > 1)
@@ -286,7 +284,6 @@ void write_request(struct connection *conn)
 		conn->rlen = conn->bufn;
 		NEXT_STATE(conn, read_reply);
 	} else if (n > 0) {
-		printf("HMMM, COULDN'T WRITE IN ONE GO\n"); /* SAM DBG */
 		conn->length -= n;
 		conn->curp += n;
 	} else {
