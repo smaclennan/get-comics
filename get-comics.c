@@ -1,6 +1,6 @@
 /*
  * get-comics.c - download comics from the net
- * Copyright (C) 2002-2010 Sean MacLennan <seanm@seanm.ca>
+ * Copyright (C) 2002-2011 Sean MacLennan <seanm@seanm.ca>
  * Revision: 1.22
  *
  * This program is free software; you can redistribute it and/or modify it
