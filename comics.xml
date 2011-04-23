@@ -30,10 +30,6 @@ helps reduce the number of timeouts. -->
   <url>http://images.ucomics.com/comics/tmloo/%Y/tmloo%y%m%d.gif</url>
   <output>loose-parts</output>
 </comic>
-<comic> <!-- Quigmans -->
-  <url>http://images.ucomics.com/comics/tmqui/%Y/tmqui%y%m%d.gif</url>
-  <days>Xmtwtfs</days>
-</comic>
 <comic> <!-- Red Meat -->
   <url>http://www.redmeat.com/redmeat/current/index-1.gif</url>
   <days>XXXXXfX</days>
@@ -47,18 +43,18 @@ helps reduce the number of timeouts. -->
 
 <comic> <!-- Aislin -->
   <url>http://www.montrealgazette.com/opinion/editorial-cartoons/index.html</url>
-  <regexp>src=\"([0-9]+\.bin)</regexp>
+  <regexp>src=\"([0-9]+\.bin\?size=[0-9]+x[0-9]+)\"</regexp>
   <regmatch>1</regmatch>
   <output>aislin.jpg</output>
   <days>Xmtwtfs</days>
 </comic>
 <comic><!-- Biff -->
   <url>http://www.thebookofbiff.com</url>
-  <regexp>http://www.thebookofbiff.com/comics/.*\.png</regexp>
+  <regexp>http://bookofbiff\.[^/]+/comics/.*\.png</regexp>
   <output>biff</output>
   <days>XmtwtfX</days>
 </comic>
-<comic><!-- Diesel Sweeites -->
+<comic><!-- Diesel Sweeties -->
   <url>http://www.dieselsweeties.com/</url>
   <regexp>/h?strips/[^.]+.(png|gif)</regexp>
   <output>diesel</output>
@@ -69,8 +65,8 @@ helps reduce the number of timeouts. -->
   <regexp>/ff[0-9]+/f[vc][0-9]+\.(gif|png)</regexp>
 </comic>
 <comic><!-- Girls With Slingshots -->
-  <url>http://www.girlswithslingshots.com/</url>
-  <regexp>comics/[0-9-]+GWS[0-9]+\.jpg</regexp>
+  <url>http://www.girlswithslingshots.com</url>
+  <regexp>comics/[0-9-]*GWS[0-9]+\.jpg</regexp>
 </comic>
 <comic> <!-- Kevin and Kell -->
   <url>http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.gif</url>
@@ -85,10 +81,6 @@ helps reduce the number of timeouts. -->
   <regexp>http://www.questionablecontent.net/comics/[0-9]*\.png</regexp>
   <output>questionable</output>
   <days>XmtwtfX</days>
-</comic>
-<comic><!-- Something Happens -->
-  <url>http://somethinghappens.keenspot.com/comics/sh%Y%m%d.gif</url>
-  <days>XXXwXXX</days>
 </comic>
 <!-- Something Positive -->
   <!-- http://www.somethingpositive.net/arch/sp%m%d%Y.gif -->
