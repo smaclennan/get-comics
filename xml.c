@@ -10,7 +10,6 @@
 static struct tm *today;
 static unsigned wday;
 
-int run_m4;
 int skipped;
 static int write_failed = 1;
 
@@ -207,51 +206,9 @@ int read_config(char *fname)
 	xmlDocPtr  doc;
 	xmlNodePtr cur;
 	time_t now;
-	char tmpname[20];
 
 	if (verbose)
 		printf("Reading %s\n", fname);
-
-#ifndef _WIN32
-	if (run_m4) {
-		FILE *in;
-		int out, n, len;
-		char line[1024];
-
-		strcpy(tmpname, "/tmp/comicsXXXXXX");
-		out = mkstemp(tmpname);
-		if (out < 0) {
-			my_perror("mkstemp");
-			return 1;
-		}
-
-		sprintf(line, "m4 %.200s", fname);
-		in = popen(line, "r");
-		if (in == NULL) {
-			my_perror(line);
-			return 1;
-		}
-
-		while (fgets(line, sizeof(line), in)) {
-			len = strlen(line);
-			n = write(out, line, len);
-			if (n != len) {
-				printf("m4 processing failed on output\n");
-				return 1;
-			}
-		}
-
-		if (ferror(in)) {
-			printf("m4 processing failed on input\n");
-			return 1;
-		}
-
-		close(out);
-		pclose(in);
-
-		fname = tmpname;
-	}
-#endif
 
 	LIBXML_TEST_VERSION;
 
@@ -265,19 +222,19 @@ int read_config(char *fname)
 	doc = xmlParseFile(fname);
 	if (!doc) {
 		printf("%s: Unable to parse XML file\n", fname);
-		goto failed;
+		return 1;
 	}
 
 	cur = xmlDocGetRootElement(doc);
 	if (!cur) {
 		printf("%s: Empry xml file\n", fname);
-		goto failed;
+		return 1;
 	}
 
 	if (!cur->name || strcmp((char *)cur->name, "Configuration")) {
 		printf("%s: Root node is not 'Configuration'", fname);
 		xmlFreeDoc(doc);
-		goto failed;
+		return 1;
 	}
 
 	for (cur = cur->xmlChildrenNode; cur; cur = cur->next) {
@@ -315,14 +272,7 @@ int read_config(char *fname)
 	if (randomize)
 		randomize_comics();
 
-	if (run_m4)
-		unlink(tmpname);
 	return 0;
-
-failed:
-	if (run_m4)
-		unlink(tmpname);
-	return 1;
 }
 
 

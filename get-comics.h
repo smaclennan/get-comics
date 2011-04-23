@@ -123,7 +123,6 @@ extern int thread_limit;
 extern int threads_set;
 extern int read_timeout;
 extern int randomize;
-extern int run_m4;
 
 static inline char *is_http(char *p)
 {
