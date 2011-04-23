@@ -376,7 +376,7 @@ int main(int argc, char *argv[])
 		case 'h':
 		default:
 			puts("usage: get-comics [-kv] [-c config]"
-				 "[-d comics_dir] [-t threads] "
+				 "[-d comics_dir] [-l links_file] [-t threads] "
 				 "[-x failed_xml_file] [xml-file]");
 			puts("Where: -k  keep index files");
 			puts("       -v  verbose");
