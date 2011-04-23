@@ -42,6 +42,7 @@ static int unlink_index = 1;
 int verbose;
 int thread_limit = THREAD_LIMIT;
 int randomize;
+static FILE *links_only;
 
 /* If the user specified this on the command line we do not want the
  * xml file to override */
@@ -111,10 +112,25 @@ static char *find_regexp(struct connection *conn)
 }
 
 
+static void add_link(struct connection *conn)
+{
+	if (verbose)
+		printf("Add link %s\n", conn->url);
+
+	fprintf(links_only, "%s\n", conn->url);
+
+	conn->gotit = 1;
+	++gotit;
+}
+
 static int start_next_comic(void)
 {
 	while (head && outstanding < thread_limit) {
-		if (build_request(head) == 0) {
+		if (links_only && !head->regexp) {
+			add_link(head);
+			head = head->next;
+			continue;
+		} else if (build_request(head) == 0) {
 			if (head->sock + 1 > nfds)
 				nfds = head->sock + 1;
 			time(&head->access);
@@ -254,6 +270,12 @@ int process_html(struct connection *conn)
 		conn->url = strdup(imgurl);
 	}
 
+	if (links_only) {
+		add_link(conn);
+		--outstanding;
+		return 0;
+	}
+
 	if (build_request(conn) == 0) {
 		FD_SET(conn->sock, &writefds);
 		if (conn->sock + 1 > nfds)
@@ -320,13 +342,20 @@ int main(int argc, char *argv[])
 	struct timeval timeout, cur_timeout;
 	struct connection *conn;
 
-	while ((i = getopt(argc, argv, "d:kp:rt:vx:")) != -1)
+	while ((i = getopt(argc, argv, "d:kl:p:rt:vx:")) != -1)
 		switch ((char)i) {
 		case 'd':
 			comics_dir = optarg;
 			break;
 		case 'k':
 			unlink_index = 0;
+			break;
+		case 'l':
+			links_only = fopen(optarg, "w");
+			if (!links_only) {
+				my_perror(optarg);
+				exit(1);
+			}
 			break;
 		case 'p':
 			set_proxy(optarg);
@@ -478,6 +507,9 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+
+	if (links_only)
+		fclose(links_only);
 
 	printf("Got %d of %d (%d skipped)\n", gotit, n_comics, skipped);
 
