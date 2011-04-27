@@ -49,8 +49,8 @@ static FILE *links_only;
 int threads_set;
 
 
-static fd_set readfds, writefds;
-static int nfds;
+static struct pollfd *ufds;
+static int npoll;
 
 static void user_command(void);
 static void dump_outstanding(int sig);
@@ -131,8 +131,6 @@ static int start_next_comic(void)
 			head = head->next;
 			continue;
 		} else if (build_request(head) == 0) {
-			if (head->sock + 1 > nfds)
-				nfds = head->sock + 1;
 			time(&head->access);
 			if (verbose)
 				printf("Started %s (%d)\n",
@@ -156,27 +154,18 @@ int release_connection(struct connection *conn)
 	if (verbose > 2)
 		printf("Release %s\n", conn->url);
 
-	if (conn->sock != -1) {
-		close(conn->sock);
-		FD_CLR(conn->sock, &readfds);
-		FD_CLR(conn->sock, &writefds);
-		if (conn->sock + 1 == nfds) {
-			int i;
-
-			for (i = nfds = 0; i < n_comics; ++i)
-				if (comics[i].sock > nfds)
-					nfds = comics[i].sock;
-			if (nfds)
-				++nfds;
-		}
-		conn->sock = -1;
-	}
 	openssl_close(conn);
 
-	if (conn->out) {
-		fclose(conn->out);
-		conn->out = NULL;
+	if (conn->poll && conn->poll->fd != -1) {
+		close(conn->poll->fd);
+		conn->poll->fd = -1;
 	}
+	conn->poll = NULL;
+
+	if (conn->out)
+		fclose(conn->out);
+	conn->out = NULL;
+
 	conn->func = NULL;
 
 	conn->connected = 0;
@@ -188,7 +177,7 @@ int release_connection(struct connection *conn)
 /* Normal way to close connection */
 int close_connection(struct connection *conn)
 {
-	if (conn->sock != -1) {
+	if (conn->poll) {
 		++gotit;
 		conn->gotit = 1;
 		--outstanding;
@@ -196,7 +185,6 @@ int close_connection(struct connection *conn)
 			printf("Closed %s (%d)\n", conn->url, outstanding);
 	} else
 		printf("Multiple Closes: %s\n", conn->url);
-	openssl_close(conn);
 	log_clear(conn);
 	return release_connection(conn);
 }
@@ -205,14 +193,13 @@ int close_connection(struct connection *conn)
 /* Abnormal way to close connection */
 int fail_connection(struct connection *conn)
 {
-	if (conn->sock != -1) {
+	if (conn->poll) {
 		write_comic(conn);
 		--outstanding;
 		if (verbose > 1)
 			printf("Failed %s (%d)\n", conn->url, outstanding);
 	} else
 		printf("Multiple Closes: %s\n", conn->url);
-	openssl_close(conn);
 	log_clear(conn);
 	return release_connection(conn);
 }
@@ -221,14 +208,15 @@ int fail_connection(struct connection *conn)
 /* Fail a redirect. We have already released the connection. */
 int fail_redirect(struct connection *conn)
 {
-	if (conn->sock == -1) {
+	if (conn->poll)
+		printf("Failed redirect not closed: %s\n", conn->url);
+	else {
 		write_comic(conn);
 		--outstanding;
 		if (verbose > 1)
-			printf("Failed redirect %s (%d)\n", conn->url, outstanding);
-	} else
-		printf("Failed redirect not closed: %s\n", conn->url);
-	openssl_close(conn);
+			printf("Failed redirect %s (%d)\n",
+			       conn->url, outstanding);
+	}
 	log_clear(conn);
 	return 0;
 }
@@ -276,11 +264,9 @@ int process_html(struct connection *conn)
 		return 0;
 	}
 
-	if (build_request(conn) == 0) {
-		FD_SET(conn->sock, &writefds);
-		if (conn->sock + 1 > nfds)
-			nfds = conn->sock + 1;
-	} else
+	if (build_request(conn) == 0)
+		set_writable(conn);
+	else
 		printf("build_request %s failed\n", conn->url);
 
 	if (verbose)
@@ -296,7 +282,7 @@ static int timeout_connections(void)
 	time_t timeout = time(NULL) - read_timeout;
 
 	for (i = 0; i < n_comics; ++i)
-		if (comics[i].sock != -1 && comics[i].access < timeout) {
+		if (comics[i].poll && comics[i].access < timeout) {
 			printf("TIMEOUT %s\n", comics[i].url);
 			fail_connection(&comics[i]);
 		}
@@ -318,7 +304,7 @@ static void read_conn(struct connection *conn)
 			return;
 	} else
 #endif
-		n = read(conn->sock, conn->curp, conn->rlen);
+		n = read(conn->poll->fd, conn->curp, conn->rlen);
 	if (n >= 0) {
 		if (verbose > 1)
 			printf("+ Read %d\n", n);
@@ -337,9 +323,7 @@ static void read_conn(struct connection *conn)
 int main(int argc, char *argv[])
 {
 	char *env;
-	int i;
-	int n;
-	struct timeval timeout, cur_timeout;
+	int i, n, timeout = 250;
 	struct connection *conn;
 
 	while ((i = getopt(argc, argv, "d:kl:p:rt:vx:")) != -1)
@@ -439,37 +423,26 @@ int main(int argc, char *argv[])
 	signal(SIGTERM, dump_outstanding);
 #endif
 
-	FD_ZERO(&readfds);
-	FD_ZERO(&writefds);
-	cur_timeout.tv_sec = 0;
-	cur_timeout.tv_usec = 250000;
+	npoll = thread_limit + 1; /* add one for stdin */
+	ufds = calloc(npoll, sizeof(struct pollfd));
+	if (!ufds) {
+		printf("Out of poll memory\n");
+		exit(1);
+	}
+	for (i = 0; i < npoll; ++i)
+		ufds[i].fd = -1;
 
 	/* Add stdin */
-	FD_SET(1, &readfds);
+	ufds[0].fd = 0;
+	ufds[0].events = POLLIN;
 
 	/* start one */
 	start_next_comic();
 
 	while (head || outstanding) {
-		fd_set reads, writes;
-
-		/* Windows considers it an error to have reads and
-		 * writes empty. Make sure we always have a file to
-		 * process. */
-		if (outstanding == 0) {
-			if (!start_next_comic()) {
-				printf("PROBLEMS!\n");
-				/* head and outstanding should now be null */
-				continue;
-			}
-		}
-
-		memcpy(&reads, &readfds, sizeof(reads));
-		memcpy(&writes, &writefds, sizeof(writes));
-		memcpy(&timeout, &cur_timeout, sizeof(timeout));
-		n = select(nfds, &reads, &writes, NULL, &timeout);
+		n = poll(ufds, npoll, timeout);
 		if (n < 0) {
-			my_perror("select");
+			my_perror("poll");
 			continue;
 		}
 
@@ -480,32 +453,30 @@ int main(int argc, char *argv[])
 				 * timeouts. We also increase the
 				 * timeout period. */
 				timeout_connections();
-				cur_timeout.tv_sec  = 1;
-				cur_timeout.tv_usec = 0;
+				timeout = 1000;
 			}
 			continue;
 		}
 
-		if (FD_ISSET(1, &reads))
+		if (ufds[0].revents)
 			user_command();
 
-		for (conn = comics; conn; conn = conn->next) {
-			if (conn->sock == -1)
+		for (conn = comics; conn; conn = conn->next)
+			if (!conn->poll)
 				continue;
-			if (FD_ISSET(conn->sock, &writes)) {
+			else if (conn->poll->revents & POLLOUT) {
 				if (!conn->connected)
 					check_connect(conn);
 				else {
 					time(&conn->access);
 					write_request(conn);
 				}
-			} else if (FD_ISSET(conn->sock, &reads)) {
+			} else if (conn->poll->revents & POLLIN) {
 				if (!conn->connected)
 					check_connect(conn);
 				else
 					read_conn(conn);
 			}
-		}
 	}
 
 	if (links_only)
@@ -536,7 +507,7 @@ static void dump_outstanding(int sig)
 	       n_comics, outstanding,
 	       atime->tm_hour, atime->tm_min, atime->tm_sec);
 	for (conn = comics; conn; conn = conn->next) {
-		if (conn->sock == -1)
+		if (!conn->poll)
 			continue;
 		printf("> %s = %s\n", conn->url,
 		       conn->connected ? "connected" : "not connected");
@@ -575,17 +546,22 @@ static void user_command(void)
 		printf("Unexpected command %s", buf);
 }
 
-int set_readable(int sock)
+int set_conn_socket(struct connection *conn, int sock)
 {
-	FD_CLR(sock, &writefds);
-	FD_SET(sock, &readfds);
-	return 0;
-}
+	int i;
 
+	if (conn->poll) { /* SAM DBG */
+		printf("PROBLEMS! conn->poll set!\n");
+		return 0;
+	}
 
-int set_writable(int sock)
-{
-	FD_CLR(sock, &readfds);
-	FD_SET(sock, &writefds);
+	for (i = 1; i < npoll; ++i)
+		if (ufds[i].fd == -1) {
+			conn->poll = &ufds[i];
+			conn->poll->fd = sock;
+			conn->poll->events = POLLIN;
+			return 1;
+		}
+
 	return 0;
 }

@@ -82,7 +82,7 @@ char *get_proxy(void)
 
 static int tcp_connected(struct connection *conn)
 {
-	set_writable(conn->sock);
+	set_writable(conn);
 
 #ifdef WANT_SSL
 	if (is_https(conn->url)) {
@@ -119,7 +119,6 @@ static int connect_socket(struct connection *conn, char *hostname, int port)
 		my_perror("socket");
 		return -1;
 	}
-	conn->sock = sock;
 
 #ifdef _WIN32
 	optval = 1;
@@ -137,6 +136,12 @@ static int connect_socket(struct connection *conn, char *hostname, int port)
 	}
 #endif
 
+	if (!set_conn_socket(conn, sock)) {
+		printf("Problems! Could not set socket\n");
+		close(sock);
+		return -1;
+	}
+
 	memset(&sock_name, 0, sizeof(sock_name));
 	sock_name.sin_family = AF_INET;
 	sock_name.sin_addr.s_addr = *(unsigned *)host->h_addr_list[0];
@@ -146,7 +151,7 @@ static int connect_socket(struct connection *conn, char *hostname, int port)
 		if (errno == EINPROGRESS) {
 			if (verbose > 1)
 				printf("Connection deferred\n");
-			set_writable(sock);
+			set_writable(conn);
 			return 0;
 		} else {
 			char errstr[100];
@@ -251,7 +256,7 @@ void check_connect(struct connection *conn)
 	}
 #endif
 
-	if (getsockopt(conn->sock, SOL_SOCKET, SO_ERROR,
+	if (getsockopt(conn->poll->fd, SOL_SOCKET, SO_ERROR,
 		       (char *)&so_error, &optlen) == 0 &&
 	    so_error == 0)
 		tcp_connected(conn);
@@ -271,7 +276,7 @@ void write_request(struct connection *conn)
 			return;
 	} else
 #endif
-		n = write(conn->sock, conn->curp, conn->length);
+		n = write(conn->poll->fd, conn->curp, conn->length);
 
 	if (n == conn->length) {
 		if (verbose > 2)
@@ -279,7 +284,7 @@ void write_request(struct connection *conn)
 		conn->length = 0;
 
 		/* reset for read */
-		set_readable(conn->sock);
+		set_readable(conn);
 		conn->curp = conn->buf;
 		conn->rlen = conn->bufn;
 		NEXT_STATE(conn, read_reply);

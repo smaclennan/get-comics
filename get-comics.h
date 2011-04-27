@@ -4,40 +4,19 @@
 #include <errno.h>
 #include <time.h>
 #ifdef _WIN32
-/* winsock2.h must be before windows.h to avoid winsock.h clashes */
-#include <winsock2.h>
-#include <windows.h>
-#include <io.h>
-#include <direct.h> /* for chdir */
+#include "win32/win32.h"
 #else
 #include <unistd.h>
 #include <sys/time.h>
+#include <sys/poll.h>
 #endif
 
 
 #define HTTP_PORT		80
 #define XML_FILE		"/usr/share/get-comics/comics.xml"
 
-
-/* Use the internal http code, else use wget. See comment below. */
-#define USE_INTERNAL	1
-
-
-/*
- * Limit the number of concurrent threads.
- *
- * The internal routine should be able to do three times the threads
- * as the wget version. Why? The reason I limited the threads was that
- * my poor little 'Winder could not handle 31 consecutive wgets. Each
- * wget needs one thread and 2 processes (a shell and the wget). With
- * the internal model, we only have the thread.
- *
- * Which is all moot since my provider seems to limit simultaneous
- * connections :-(
- *
- */
+/* Limit the number of concurrent sockets. */
 #define THREAD_LIMIT	10
-
 
 /*
  * Maximum length of time to wait for a read
@@ -54,7 +33,6 @@
 /* The depth of the regexp matchs. */
 /* Affects the maximum value of the <regmatch> tag */
 #define MATCH_DEPTH		4
-
 
 /* I seem to get 1360 byte "chunks"
  * This seems a good compromise
@@ -81,7 +59,7 @@ struct connection {
 	unsigned days; /* bitmask */
 	int   gotit;
 
-	int sock;
+	struct pollfd *poll;
 	int connected;
 	FILE *out;
 	time_t access;
@@ -103,9 +81,7 @@ struct connection {
 	int (*func)(struct connection *conn);
 #define NEXT_STATE(c, f)  ((c)->func = (f))
 
-#ifdef LOGGING
-	struct log log;
-#endif
+	struct log *log;
 
 #ifdef WANT_SSL
 	void *ssl;
@@ -149,8 +125,17 @@ int fail_redirect(struct connection *conn);
 int release_connection(struct connection *conn);
 int process_html(struct connection *conn);
 
-int set_readable(int sock);
-int set_writable(int sock);
+static inline void set_readable(struct connection *conn)
+{
+	conn->poll->events = POLLIN;
+}
+
+static inline void set_writable(struct connection *conn)
+{
+	conn->poll->events = POLLOUT;
+}
+
+int set_conn_socket(struct connection *conn, int sock);
 
 /* export from xml.c */
 int read_config(char *fname);
@@ -178,22 +163,3 @@ int openssl_check_connect(struct connection *conn);
 int openssl_read(struct connection *conn);
 int openssl_write(struct connection *conn);
 void openssl_close(struct connection *conn);
-
-#ifdef _WIN32
-/* We only use read/write/close on sockets */
-/* We use stream operations on files */
-#define close closesocket
-#define read(s, b, n)  recv(s, b, n, 0)
-#define write(s, b, n) send(s, b, n, 0)
-
-#define socklen_t int
-
-#define unlink _unlink
-#define strdup _strdup
-#define chdir _chdir
-#define stricmp _stricmp
-#define inline _inline
-
-/* from win32.c */
-void win32_init(void);
-#endif
