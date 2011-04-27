@@ -9,11 +9,11 @@
  * connections.  */
 static SSL_CTX *ssl_ctx;
 
-static void print_errors (void)
+static void print_errors(void)
 {
 	unsigned long err;
-	while ((err = ERR_get_error ()))
-		printf ("OpenSSL: %s\n", ERR_error_string(err, NULL));
+	while ((err = ERR_get_error()))
+		printf("OpenSSL: %s\n", ERR_error_string(err, NULL));
 }
 
 static int openssl_init()
@@ -22,14 +22,14 @@ static int openssl_init()
 		return 0;
 
 	if (RAND_status() != 1) {
-		printf ("Could not seed PRNG\n");
-		return ENOENT;
+		printf("Could not seed PRNG\n");
+		return -ENOENT;
 	}
 
-	SSL_library_init ();
-	SSL_load_error_strings ();
-	SSLeay_add_all_algorithms ();
-	SSLeay_add_ssl_algorithms ();
+	SSL_library_init();
+	SSL_load_error_strings();
+	SSLeay_add_all_algorithms();
+	SSLeay_add_ssl_algorithms();
 
 	ssl_ctx = SSL_CTX_new(SSLv23_client_method());
 	if (!ssl_ctx) {
@@ -39,11 +39,11 @@ static int openssl_init()
 
 	/* SSL_VERIFY_NONE instructs OpenSSL not to abort SSL_connect
 	 * if the certificate is invalid. */
-	SSL_CTX_set_verify (ssl_ctx, SSL_VERIFY_NONE, NULL);
+	SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_NONE, NULL);
 
-	SSL_CTX_set_mode (ssl_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
+	SSL_CTX_set_mode(ssl_ctx, SSL_MODE_ENABLE_PARTIAL_WRITE);
 
-	SSL_CTX_set_mode (ssl_ctx, SSL_MODE_AUTO_RETRY);
+	SSL_CTX_set_mode(ssl_ctx, SSL_MODE_AUTO_RETRY);
 
 	return 0;
 }
@@ -54,10 +54,10 @@ int openssl_check_connect(struct connection *conn)
 	if (ret <= 0)
 		switch (SSL_get_error(conn->ssl, ret)) {
 		case SSL_ERROR_WANT_READ:
-			set_readable(conn->sock);
+			set_readable(conn);
 			return 0;
 		case SSL_ERROR_WANT_WRITE:
-			set_writable(conn->sock);
+			set_writable(conn);
 			return 0;
 		default:
 			printf("Not read or write\n");
@@ -66,7 +66,7 @@ int openssl_check_connect(struct connection *conn)
 
 	conn->connected = 1;
 
-	set_writable(conn->sock);
+	set_writable(conn);
 
 	return 0;
 }
@@ -85,7 +85,7 @@ int openssl_connect(struct connection *conn)
 
 	conn->ssl = ssl;
 
-	if (!SSL_set_fd(ssl, conn->sock))
+	if (!SSL_set_fd(ssl, conn->poll->fd))
 		goto error;
 
 	SSL_set_connect_state(ssl);
@@ -93,7 +93,7 @@ int openssl_connect(struct connection *conn)
 	return openssl_check_connect(conn);
 
 error:
-	printf ("SSL handshake failed.\n");
+	printf("SSL handshake failed.\n");
 	print_errors();
 	return 1;
 }
