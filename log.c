@@ -5,11 +5,24 @@
 
 #define EVENT_INC 32
 
+static struct log *get_log(struct connection *conn)
+{
+	if (!conn->log) {
+		conn->log = calloc(1, sizeof(struct log));
+		if (!conn->log) {
+			printf("Out of memory\n");
+			exit(1);
+		}
+	}
+
+	return conn->log;
+}
+
 /* We do not need any locking since get-comics is single threaded */
 void log_add(struct connection *conn, char *fmt, ...)
 {
 	char txt[128];
-	struct log *log = &conn->log;
+	struct log *log = get_log(conn);
 	va_list ap;
 
 	if (log->n_events >= log->max_events) {
@@ -44,37 +57,43 @@ void log_add(struct connection *conn, char *fmt, ...)
 
 void log_want_dump(struct connection *conn)
 {	/* User wants log to dump */
-	conn->log.failed |= 2;
+	struct log *log = get_log(conn);
+	log->failed |= 2;
 }
 
 void log_dump(struct connection *conn)
 {
 	int i;
-	struct log *log = &conn->log;
+
+	if (!conn->log)
+		return; /* nothing to see */
 
 	printf(">Log dump %s\n", conn->url);
-	if (log->failed & 1)
+	if (conn->log->failed & 1)
 		printf(">WARNING: Log entries incomplete\n");
-	for (i = 0; i < log->n_events; ++i)
-		puts(log->events[i]);
+	for (i = 0; i < conn->log->n_events; ++i)
+		puts(conn->log->events[i]);
 	puts("> EOD");
 }
 
 void log_clear(struct connection *conn)
 {
 	int i;
-	struct log *log = &conn->log;
 
-	if (!log->n_events)
+	if (!conn->log)
+		return; /* that was easy */
+
+	if (!conn->log->n_events)
 		return;
 
-	if (log->failed & 2)
+	if (conn->log->failed & 2)
 		log_dump(conn);
 
-	for (i = 0; i < log->n_events; ++i)
-		free(log->events[i]);
-	free(log->events);
-	log->n_events = 0;
+	for (i = 0; i < conn->log->n_events; ++i)
+		free(conn->log->events[i]);
+	free(conn->log->events);
+	conn->log->n_events = 0;
+	conn->log->max_events = 0;
 }
 #else
 void log_add(struct connection *conn, char *fmt, ...) {}

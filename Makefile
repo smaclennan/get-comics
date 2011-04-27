@@ -1,7 +1,7 @@
 CFLAGS += -O3 -Wall -g
 
 # Comment in to enable the log_* functions
-#CFLAGS += -DLOGGING
+CFLAGS += -DLOGGING
 
 # Comment in to enable https via openssl
 CFLAGS += -DWANT_SSL
