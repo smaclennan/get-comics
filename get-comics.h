@@ -116,7 +116,15 @@ static inline int is_https(char *p)
 	return strncmp(p, "https://", 8) == 0;
 }
 
-void my_perror(char *str);
+/* Send to stdout, not stderr */
+static inline void my_perror(char *str)
+{
+#ifdef _WIN32
+	printf("%s: error %d\n", str, WSAGetLastError());
+#else
+	printf("%s: %s\n", str, strerror(errno));
+#endif
+}
 #define perror(s)	Do not use
 
 int close_connection(struct connection *conn);

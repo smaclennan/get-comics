@@ -31,7 +31,7 @@ int read_timeout = SOCKET_TIMEOUT;
 char *comics_dir;
 struct connection *comics;
 int n_comics;
-
+int skipped;
 
 static struct connection *head;
 static int outstanding;
@@ -54,6 +54,7 @@ static int npoll;
 
 static void user_command(void);
 static void dump_outstanding(int sig);
+static void randomize_comics(void);
 
 
 static char *find_regexp(struct connection *conn)
@@ -381,6 +382,8 @@ int main(int argc, char *argv[])
 	}
 
 	/* Build the linked list - do after randomizing */
+	if (randomize)
+		randomize_comics();
 	for (i = 0; i < n_comics - 1; ++i)
 		comics[i].next = &comics[i + 1];
 	head = comics;
@@ -564,4 +567,36 @@ int set_conn_socket(struct connection *conn, int sock)
 		}
 
 	return 0;
+}
+
+static void swap_comics(int i, int n)
+{
+	struct connection tmp;
+
+	memcpy(&tmp, &comics[n], sizeof(struct connection));
+	memcpy(&comics[n], &comics[i], sizeof(struct connection));
+	memcpy(&comics[i], &tmp, sizeof(struct connection));
+}
+
+static void randomize_comics(void)
+{
+	int i, n;
+
+	srand((unsigned)time(NULL));
+
+	for (i = 0; i < n_comics; ++i) {
+		n = (rand() >> 3) % n_comics;
+		if (n != i)
+			swap_comics(i, n);
+	}
+}
+
+char *must_strdup(char *old)
+{
+	char *new = strdup(old);
+	if (!new) {
+		printf("OUT OF MEMORY\n");
+		exit(1);
+	}
+	return new;
 }

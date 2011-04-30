@@ -19,6 +19,7 @@
 #define chdir _chdir
 #define stricmp _stricmp
 #define inline _inline
+#define strcasecmp stricmp
 
 /* from win32.c */
 void win32_init(void);

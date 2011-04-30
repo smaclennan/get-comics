@@ -2,19 +2,9 @@
 #include <libxml/xmlmemory.h>
 
 
-#ifdef _WIN32
-#define strcasecmp stricmp
-#endif
-
-
 static struct tm *today;
 static unsigned wday;
 
-int skipped;
-static int write_failed = 1;
-
-
-static void randomize_comics(void);
 
 static struct connection *new_comic(void)
 {
@@ -34,16 +24,6 @@ static struct connection *new_comic(void)
 	return new;
 }
 
-
-char *must_strdup(char *old)
-{
-	char *new = strdup(old);
-	if (!new) {
-		printf("OUT OF MEMORY\n");
-		exit(1);
-	}
-	return new;
-}
 
 static char *must_xml_strdup(xmlChar *old)
 {
@@ -261,16 +241,11 @@ int read_config(char *fname)
 			read_timeout = strtol(str, NULL, 0);
 		else if (strcmp(name, "randomize") == 0)
 			randomize = strtol(str, NULL, 0);
-		else if (strcmp(name, "write-failed") == 0)
-			write_failed = strtol(str, NULL, 0);
 		else
 			printf("Unexpected element '%s'\n", name);
 	}
 
 	xmlFreeDoc(doc);
-
-	if (randomize)
-		randomize_comics();
 
 	return 0;
 }
@@ -297,6 +272,7 @@ static void write_comic_trailer(void)
 }
 
 
+/* exported */
 void set_failed(char *fname)
 {
 	wfp = fopen(fname, "w");
@@ -307,14 +283,12 @@ void set_failed(char *fname)
 }
 
 
+/* exported */
 int write_comic(struct connection *conn)
 {
 	static int first_time = 1;
 
 	if (!wfp)
-		return 0;
-
-	if (!write_failed)
 		return 0;
 
 	if (first_time) {
@@ -360,36 +334,3 @@ int write_comic(struct connection *conn)
 }
 
 
-
-/* Send to stdout, not stderr */
-void my_perror(char *str)
-{
-#ifdef _WIN32
-	printf("%s: error %d\n", str, WSAGetLastError());
-#else
-	printf("%s: %s\n", str, strerror(errno));
-#endif
-}
-
-
-static void swap_comics(int i, int n)
-{
-	struct connection tmp;
-
-	memcpy(&tmp, &comics[n], sizeof(struct connection));
-	memcpy(&comics[n], &comics[i], sizeof(struct connection));
-	memcpy(&comics[i], &tmp, sizeof(struct connection));
-}
-
-static void randomize_comics(void)
-{
-	int i, n;
-
-	srand((unsigned)time(NULL));
-
-	for (i = 0; i < n_comics; ++i) {
-		n = (rand() >> 3) % n_comics;
-		if (n != i)
-			swap_comics(i, n);
-	}
-}
