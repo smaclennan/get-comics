@@ -162,7 +162,7 @@ helps reduce the number of timeouts. */
   "output": "f_minus"
 },
 { /* Frank and Ernest */
-  "url": "http://comics.com/frank&amp;ernest/",
+  "url": "http://comics.com/frank&ernest/",
   "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
   "output": "franknernest"
 },
