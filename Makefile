@@ -6,11 +6,26 @@ CFLAGS += -DLOGGING
 # Comment in to enable https via openssl
 CFLAGS += -DWANT_SSL
 
-OBJS := get-comics.o http.o xml.o log.o openssl.o
+# Comment in to enable XML
+CFLAGS += -DWANT_XML
+
+# Comment in to enable JSON
+#CFLAGS += -DWANT_JSON
+
+OBJS := get-comics.o http.o log.o openssl.o
 
 # For libxml2
+ifneq ($(findstring WANT_XML,$(CFLAGS)),)
+OBJS += xml.o
 CFLAGS += -I/usr/include/libxml2
 LIBS += -lxml2
+endif
+
+# For json-c
+ifneq ($(findstring WANT_JSON,$(CFLAGS)),)
+OBJS += json.o
+LIBS += -ljson
+endif
 
 # Optionaly add openssl
 ifneq ($(findstring WANT_SSL,$(CFLAGS)),)

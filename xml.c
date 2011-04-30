@@ -1,3 +1,4 @@
+#ifdef WANT_XML
 #include "get-comics.h"
 #include <libxml/xmlmemory.h>
 
@@ -332,5 +333,10 @@ int write_comic(struct connection *conn)
 
 	return 0;
 }
+#endif
 
-
+/*
+ * Local Variables:
+ * my-sparse-args: "-DWANT_XML"
+ * End:
+ */
