@@ -10,9 +10,9 @@ CFLAGS += -DWANT_SSL
 CFLAGS += -DWANT_XML
 
 # Comment in to enable JSON
-#CFLAGS += -DWANT_JSON
+CFLAGS += -DWANT_JSON
 
-OBJS := get-comics.o http.o log.o openssl.o
+OBJS := get-comics.o http.o config.o log.o openssl.o
 
 # For libxml2
 ifneq ($(findstring WANT_XML,$(CFLAGS)),)

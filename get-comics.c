@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
 	int i, n, timeout = 250;
 	struct connection *conn;
 
-	while ((i = getopt(argc, argv, "d:kl:p:rt:vx:")) != -1)
+	while ((i = getopt(argc, argv, "d:kl:p:rt:v")) != -1)
 		switch ((char)i) {
 		case 'd':
 			comics_dir = optarg;
@@ -355,14 +355,11 @@ int main(int argc, char *argv[])
 		case 'v':
 			verbose++;
 			break;
-		case 'x':
-			set_failed(optarg);
-			break;
 		case 'h':
 		default:
 			puts("usage: get-comics [-kv] [-c config]"
 				 "[-d comics_dir] [-l links_file] [-t threads] "
-				 "[-x failed_xml_file] [xml-file]");
+				 "[xml-file]");
 			puts("Where: -k  keep index files");
 			puts("       -v  verbose");
 			exit(1);
@@ -376,7 +373,7 @@ int main(int argc, char *argv[])
 			}
 			++optind;
 		}
-	else if (read_config(XML_FILE)) {
+	else if (read_config(NULL)) {
 		printf("Fatal error in xml file\n");
 		exit(1);
 	}
