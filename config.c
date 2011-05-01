@@ -1,19 +1,32 @@
 #include "get-comics.h"
+#include <sys/stat.h>
 
 
 struct tm *today;
 unsigned wday;
 
 
+static int file_access(char *fname)
+{
+	struct stat sbuf;
+
+	if (stat(fname, &sbuf))
+		return errno;
+
+	/* This allows files and links */
+	errno = EISDIR;
+	return S_ISREG(sbuf.st_mode) == 0;
+}
+
 static char *pick_filename(void)
 {
 #ifdef WANT_JSON
-	if (access(JSON_FILE, R_OK) == 0)
+	if (file_access(JSON_FILE) == 0)
 		return JSON_FILE;
 #endif
 
 #ifdef WANT_XML
-	if (access(XML_FILE, R_OK) == 0)
+	if (file_access(XML_FILE) == 0)
 		return XML_FILE;
 #endif
 
@@ -30,6 +43,11 @@ int read_config(char *fname)
 
 	if (verbose)
 		printf("Reading %s\n", fname);
+
+	if (file_access(fname)) {
+		my_perror(fname);
+		exit(1);
+	}
 
 	/* Get the time for the urls */
 	time(&now);
