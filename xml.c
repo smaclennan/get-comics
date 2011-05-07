@@ -42,6 +42,9 @@ int read_xml_config(char *fname)
 	xmlDocPtr  doc;
 	xmlNodePtr cur;
 
+	if (verbose)
+		printf("Reading XML %s\n", fname);
+
 	LIBXML_TEST_VERSION;
 
 	xmlKeepBlanksDefault(0); /* ignore indentation */

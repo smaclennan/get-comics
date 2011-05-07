@@ -1,5 +1,4 @@
 #include "get-comics.h"
-#include <sys/stat.h>
 
 
 struct tm *today;
@@ -20,7 +19,7 @@ static int file_access(char *fname)
 
 static char *pick_filename(void)
 {
-#ifdef WANT_JSON
+#if defined(WANT_JSON) || defined(WANT_JSON_INTERNAL)
 	if (file_access(JSON_FILE) == 0)
 		return JSON_FILE;
 #endif
@@ -41,9 +40,6 @@ int read_config(char *fname)
 	if (!fname)
 		fname = pick_filename();
 
-	if (verbose)
-		printf("Reading %s\n", fname);
-
 	if (file_access(fname)) {
 		my_perror(fname);
 		exit(1);
@@ -54,20 +50,19 @@ int read_config(char *fname)
 	today = localtime(&now);
 	wday = 1 << today->tm_wday;
 
-#if defined(WANT_XML) && defined(WANT_JSON)
+#if defined(WANT_JSON) || defined(WANT_JSON_INTERNAL)
+#  if defined(WANT_XML)
 	{
 		char *p = strrchr(fname, '.');
 		if (p && strcasecmp(p, ".xml") == 0)
 			return read_xml_config(fname);
-		else
-			return read_json_config(fname);
 	}
+#  endif
+	return read_json_config(fname);
 #elif defined(WANT_XML)
 	return read_xml_config(fname);
-#elif defined(WANT_JSON)
-	return read_json_config(fname);
 #else
-#error Need WANT_XML and/or WANT_JSON defined
+#error Need WANT_XML and/or (WANT_JSON or WANT_JSON_INTERNAL) defined
 #endif
 }
 

@@ -324,10 +324,10 @@ static void read_conn(struct connection *conn)
 int main(int argc, char *argv[])
 {
 	char *env;
-	int i, n, timeout = 250;
+	int i, n, timeout = 250, verify = 0;
 	struct connection *conn;
 
-	while ((i = getopt(argc, argv, "d:kl:p:rt:v")) != -1)
+	while ((i = getopt(argc, argv, "d:kl:p:rt:vV")) != -1)
 		switch ((char)i) {
 		case 'd':
 			comics_dir = optarg;
@@ -355,6 +355,9 @@ int main(int argc, char *argv[])
 		case 'v':
 			verbose++;
 			break;
+		case 'V':
+			verify = 1;
+			break;
 		case 'h':
 		default:
 			puts("usage: get-comics [-kv] [-c config]"
@@ -377,6 +380,9 @@ int main(int argc, char *argv[])
 		printf("Fatal error in xml file\n");
 		exit(1);
 	}
+
+	if (verify)
+		return 0;
 
 	/* Build the linked list - do after randomizing */
 	if (randomize)

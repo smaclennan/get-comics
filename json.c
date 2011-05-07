@@ -55,6 +55,9 @@ int read_json_config(char *fname)
 	struct json_object *top = NULL;
 	int i, max;
 
+	if (verbose)
+		printf("Reading JSON %s\n", fname);
+
 	top = json_object_from_file(fname);
 	if (!top) {
 		printf("Parse failed\n");

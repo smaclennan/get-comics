@@ -3,6 +3,7 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+#include <fcntl.h>
 #ifdef _WIN32
 #include "win32/win32.h"
 #else
@@ -10,6 +11,7 @@
 #include <sys/time.h>
 #include <sys/poll.h>
 #endif
+#include <sys/stat.h>
 
 
 #define HTTP_PORT		80
@@ -127,7 +129,7 @@ static inline void my_perror(char *str)
 	printf("%s: %s\n", str, strerror(errno));
 #endif
 }
-#define perror(s)	Do not use
+#define perror(s)	Do_not_use_perror
 
 int close_connection(struct connection *conn);
 int fail_connection(struct connection *conn);

@@ -500,11 +500,13 @@ static int read_chunkblock(struct connection *conn)
 
 /* Make code more readable */
 #define INC_CURP(conn)						\
-	if (++conn->curp == conn->endp) {			\
-		if (verbose > 1)				\
-			printf("Empty %d\n", __LINE__);		\
-		return 0;					\
-	}
+	do {							\
+		if (++conn->curp == conn->endp) {		\
+			if (verbose > 1)			\
+				printf("Empty %d\n", __LINE__);	\
+			return 0;				\
+		}						\
+	} while (0)
 
 
 /* State function */

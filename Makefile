@@ -9,8 +9,9 @@ CFLAGS += -DWANT_SSL
 # Comment in to enable XML
 CFLAGS += -DWANT_XML
 
-# Comment in to enable JSON
+# Comment in only one to enable JSON
 CFLAGS += -DWANT_JSON
+#CFLAGS += -DWANT_JSON_INTERNAL
 
 OBJS := get-comics.o http.o config.o log.o openssl.o
 
@@ -21,10 +22,15 @@ CFLAGS += -I/usr/include/libxml2
 LIBS += -lxml2
 endif
 
+# For internal json
+ifneq ($(findstring WANT_JSON_INTERNAL,$(CFLAGS)),)
+OBJS += json-internal.o js0n.o
+else
 # For json-c
 ifneq ($(findstring WANT_JSON,$(CFLAGS)),)
 OBJS += json.o
 LIBS += -ljson
+endif
 endif
 
 # Optionaly add openssl
