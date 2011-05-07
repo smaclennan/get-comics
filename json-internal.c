@@ -11,6 +11,23 @@ static char *strval(unsigned char *str, int len)
 	return strbuf;
 }
 
+/* js0n returns pointers into the original file, it cannot un-escape
+ * the characters. */
+static char *unesc(char *str)
+{
+	char ch, *start = str, *out = str;
+
+	while ((ch = *str++)) {
+		*out++ = ch;
+		if (ch == '\\' && *str == '\\')
+			++str;
+	}
+
+	*out = '\0';
+
+	return start;
+}
+
 static void parse_comic(unsigned char *comic, int len)
 {
 	int i;
@@ -27,12 +44,15 @@ static void parse_comic(unsigned char *comic, int len)
 		char *key = (char *)comic + res[i];
 		char *val = strval(comic + res[i + 2], res[i + 3]);
 
+		if (verbose > 1)
+			printf("key '%.*s' val '%s'\n", res[i + 1], key, val);
+
 		if (strncmp(key, "url", res[i + 1]) == 0)
 			add_url(&new, val);
 		else if (strncmp(key, "days", res[i + 1]) == 0)
 			add_days(&new, val);
 		else if (strncmp(key, "regexp", res[i + 1]) == 0)
-			add_regexp(&new, val);
+			add_regexp(&new, unesc(val));
 		else if (strncmp(key, "regmatch", res[i + 1]) == 0)
 			add_regmatch(&new, strtol(val, NULL, 0));
 		else if (strncmp(key, "output", res[i + 1]) == 0)
@@ -88,7 +108,7 @@ int read_json_config(char *fname)
 {
 	unsigned char *json = NULL;
 	int i, n;
-	unsigned short res[40]; /* SAM */
+	unsigned short res[40];
 	int fd;
 	struct stat sbuf;
 
