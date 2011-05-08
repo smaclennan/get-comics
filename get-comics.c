@@ -27,16 +27,15 @@
 
 int read_timeout = SOCKET_TIMEOUT;
 
-/* These are filled in by read_config */
 char *comics_dir;
-struct connection *comics;
-int n_comics;
 int skipped;
 
-static struct connection *head;
+static struct connection *comics;
+int n_comics;
 static int outstanding;
-
 static int gotit;
+
+static struct connection *head;
 
 static int unlink_index = 1;
 int verbose;
@@ -279,13 +278,13 @@ int process_html(struct connection *conn)
 
 static int timeout_connections(void)
 {
-	int i;
+	struct connection *comic;
 	time_t timeout = time(NULL) - read_timeout;
 
-	for (i = 0; i < n_comics; ++i)
-		if (comics[i].poll && comics[i].access < timeout) {
-			printf("TIMEOUT %s\n", comics[i].url);
-			fail_connection(&comics[i]);
+	for (comic = comics; comic; comic = comic->next)
+		if (comic->poll && comic->access < timeout) {
+			printf("TIMEOUT %s\n", comic->url);
+			fail_connection(comic);
 		}
 
 	return 0;
@@ -385,15 +384,14 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (verify)
-		return 0;
-
-	/* Build the linked list - do after randomizing */
 	if (randomize)
 		randomize_comics();
-	for (i = 0; i < n_comics - 1; ++i)
-		comics[i].next = &comics[i + 1];
-	head = comics;
+
+	if (verify) {
+		if (verbose)
+			dump_outstanding(0);
+		return 0;
+	}
 
 	/* set_proxy will not use this if proxy already set */
 	env = getenv("COMICS_PROXY");
@@ -581,26 +579,48 @@ int set_conn_socket(struct connection *conn, int sock)
 	return 0;
 }
 
-static void swap_comics(int i, int n)
+void add_comic(struct connection *new)
 {
-	struct connection tmp;
+	static struct connection *tail;
 
-	memcpy(&tmp, &comics[n], sizeof(struct connection));
-	memcpy(&comics[n], &comics[i], sizeof(struct connection));
-	memcpy(&comics[i], &tmp, sizeof(struct connection));
+	if (comics)
+		tail->next = new;
+	else
+		comics = head = new;
+	tail = new;
+	++n_comics;
 }
 
 static void randomize_comics(void)
 {
+	struct connection **array, *tmp;
 	int i, n;
 
 	srand((unsigned)time(NULL));
 
+	array = calloc(n_comics, sizeof(struct connection *));
+	if (!array) {
+		printf("Out of memory\n");
+		exit(1);
+	}
+
+	for (i = 0, tmp = comics; tmp; tmp = tmp->next, ++i)
+		array[i] = tmp;
+
 	for (i = 0; i < n_comics; ++i) {
 		n = (rand() >> 3) % n_comics;
-		if (n != i)
-			swap_comics(i, n);
+		tmp = array[i];
+		array[i] = array[n];
+		array[n] = tmp;
 	}
+
+	for (i = 0; i < n_comics - 1; ++i)
+		array[i]->next = array[i + 1];
+	array[i]->next = NULL;
+
+	comics = head = array[0];
+
+	free(array);
 }
 
 char *must_strdup(char *old)

@@ -96,7 +96,6 @@ struct connection {
 };
 
 extern char *comics_dir;
-extern struct connection *comics;
 extern int n_comics;
 extern int skipped;
 extern int verbose;
@@ -149,6 +148,7 @@ static inline void set_writable(struct connection *conn)
 }
 
 int set_conn_socket(struct connection *conn, int sock);
+void add_comic(struct connection *comic);
 char *must_strdup(char *str);
 
 /* export from config.c */

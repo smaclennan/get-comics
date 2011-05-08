@@ -1,6 +1,5 @@
 #include "get-comics.h"
 
-
 struct tm *today;
 unsigned wday;
 
@@ -69,19 +68,11 @@ int read_config(char *fname)
 /* Helpers for the read_X_config functions */
 struct connection *new_comic(void)
 {
-	struct connection *new;
-
-	comics = realloc(comics, (n_comics + 1) * sizeof(struct connection));
-	if (!comics) {
+	struct connection *new = calloc(1, sizeof(struct connection));
+	if (!new) {
 		printf("OUT OF MEMORY\n");
 		exit(1);
 	}
-
-	new = &comics[n_comics];
-	++n_comics;
-
-	memset(new, 0, sizeof(struct connection));
-
 	return new;
 }
 
@@ -99,9 +90,9 @@ void sanity_check_comic(struct connection *new)
 		if (verbose)
 			printf("Skipping %s\n", new->url);
 		++skipped;
-		/* Memory leak and I don't care */
-		--n_comics;
-	}
+		free(new);
+	} else
+		add_comic(new);
 }
 
 void add_url(struct connection **conn, char *url)
