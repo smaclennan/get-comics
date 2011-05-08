@@ -1,5 +1,6 @@
 *.o
 get-comics
-http
 get-comics.html
+json2xml
+comics.xml
 TAGS

@@ -38,7 +38,7 @@ ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
 LIBS += -lssl
 endif
 
-all: 	get-comics get-comics.html
+all: 	get-comics get-comics.html comics.xml
 
 get-comics: $(OBJS)
 	$(CC) $(CFLAGS) -o get-comics $(OBJS) $(LIBS)
@@ -48,10 +48,15 @@ get-comics: $(OBJS)
 get-comics.html: get-comics.1
 	man2html get-comics.1 > get-comics.html
 
+comics.xml: comics.json
+	$(CC) $(CFLAGS) -o json2xml json2xml.c
+	./json2xml < comics.json > comics.xml
+
 install:
 	install -D -s -m 755 get-comics $(DESTDIR)/usr/bin/get-comics
 	install -D -m 644 get-comics.1 $(DESTDIR)/usr/man/man1/get-comics.1
 	gzip $(DESTDIR)/usr/man/man1/get-comics.1
+	install -D -m 644 comics.json $(DESTDIR)/usr/share/get-comics/comics.json
 	install -D -m 644 comics.xml $(DESTDIR)/usr/share/get-comics/comics.xml
 
 clean:
