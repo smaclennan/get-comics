@@ -3,11 +3,11 @@
 of this, a given provider tends to get hit all at once. This causes
 connections to fail even though the comic exists (throttling?). By
 randomizing the comics, we lessen this problem.  */
-"randomize": 1,
+/* "randomize": 1, */
 
 /* For slow links it helps to limit the number of threads. This
 helps reduce the number of timeouts. */
-"threads": 4,
+/* "threads": 4, */
 
 "comics": [
 
@@ -23,6 +23,11 @@ helps reduce the number of timeouts. */
 { /* Duplex */
   "url": "http://images.ucomics.com/comics/dp/%Y/dp%y%m%d.gif"
 },
+{ /* Free Range */
+  "url": "http://www.gocomics.com/freerange/",
+  "regexp": "http://imgsrv.gocomics.com/dim/\\?fh=[a-z0-9]+",
+  "output": "free-range.gif" /* we need the extension */
+},
 { /* Lio */
   "url": "http://images.ucomics.com/comics/lio/%Y/lio%y%m%d.gif"
 },
@@ -37,6 +42,11 @@ helps reduce the number of timeouts. */
 { /* Tom the Dancing Bug */
   "url": "http://images.ucomics.com/comics/td/%Y/td%y%m%d.gif",
   "days": "XXXXXXs"
+},
+{ /* Working It Out */
+  "url": "http://www.gocomics.com/workingitout/",
+  "regexp": "http://imgsrv.gocomics.com/dim/\\?fh=[a-z0-9]+",
+  "output": "workingitout.gif" /* we need the extension */
 },
 
 /* Independents */
