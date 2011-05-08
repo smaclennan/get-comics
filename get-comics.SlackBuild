@@ -17,6 +17,8 @@ make || exit 1
 
 make DESTDIR=$PKG PREFIX=/usr install || exit 1
 
+mv $PKG/usr/share/get-comics/comics.json \
+   $PKG/usr/share/get-comics/comics.json.new
 mv $PKG/usr/share/get-comics/comics.xml \
    $PKG/usr/share/get-comics/comics.xml.new
 

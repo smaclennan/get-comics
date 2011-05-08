@@ -19,4 +19,5 @@ config_file () {
     fi
 }
 
-config_file /usr/share/get-comics/comics.xml
+config_file usr/share/get-comics/comics.json
+config_file usr/share/get-comics/comics.xml
