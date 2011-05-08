@@ -551,8 +551,8 @@ static void user_command(void)
 		int queued = 0;
 		for (conn = head; conn; conn = conn->next)
 			++queued;
-		printf("Total %d Outstanding: %d Queued %d\n",
-			   n_comics, outstanding, queued);
+		printf("Total %d Got %d Outstanding %d Queued %d\n",
+		       n_comics, gotit, outstanding, queued);
 	} else if (*p)
 		printf("Unexpected command %s", buf);
 }
