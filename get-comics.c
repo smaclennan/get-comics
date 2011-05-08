@@ -439,8 +439,10 @@ int main(int argc, char *argv[])
 		ufds[i].fd = -1;
 
 	/* Add stdin */
-	ufds[0].fd = 0;
-	ufds[0].events = POLLIN;
+	if (isatty(0)) {
+		ufds[0].fd = 0;
+		ufds[0].events = POLLIN;
+	}
 
 	/* start one */
 	start_next_comic();
