@@ -360,11 +360,15 @@ int main(int argc, char *argv[])
 			break;
 		case 'h':
 		default:
-			puts("usage: get-comics [-kv] [-c config]"
-				 "[-d comics_dir] [-l links_file] [-t threads] "
-				 "[config-file]");
+			puts("usage: get-comics [-krvV]"
+			     "[-d comics_dir] [-l links_file] "
+			     "[-p proxy]");
+			puts("                  [-t threads] "
+			     "[config-file ...]");
 			puts("Where: -k  keep index files");
+			puts("       -r  randomize");
 			puts("       -v  verbose");
+			puts("       -V  verify config");
 			exit(1);
 		}
 
