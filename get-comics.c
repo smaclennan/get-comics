@@ -45,7 +45,7 @@ int randomize;
 static FILE *links_only;
 
 /* If the user specified this on the command line we do not want the
- * conifg file to override */
+ * config file to override */
 int threads_set;
 
 
@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
 		default:
 			puts("usage: get-comics [-kv] [-c config]"
 				 "[-d comics_dir] [-l links_file] [-t threads] "
-				 "[conifg-file]");
+				 "[config-file]");
 			puts("Where: -k  keep index files");
 			puts("       -v  verbose");
 			exit(1);
@@ -371,13 +371,13 @@ int main(int argc, char *argv[])
 	if (optind < argc)
 		while (optind < argc) {
 			if (read_config(argv[optind])) {
-				printf("Fatal error in conifg file\n");
+				printf("Fatal error in config file\n");
 				exit(1);
 			}
 			++optind;
 		}
 	else if (read_config(NULL)) {
-		printf("Fatal error in conifg file\n");
+		printf("Fatal error in config file\n");
 		exit(1);
 	}
 
