@@ -1,10 +1,7 @@
 #include "get-comics.h"
 
-#include <ctype.h>
-#include <errno.h>
 #include <fcntl.h>
-#ifdef _WIN32
-#else
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

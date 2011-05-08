@@ -45,7 +45,7 @@ int randomize;
 static FILE *links_only;
 
 /* If the user specified this on the command line we do not want the
- * xml file to override */
+ * conifg file to override */
 int threads_set;
 
 
@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
 		default:
 			puts("usage: get-comics [-kv] [-c config]"
 				 "[-d comics_dir] [-l links_file] [-t threads] "
-				 "[xml-file]");
+				 "[conifg-file]");
 			puts("Where: -k  keep index files");
 			puts("       -v  verbose");
 			exit(1);
@@ -371,13 +371,13 @@ int main(int argc, char *argv[])
 	if (optind < argc)
 		while (optind < argc) {
 			if (read_config(argv[optind])) {
-				printf("Fatal error in xml file\n");
+				printf("Fatal error in conifg file\n");
 				exit(1);
 			}
 			++optind;
 		}
 	else if (read_config(NULL)) {
-		printf("Fatal error in xml file\n");
+		printf("Fatal error in conifg file\n");
 		exit(1);
 	}
 
@@ -532,7 +532,7 @@ static void dump_outstanding(int sig)
 
 static void user_command(void)
 {
-	char buf[80];
+	char buf[80], *p;
 	struct connection *conn;
 
 	if (!fgets(buf, sizeof(buf), stdin)) {
@@ -540,15 +540,18 @@ static void user_command(void)
 		return;
 	}
 
-	if (*buf == 'd')
+	for (p = buf; isspace(*p); ++p)
+		;
+
+	if (*p == 'd')
 		dump_outstanding(0);
-	else if (*buf == 'b') {
+	else if (*p == 'b') {
 		int queued = 0;
 		for (conn = head; conn; conn = conn->next)
 			++queued;
 		printf("Total %d Outstanding: %d Queued %d\n",
 			   n_comics, outstanding, queued);
-	} else
+	} else if (*p)
 		printf("Unexpected command %s", buf);
 }
 
