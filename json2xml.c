@@ -92,8 +92,7 @@ int main(int argc, char *argv[])
 
 	/* Static header */
 	puts("<?xml version=\"1.0\"?>");
-	puts("<comics:Configuration xmlns:comics=\"http://seanm.ca/\">");
-	puts("");
+	puts("<comics:Configuration xmlns:comics=\"http://seanm.ca/\">\n");
 
 	/* Parse the top level */
 	while (fgets(line, sizeof(line), stdin)) {

@@ -60,4 +60,4 @@ install:
 	install -D -m 644 comics.xml $(DESTDIR)/usr/share/get-comics/comics.xml
 
 clean:
-	rm -f get-comics http *.o get-comics.html TAGS
+	rm -f get-comics json2xml *.o get-comics.html comics.xml TAGS
