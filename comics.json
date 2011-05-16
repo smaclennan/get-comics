@@ -25,7 +25,7 @@ helps reduce the number of timeouts. */
 },
 { /* Free Range */
   "url": "http://www.gocomics.com/freerange/",
-  "regexp": "http://imgsrv.gocomics.com/dim/\\?fh=[a-z0-9]+",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "free-range.gif" /* we need the extension */
 },
 { /* Lio */
@@ -45,7 +45,7 @@ helps reduce the number of timeouts. */
 },
 { /* Working It Out */
   "url": "http://www.gocomics.com/workingitout/",
-  "regexp": "http://imgsrv.gocomics.com/dim/\\?fh=[a-z0-9]+",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "workingitout.gif" /* we need the extension */
 },
 
