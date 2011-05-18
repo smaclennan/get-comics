@@ -176,11 +176,6 @@ helps reduce the number of timeouts. */
   "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
   "output": "franknernest"
 },
-{ /* Free Range */
-  "url": "http://comics.com/free_range/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
-  "output": "free-range"
-},
 { /* Herman */
   "url": "http://comics.com/herman/",
   "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
@@ -231,11 +226,6 @@ helps reduce the number of timeouts. */
   "url": "http://comics.com/working_daze/",
   "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
   "output": "working_daze"
-},
-{ /* Working It Out */
-  "url": "http://comics.com/working_it_out/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]+\\.full\\.gif",
-  "output": "workingitout"
 },
 { /* Zack Hill */
   "url": "http://comics.com/zack_hill/",
