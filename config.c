@@ -13,7 +13,12 @@ static int file_access(char *fname)
 
 	/* This allows files and links */
 	errno = EISDIR;
+	/* SAM FIXME */
+#ifdef _WIN32
+	return (sbuf.st_mode & _S_IFREG) != _S_IFREG;
+#else
 	return S_ISREG(sbuf.st_mode) == 0;
+#endif
 }
 
 static char *pick_filename(void)

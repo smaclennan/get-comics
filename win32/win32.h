@@ -20,6 +20,10 @@
 #define stricmp _stricmp
 #define inline _inline
 #define strcasecmp stricmp
+#define snprintf _snprintf
 
 /* from win32.c */
 void win32_init(void);
+
+/* from poll.c */
+int poll(struct pollfd *fds, int nfds, int timeout);

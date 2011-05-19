@@ -145,7 +145,7 @@ static int connect_socket(struct connection *conn, char *hostname, int port)
 	sock_name.sin_port = htons((short)port);
 
 	if (connect(sock, (struct sockaddr *)&sock_name, sizeof(sock_name))) {
-		if (errno == EINPROGRESS) {
+		if (inprogress()) {
 			if (verbose > 1)
 				printf("Connection deferred\n");
 			set_writable(conn);

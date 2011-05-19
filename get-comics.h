@@ -147,6 +147,16 @@ static inline void set_writable(struct connection *conn)
 	conn->poll->events = POLLOUT;
 }
 
+static inline int inprogress()
+{
+#ifdef _WIN32
+	return WSAGetLastError() == WSAEWOULDBLOCK;
+#else
+	return errno == EINPROGRESS;
+#endif
+}
+
+
 int set_conn_socket(struct connection *conn, int sock);
 void add_comic(struct connection *comic);
 char *must_strdup(char *str);

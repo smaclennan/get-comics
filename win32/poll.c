@@ -1,5 +1,5 @@
+#include <winsock2.h>
 #include <windows.h>
-#include "poll.h"
 
 int poll(struct pollfd *fds, int nfds, int timeout)
 {

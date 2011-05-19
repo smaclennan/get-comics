@@ -43,8 +43,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="win32,c:/src/libxml2-2.7.6.win32/include,c:/src/iconv-1.9.2.win32/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="win32;&quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Include&quot;"
+				PreprocessorDefinitions="WANT_JSON;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -69,11 +69,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib libxml2.lib iconv.lib ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile=".\Debug/get-comics.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="c:/src/libxml2-2.7.6.win32/lib,c:/src/iconv-1.9.2.win32/lib"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib&quot;"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/get-comics.pdb"
 				SubSystem="1"
@@ -201,6 +201,10 @@
 	</References>
 	<Files>
 		<File
+			RelativePath=".\config.c"
+			>
+		</File>
+		<File
 			RelativePath="get-comics.c"
 			>
 			<FileConfiguration
@@ -251,6 +255,30 @@
 			</FileConfiguration>
 		</File>
 		<File
+			RelativePath=".\json-parser.c"
+			>
+		</File>
+		<File
+			RelativePath=".\JSON_parser.c"
+			>
+		</File>
+		<File
+			RelativePath=".\JSON_parser.h"
+			>
+		</File>
+		<File
+			RelativePath=".\log.c"
+			>
+		</File>
+		<File
+			RelativePath=".\openssl.c"
+			>
+		</File>
+		<File
+			RelativePath=".\win32\poll.c"
+			>
+		</File>
+		<File
 			RelativePath="win32\regex.c"
 			>
 			<FileConfiguration
@@ -297,25 +325,8 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="xml.c"
+			RelativePath=".\win32\win32.h"
 			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>

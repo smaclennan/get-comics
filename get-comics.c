@@ -440,16 +440,19 @@ int main(int argc, char *argv[])
 	for (i = 0; i < npoll; ++i)
 		ufds[i].fd = -1;
 
-	/* Add stdin */
+#ifndef _WIN32
+	/* Add stdin - windows can poll only on sockets */
 	if (isatty(0)) {
 		ufds[0].fd = 0;
 		ufds[0].events = POLLIN;
 	}
-
-	/* start one */
-	start_next_comic();
+#endif
 
 	while (head || outstanding) {
+
+		if (outstanding == 0)
+			start_next_comic();
+
 		n = poll(ufds, npoll, timeout);
 		if (n < 0) {
 			my_perror("poll");

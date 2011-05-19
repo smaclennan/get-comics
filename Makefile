@@ -10,9 +10,9 @@ CFLAGS += -DWANT_SSL
 CFLAGS += -DWANT_XML
 
 # Comment in only one to enable JSON
-JSON := WANT_JSON_LIB
+#JSON := WANT_JSON_LIB
 #JSON := WANT_JSON_INTERNAL
-#JSON := WANT_JSON_PARSER
+JSON := WANT_JSON_PARSER
 
 OBJS := get-comics.o http.o config.o log.o openssl.o
 
