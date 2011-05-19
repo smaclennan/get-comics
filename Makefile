@@ -10,8 +10,9 @@ CFLAGS += -DWANT_SSL
 CFLAGS += -DWANT_XML
 
 # Comment in only one to enable JSON
-CFLAGS += -DWANT_JSON
-#CFLAGS += -DWANT_JSON_INTERNAL
+JSON := WANT_JSON_LIB
+#JSON := WANT_JSON_INTERNAL
+#JSON := WANT_JSON_PARSER
 
 OBJS := get-comics.o http.o config.o log.o openssl.o
 
@@ -22,15 +23,19 @@ CFLAGS += -I/usr/include/libxml2
 LIBS += -lxml2
 endif
 
-# For internal json
-ifneq ($(findstring WANT_JSON_INTERNAL,$(CFLAGS)),)
+# For json
+ifneq ($(findstring WANT_JSON_INTERNAL,$(JSON)),)
+CFLAGS += -DWANT_JSON
 OBJS += json-internal.o js0n.o
-else
-# For json-c
-ifneq ($(findstring WANT_JSON,$(CFLAGS)),)
+endif
+ifneq ($(findstring WANT_JSON_PARSER,$(JSON)),)
+CFLAGS += -DWANT_JSON
+OBJS += json-parser.o JSON_parser.o
+endif
+ifneq ($(findstring WANT_JSON_LIB,$(JSON)),)
+CFLAGS += -DWANT_JSON
 OBJS += json.o
 LIBS += -ljson
-endif
 endif
 
 # Optionaly add openssl

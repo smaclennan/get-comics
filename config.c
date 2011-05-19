@@ -18,7 +18,7 @@ static int file_access(char *fname)
 
 static char *pick_filename(void)
 {
-#if defined(WANT_JSON) || defined(WANT_JSON_INTERNAL)
+#ifdef WANT_JSON
 	if (file_access(JSON_FILE) == 0)
 		return JSON_FILE;
 #endif
@@ -49,8 +49,8 @@ int read_config(char *fname)
 	today = localtime(&now);
 	wday = 1 << today->tm_wday;
 
-#if defined(WANT_JSON) || defined(WANT_JSON_INTERNAL)
-#  if defined(WANT_XML)
+#ifdef WANT_JSON
+#  ifdef WANT_XML
 	{
 		char *p = strrchr(fname, '.');
 		if (p && strcasecmp(p, ".xml") == 0)
@@ -61,7 +61,7 @@ int read_config(char *fname)
 #elif defined(WANT_XML)
 	return read_xml_config(fname);
 #else
-#error Need WANT_XML and/or (WANT_JSON or WANT_JSON_INTERNAL) defined
+#error Need config defined. See Makefile
 #endif
 }
 
