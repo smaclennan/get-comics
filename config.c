@@ -13,23 +13,18 @@ static int file_access(char *fname)
 
 	/* This allows files and links */
 	errno = EISDIR;
-	/* SAM FIXME */
-#ifdef _WIN32
-	return (sbuf.st_mode & _S_IFREG) != _S_IFREG;
-#else
-	return S_ISREG(sbuf.st_mode) == 0;
-#endif
+	return S_ISREG(sbuf.st_mode);
 }
 
 static char *pick_filename(void)
 {
 #ifdef WANT_JSON
-	if (file_access(JSON_FILE) == 0)
+	if (file_access(JSON_FILE))
 		return JSON_FILE;
 #endif
 
 #ifdef WANT_XML
-	if (file_access(XML_FILE) == 0)
+	if (file_access(XML_FILE))
 		return XML_FILE;
 #endif
 
@@ -44,7 +39,7 @@ int read_config(char *fname)
 	if (!fname)
 		fname = pick_filename();
 
-	if (file_access(fname)) {
+	if (!file_access(fname)) {
 		my_perror(fname);
 		exit(1);
 	}
@@ -93,7 +88,12 @@ void sanity_check_comic(struct connection *new)
 		exit(1);
 	} else if (new->days && (new->days & wday) == 0) {
 		if (verbose)
-			printf("Skipping %s\n", new->url);
+			printf("Skipping: %s\n", new->url);
+		++skipped;
+		free(new);
+	} else if (!is_http(new->url)) {
+		if (verbose)
+			printf("Skipping not http: %s\n", new->url);
 		++skipped;
 		free(new);
 	} else

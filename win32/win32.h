@@ -22,6 +22,8 @@
 #define strcasecmp stricmp
 #define snprintf _snprintf
 
+#define S_ISREG(m) ((m) & _S_IFREG)
+
 /* from win32.c */
 void win32_init(void);
 
