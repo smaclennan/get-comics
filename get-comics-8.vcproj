@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="win32;&quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Include&quot;"
-				PreprocessorDefinitions="WANT_JSON;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -137,7 +137,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories=".\win32;&quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Include&quot;"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -161,10 +162,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile=".\Release/get-comics.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib&quot;"
 				ProgramDatabaseFile=".\Release/get-comics.pdb"
 				SubSystem="1"
 				TargetMachine="1"
@@ -253,10 +255,6 @@
 					PreprocessorDefinitions=""
 				/>
 			</FileConfiguration>
-		</File>
-		<File
-			RelativePath=".\json-parser.c"
-			>
 		</File>
 		<File
 			RelativePath=".\JSON_parser.c"
