@@ -162,24 +162,7 @@ char *must_strdup(char *str);
 
 /* export from config.c */
 int read_config(char *fname);
-void set_failed(char *fname);
 void write_comic(struct connection *conn);
-struct connection *new_comic(void);
-void add_url(struct connection **conn, char *url);
-void add_days(struct connection **conn, char *days);
-void add_regexp(struct connection **conn, char *regexp);
-void add_regmatch(struct connection **conn, int match);
-void add_outname(struct connection **conn, char *outname);
-void add_base_href(struct connection **conn, char *base_href);
-void add_referer(struct connection **conn, char *referer);
-void sanity_check_comic(struct connection *conn);
-
-extern struct tm *today;
-extern unsigned wday;
-
-/* export from json.c */
-int read_json_config(char *fname);
-void write_json_comic(struct connection *conn);
 
 /* export from http.c */
 void set_proxy(char *proxystr);

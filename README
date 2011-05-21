@@ -2,11 +2,11 @@ What is it?
 -----------
 
 I read about 30 to 40 comics daily from the net. That is along with
-the comics in the newspaper. I wrote an emacs lisp program to download
+the comics in the newspaper. I wrote an Emacs lisp program to download
 them all for convenient viewing.
 
 However, when I go away on vacation, I wanted something to download
-the comics daily and save them. I had problems getting emacs to
+the comics daily and save them. I had problems getting Emacs to
 startup and run reliably, so I quickly wrote the first get-comics.
 
 
@@ -38,10 +38,30 @@ hangs too often. Since the second version has been reliable for years,
 I basically dropped this version in favour of the second version.
 
 
+JSON Parsers
+------------
+
+I was using JSON at work and much preferred it to XML. I decided to
+convert get-comics to use JSON.
+
+get-comics went through three JSON parsers. I started with JSON
+lib. But it was an extra library dependency which is a pain on distros
+like Ubuntu that do not provide include files by default.
+
+So I decided to go with a source code version. I only needed a parser,
+not a full JSON library. I decided on js0n. I really like js0n. It is
+very small and fits nicely with the comics layout. Unfortunately, it
+is not portable to windows.
+
+So I finally decided on JSON_parser.c. It is portable. And it has the
+big plus that it tells you the exact character in the file the syntax
+error was on.
+
+
 Documentation
 -------------
 
 The documentation for get-comics is either in man format
-(get-comics.1) or an html version (get-comics.html)
+(get-comics.1) or an HTML version (get-comics.html)
 
-There is a sample json file that I use: comics.json.
+There is a sample JSON file that I use: comics.json.

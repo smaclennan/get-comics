@@ -9,24 +9,7 @@ CFLAGS += -DLOGGING
 # Comment in to enable https via openssl
 CFLAGS += -DWANT_SSL
 
-# Comment in only one to enable JSON
-#JSON := WANT_JSON_LIB
-#JSON := WANT_JSON_INTERNAL
-JSON := WANT_JSON_PARSER
-
-OBJS := get-comics.o http.o config.o log.o openssl.o
-
-# For json
-ifneq ($(findstring WANT_JSON_INTERNAL,$(JSON)),)
-OBJS += json-internal.o js0n.o
-endif
-ifneq ($(findstring WANT_JSON_PARSER,$(JSON)),)
-OBJS += json-parser.o JSON_parser.o
-endif
-ifneq ($(findstring WANT_JSON_LIB,$(JSON)),)
-OBJS += json.o
-LIBS += -ljson
-endif
+OBJS := get-comics.o http.o config.o log.o openssl.o JSON_parser.o
 
 # Optionaly add openssl
 ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
@@ -61,7 +44,7 @@ install:
 	install -D -m 644 comics.json $(DESTDIR)/usr/share/get-comics/comics.json
 
 clean:
-	rm -f get-comics *.o get-comics.html TAGS
+	rm -f get-comics *.o .*.o.d get-comics.html TAGS
 
 DEP_FILES := $(wildcard .*.o.d)
 $(if $(DEP_FILES),$(eval include $(DEP_FILES)))
