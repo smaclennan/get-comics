@@ -44,5 +44,4 @@ Documentation
 The documentation for get-comics is either in man format
 (get-comics.1) or an html version (get-comics.html)
 
-There is a sample xml file that I use (get-comics.xml) and an empty
-xml file for testing (test.xml).
+There is a sample json file that I use: comics.json.
