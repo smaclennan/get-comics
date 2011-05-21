@@ -6,9 +6,6 @@ CFLAGS += -DLOGGING
 # Comment in to enable https via openssl
 CFLAGS += -DWANT_SSL
 
-# Comment in to enable XML
-#CFLAGS += -DWANT_XML
-
 # Comment in only one to enable JSON
 #JSON := WANT_JSON_LIB
 #JSON := WANT_JSON_INTERNAL
@@ -16,24 +13,14 @@ JSON := WANT_JSON_PARSER
 
 OBJS := get-comics.o http.o config.o log.o openssl.o
 
-# For libxml2
-ifneq ($(findstring WANT_XML,$(CFLAGS)),)
-OBJS += xml.o
-CFLAGS += -I/usr/include/libxml2
-LIBS += -lxml2
-endif
-
 # For json
 ifneq ($(findstring WANT_JSON_INTERNAL,$(JSON)),)
-CFLAGS += -DWANT_JSON
 OBJS += json-internal.o js0n.o
 endif
 ifneq ($(findstring WANT_JSON_PARSER,$(JSON)),)
-CFLAGS += -DWANT_JSON
 OBJS += json-parser.o JSON_parser.o
 endif
 ifneq ($(findstring WANT_JSON_LIB,$(JSON)),)
-CFLAGS += -DWANT_JSON
 OBJS += json.o
 LIBS += -ljson
 endif
@@ -49,13 +36,12 @@ endif
 V	      = @
 Q	      = $(V:1=)
 QUIET_CC      = $(Q:@=@echo    '     CC       '$@;)
-QUIET_GEN     = $(Q:@=@echo    '     GEN      '$@;)
 QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
 
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
 
-all: 	get-comics comics.xml
+all: 	get-comics
 
 get-comics: $(OBJS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $(OBJS) $(LIBS)
@@ -65,18 +51,11 @@ get-comics: $(OBJS)
 get-comics.html: get-comics.1
 	man2html get-comics.1 > get-comics.html
 
-comics.xml: json2xml comics.json
-	$(QUIET_GEN)./json2xml < comics.json > comics.xml
-
-json2xml: json2xml.c
-	$(QUIET_LINK)$(CC) $(CFLAGS) -o json2xml json2xml.c
-
 install:
 	install -D -s -m 755 get-comics $(DESTDIR)/usr/bin/get-comics
 	install -D -m 644 get-comics.1 $(DESTDIR)/usr/man/man1/get-comics.1
 	gzip $(DESTDIR)/usr/man/man1/get-comics.1
 	install -D -m 644 comics.json $(DESTDIR)/usr/share/get-comics/comics.json
-	install -D -m 644 comics.xml $(DESTDIR)/usr/share/get-comics/comics.xml
 
 clean:
-	rm -f get-comics json2xml *.o get-comics.html comics.xml TAGS
+	rm -f get-comics *.o get-comics.html TAGS

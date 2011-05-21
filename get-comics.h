@@ -16,7 +16,6 @@
 
 
 #define HTTP_PORT		80
-#define XML_FILE		"/usr/share/get-comics/comics.xml"
 #define JSON_FILE		"/usr/share/get-comics/comics.json"
 
 
@@ -177,10 +176,6 @@ void sanity_check_comic(struct connection *conn);
 
 extern struct tm *today;
 extern unsigned wday;
-
-/* export from xml.c */
-int read_xml_config(char *fname);
-void write_xml_comic(struct connection *conn);
 
 /* export from json.c */
 int read_json_config(char *fname);

@@ -5,7 +5,7 @@ get-comics: get-comics is a program to batch download comics from the net. It wa
 get-comics: written to automagically download comics every day while I was on
 get-comics: vacation and computerless.
 get-comics:
-get-comics: get-comics uses an xml file to describe how to download the comics.
+get-comics: get-comics uses an JSON file to describe how to download the comics.
 get-comics:
 get-comics: get-today is a small shell script that puts all the days comics in a
 get-comics: subdirectory based on the date. It then builds an index.html of the

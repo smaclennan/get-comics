@@ -16,28 +16,12 @@ static int file_access(char *fname)
 	return S_ISREG(sbuf.st_mode);
 }
 
-static char *pick_filename(void)
-{
-#ifdef WANT_JSON
-	if (file_access(JSON_FILE))
-		return JSON_FILE;
-#endif
-
-#ifdef WANT_XML
-	if (file_access(XML_FILE))
-		return XML_FILE;
-#endif
-
-	printf("No config files found\n");
-	exit(1);
-}
-
 int read_config(char *fname)
 {
 	time_t now;
 
 	if (!fname)
-		fname = pick_filename();
+		fname = JSON_FILE;
 
 	if (!file_access(fname)) {
 		my_perror(fname);
@@ -49,20 +33,7 @@ int read_config(char *fname)
 	today = localtime(&now);
 	wday = 1 << today->tm_wday;
 
-#ifdef WANT_JSON
-#  ifdef WANT_XML
-	{
-		char *p = strrchr(fname, '.');
-		if (p && strcasecmp(p, ".xml") == 0)
-			return read_xml_config(fname);
-	}
-#  endif
 	return read_json_config(fname);
-#elif defined(WANT_XML)
-	return read_xml_config(fname);
-#else
-#error Need config defined. See Makefile
-#endif
 }
 
 /* Helpers for the read_X_config functions */
@@ -190,9 +161,3 @@ void add_referer(struct connection **conn, char *referer)
 }
 
 void write_comic(struct connection *conn) {}
-
-/*
- * Local Variables:
- * my-sparse-args: "-DWANT_XML -DWANT_JSON"
- * End:
- */

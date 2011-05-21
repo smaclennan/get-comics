@@ -2,7 +2,6 @@
 
 # configurable
 BASE=$HOME/public_html/comics
-#XML=/usr/share/get-comics/comics.xml
 if false ; then
   DIR=`date +%Y%m%d`
 else
@@ -18,7 +17,7 @@ cd $DIR || { echo "Problems with $DIR"; exit 1; }
 
 if [ 1 -eq 1 ] ; then
   rm -f *
-  get-comics -d. $XML 2> $BASE/probs.xml | tee $BASE/output
+  get-comics -d. | tee $BASE/output
 fi
 
 cd $BASE

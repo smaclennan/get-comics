@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "Running sparse on files..."
-sparse -I/usr/include/libxml2 -DWANT_XML -DWANT_JSON *.[ch]
+sparse *.[ch]
 
 echo "Running checkpatch on files..."
 for f in *.[ch]; do
