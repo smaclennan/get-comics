@@ -1,4 +1,4 @@
-CFLAGS += -O3 -Wall -g -Wno-unused-result
+CFLAGS += -O3 -Wall -g
 
 # For dependencies
 CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
