@@ -43,19 +43,33 @@ ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
 LIBS += -lssl
 endif
 
+#
+# Pretty print - "borrowed" from sparse Makefile
+#
+V	      = @
+Q	      = $(V:1=)
+QUIET_CC      = $(Q:@=@echo    '     CC       '$@;)
+QUIET_GEN     = $(Q:@=@echo    '     GEN      '$@;)
+QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
+
+%.o: %.c
+	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
+
 all: 	get-comics comics.xml
 
 get-comics: $(OBJS)
-	$(CC) $(CFLAGS) -o get-comics $(OBJS) $(LIBS)
+	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $(OBJS) $(LIBS)
 
 *.o: get-comics.h
 
 get-comics.html: get-comics.1
 	man2html get-comics.1 > get-comics.html
 
-comics.xml: comics.json
-	$(CC) $(CFLAGS) -o json2xml json2xml.c
-	./json2xml < comics.json > comics.xml
+comics.xml: json2xml comics.json
+	$(QUIET_GEN)./json2xml < comics.json > comics.xml
+
+json2xml: json2xml.c
+	$(QUIET_LINK)$(CC) $(CFLAGS) -o json2xml json2xml.c
 
 install:
 	install -D -s -m 755 get-comics $(DESTDIR)/usr/bin/get-comics
