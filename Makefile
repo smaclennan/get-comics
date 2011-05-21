@@ -14,7 +14,7 @@ CFLAGS += -DWANT_SSL
 #JSON := WANT_JSON_INTERNAL
 JSON := WANT_JSON_PARSER
 
-OBJS := get-comics.o http.o config.o log.o openssl.o win32/regex.o
+OBJS := get-comics.o http.o config.o log.o openssl.o
 
 # For libxml2
 ifneq ($(findstring WANT_XML,$(CFLAGS)),)
