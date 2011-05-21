@@ -96,8 +96,5 @@ void log_clear(struct connection *conn)
 	conn->log->max_events = 0;
 }
 #else
-void log_add(struct connection *conn, char *fmt, ...) {}
-void log_want_dump(struct connection *conn) {}
-void log_dump(struct connection *conn) {}
 void log_clear(struct connection *conn) {}
 #endif
