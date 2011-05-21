@@ -1,5 +1,8 @@
 CFLAGS += -O3 -Wall -g -Wno-unused-result
 
+# For dependencies
+CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
+
 # Comment in to enable the log_* functions
 CFLAGS += -DLOGGING
 
@@ -59,3 +62,6 @@ install:
 
 clean:
 	rm -f get-comics *.o get-comics.html TAGS
+
+DEP_FILES := $(wildcard .*.o.d)
+$(if $(DEP_FILES),$(eval include $(DEP_FILES)))
