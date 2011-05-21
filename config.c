@@ -5,14 +5,15 @@ static struct tm *today;
 static unsigned wday;
 
 /* Helpers for the read_X_config functions */
-struct connection *new_comic(void)
+void new_comic(struct connection **conn)
 {
-	struct connection *new = calloc(1, sizeof(struct connection));
-	if (!new) {
-		printf("OUT OF MEMORY\n");
-		exit(1);
+	if (*conn == NULL) {
+		*conn = calloc(1, sizeof(struct connection));
+		if (*conn == NULL) {
+			printf("OUT OF MEMORY\n");
+			exit(1);
+		}
 	}
-	return new;
 }
 
 void sanity_check_comic(struct connection *new)
@@ -43,8 +44,7 @@ void add_url(struct connection **conn, char *url)
 {
 	char outurl[1024], *e;
 
-	if (*conn == NULL)
-		*conn = new_comic();
+	new_comic(conn);
 
 	if (strftime(outurl, sizeof(outurl), url, today) == 0) {
 		printf("strftime failed for '%s'\n", url);
@@ -73,8 +73,7 @@ void add_days(struct connection **conn, char *days)
 {
 	unsigned i;
 
-	if (*conn == NULL)
-		*conn = new_comic();
+	new_comic(conn);
 
 	for (i = 0; *days && i < 7; ++days, ++i)
 		if (*days != 'X' && *days != 'x')
@@ -83,8 +82,7 @@ void add_days(struct connection **conn, char *days)
 
 void add_regexp(struct connection **conn, char *regexp)
 {
-	if (*conn == NULL)
-		*conn = new_comic();
+	new_comic(conn);
 	(*conn)->regexp = must_strdup(regexp);
 	if ((*conn)->regfname == NULL) {
 		char fname[20];
@@ -96,8 +94,7 @@ void add_regexp(struct connection **conn, char *regexp)
 
 void add_regmatch(struct connection **conn, int match)
 {
-	if (*conn == NULL)
-		*conn = new_comic();
+	new_comic(conn);
 	if (match >= MATCH_DEPTH)
 		printf("<regmatch> %d too big.\n", match);
 	else
@@ -106,22 +103,19 @@ void add_regmatch(struct connection **conn, int match)
 
 void add_outname(struct connection **conn, char *outname)
 {
-	if (*conn == NULL)
-		*conn = new_comic();
+	new_comic(conn);
 	(*conn)->outname = must_strdup(outname);
 }
 
 void add_base_href(struct connection **conn, char *base_href)
 {
-	if (*conn == NULL)
-		*conn = new_comic();
+	new_comic(conn);
 	(*conn)->base_href = must_strdup(base_href);
 }
 
 void add_referer(struct connection **conn, char *referer)
 {
-	if (*conn == NULL)
-		*conn = new_comic();
+	new_comic(conn);
 	if (strcasecmp((char *)referer, "url") == 0 && (*conn)->url)
 		(*conn)->referer = must_strdup((*conn)->url);
 	else
