@@ -1,4 +1,4 @@
-CFLAGS += -O3 -Wall -g
+CFLAGS += -O3 -Wall -g -Wno-unused-result
 
 # Comment in to enable the log_* functions
 CFLAGS += -DLOGGING
@@ -7,7 +7,7 @@ CFLAGS += -DLOGGING
 CFLAGS += -DWANT_SSL
 
 # Comment in to enable XML
-CFLAGS += -DWANT_XML
+#CFLAGS += -DWANT_XML
 
 # Comment in only one to enable JSON
 #JSON := WANT_JSON_LIB
@@ -43,7 +43,7 @@ ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
 LIBS += -lssl
 endif
 
-all: 	get-comics get-comics.html comics.xml
+all: 	get-comics comics.xml
 
 get-comics: $(OBJS)
 	$(CC) $(CFLAGS) -o get-comics $(OBJS) $(LIBS)
