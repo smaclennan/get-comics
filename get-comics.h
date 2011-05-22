@@ -146,7 +146,7 @@ static inline void set_writable(struct connection *conn)
 	conn->poll->events = POLLOUT;
 }
 
-static inline int inprogress()
+static inline int inprogress(void)
 {
 #ifdef _WIN32
 	return WSAGetLastError() == WSAEWOULDBLOCK;

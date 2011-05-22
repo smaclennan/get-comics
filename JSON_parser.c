@@ -770,7 +770,7 @@ static int add_char_to_parse_buffer(JSON_parser jc, int next_char, int next_clas
             return false; 
         }
     } else if (!jc->comment) {
-        if ((jc->type != JSON_T_NONE) | !((next_class == C_SPACE) | (next_class == C_WHITE)) /* non-white-space */) {
+        if ((jc->type != JSON_T_NONE) || !((next_class == C_SPACE) | (next_class == C_WHITE)) /* non-white-space */) {
             parse_buffer_push_back_char(jc, (char)next_char);
         }
     }
