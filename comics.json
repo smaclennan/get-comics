@@ -147,7 +147,8 @@ helps reduce the number of timeouts. */
 },
 { /* Candorville */
   "url": "http://candorville.com/",
-  "regexp": "http://candorville\\.com/comics/.*\\.(gif|jpg)"
+  "regexp": "http://candorville\\.com/comics/.*\\.(gif|jpg)",
+  "output": "candorville"
 },
 { /* Dilbert */
   "url": "http://dilbert.com/",
