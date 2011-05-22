@@ -7,13 +7,8 @@
 
 static struct log *get_log(struct connection *conn)
 {
-	if (!conn->log) {
-		conn->log = calloc(1, sizeof(struct log));
-		if (!conn->log) {
-			printf("Out of memory\n");
-			exit(1);
-		}
-	}
+	if (!conn->log)
+		conn->log = must_alloc(sizeof(struct log));
 
 	return conn->log;
 }

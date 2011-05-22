@@ -7,13 +7,8 @@ static unsigned wday;
 /* Helpers for the read_X_config functions */
 static void new_comic(struct connection **conn)
 {
-	if (*conn == NULL) {
-		*conn = calloc(1, sizeof(struct connection));
-		if (*conn == NULL) {
-			printf("OUT OF MEMORY\n");
-			exit(1);
-		}
-	}
+	if (*conn == NULL)
+		*conn = must_alloc(sizeof(struct connection));
 }
 
 static void sanity_check_comic(struct connection *new)
@@ -104,7 +99,8 @@ static void add_regmatch(struct connection **conn, int match)
 static void add_outname(struct connection **conn, char *outname)
 {
 	new_comic(conn);
-	(*conn)->outname = must_strdup(outname);
+	(*conn)->outname = must_alloc(strlen(outname) + 4 + 1);
+	strcpy((*conn)->outname, outname);
 }
 
 static void add_base_href(struct connection **conn, char *base_href)

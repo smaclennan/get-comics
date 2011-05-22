@@ -416,17 +416,6 @@ int read_reply(struct connection *conn)
 				fname = "index.html";
 		} else
 			fname = conn->url;
-	} else if (strrchr(fname, '.') == NULL) {
-		/* User did not supply an extension. Get it from the URL. */
-		p = strrchr(conn->url, '.');
-		if (p) {
-			fname = realloc(fname, strlen(fname) + strlen(p) + 1);
-			if (!fname) {
-				printf("Not enough memory\n");
-				return 1;
-			}
-			strcat(fname, p);
-		}
 	}
 
 	conn->out = fopen(fname, "wb");

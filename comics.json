@@ -26,7 +26,7 @@ helps reduce the number of timeouts. */
 { /* Free Range */
   "url": "http://www.gocomics.com/freerange/",
   "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "free-range.gif" /* we need the extension */
+  "output": "free-range"
 },
 { /* Lio */
   "url": "http://images.ucomics.com/comics/lio/%Y/lio%y%m%d.gif"
@@ -46,7 +46,7 @@ helps reduce the number of timeouts. */
 { /* Working It Out */
   "url": "http://www.gocomics.com/workingitout/",
   "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "workingitout.gif" /* we need the extension */
+  "output": "workingitout"
 },
 
 /* Independents */
@@ -55,7 +55,7 @@ helps reduce the number of timeouts. */
   "url": "http://www.montrealgazette.com/opinion/editorial-cartoons/index.html",
   "regexp": "src=\"([0-9]+\\.bin\\?size=[0-9]+x[0-9]+)\"",
   "regmatch": 1,
-  "output": "aislin.jpg",
+  "output": "aislin",
   "days": "Xmtwtfs"
 },
 {/* Biff */
