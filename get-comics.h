@@ -65,7 +65,7 @@ struct connection {
 
 	struct pollfd *poll;
 	int connected;
-	FILE *out;
+	int out;
 	time_t access;
 
 	char buf[BUFSIZE + 1];
@@ -102,6 +102,10 @@ extern int thread_limit;
 extern int threads_set;
 extern int read_timeout;
 extern int randomize;
+
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 static inline char *is_http(char *p)
 {
@@ -160,6 +164,7 @@ int set_conn_socket(struct connection *conn, int sock);
 void add_comic(struct connection *comic);
 char *must_strdup(char *str);
 void *must_alloc(int size);
+char *imgtype(struct connection *conn);
 
 /* export from config.c */
 int read_config(char *fname);

@@ -54,7 +54,6 @@ static int npoll;
 static void user_command(void);
 static void dump_outstanding(int sig);
 static void randomize_comics(void);
-static void addext(struct connection *conn);
 
 
 static char *find_regexp(struct connection *conn)
@@ -163,12 +162,9 @@ int release_connection(struct connection *conn)
 	}
 	conn->poll = NULL;
 
-	if (conn->out) {
-		fclose(conn->out);
-		conn->out = NULL;
-
-		if (conn->outname)
-			addext(conn);
+	if (conn->out >= 0) {
+		close(conn->out);
+		conn->out = -1;
 	}
 
 	conn->func = NULL;
@@ -230,9 +226,9 @@ int process_html(struct connection *conn)
 {
 	char *p;
 
-	if (conn->out) {
-		fclose(conn->out);
-		conn->out = NULL;
+	if (conn->out >= 0) {
+		close(conn->out);
+		conn->out = -1;
 	}
 
 	p = find_regexp(conn);
@@ -647,69 +643,32 @@ void *must_alloc(int size)
 	return new;
 }
 
-static char *imgtype(struct connection *conn)
+char *imgtype(struct connection *conn)
 {
 	static const unsigned char jfif_hdr[] = { 0xff, 0xd8, 0xff, 0xe0 };
 	static const unsigned char exif_hdr[] = { 0xff, 0xd8, 0xff, 0xe1 };
 	static const unsigned char png_hdr[] = {
 		0x89, 'P', 'N', 'G', '\r', '\n', 0x1a, '\n'
 	};
-	char hdr[12];
-	int n, fd = open(conn->outname, O_RDONLY);
-	if (fd < 0) {
-		my_perror(conn->outname);
-		return ".xxx";
-	}
-
-	n = read(fd, hdr, sizeof(hdr));
-	close(fd);
-
-	if (n != sizeof(hdr)) {
-		printf("WARNING: File too small %s (%d)\n", conn->outname, n);
-		return ".xxx";
-	}
 
 	/* GIF is easy */
-	if (strncmp(hdr, "GIF89", 5) == 0)
+	if (strncmp(conn->curp, "GIF89", 5) == 0)
 		return ".gif";
 
 	/* JPEG */
-	if (memcmp(hdr, jfif_hdr, sizeof(jfif_hdr)) == 0 &&
-	    strcmp(hdr + 6, "JFIF") == 0)
+	if (memcmp(conn->curp, jfif_hdr, sizeof(jfif_hdr)) == 0 &&
+	    strcmp(conn->curp + 6, "JFIF") == 0)
 		return ".jpg";
 
 	/* EXIF */
-	if (memcmp(hdr, exif_hdr, sizeof(exif_hdr)) == 0 &&
-	    strcmp(hdr + 6, "Exif") == 0)
+	if (memcmp(conn->curp, exif_hdr, sizeof(exif_hdr)) == 0 &&
+	    strcmp(conn->curp + 6, "Exif") == 0)
 		return ".jpg";
 
 	/* PNG */
-	if (memcmp(hdr, png_hdr, sizeof(png_hdr)) == 0)
+	if (memcmp(conn->curp, png_hdr, sizeof(png_hdr)) == 0)
 		return ".png";
 
 	printf("WARNING: Unknown file type %s\n", conn->outname);
 	return ".xxx";
-}
-
-/* SAM We could be smarter about this. We could hold off opening the
- * output file until we have read the first 12 bytes - we definitely
- * have the buffer space. But this was easier to start with ;) */
-static void addext(struct connection *conn)
-{
-	char *oldname = strdup(conn->outname);
-	if (!oldname) { /* we cannot call must_strdup since it might exit */
-		printf("Low on memory\n");
-		return;
-	}
-
-	/* We alloced space for the extension in add_outname */
-	strcat(conn->outname, imgtype(conn));
-
-	if (link(oldname, conn->outname)) {
-		my_perror(oldname);
-		return;
-	}
-
-	if (unlink(oldname))
-		my_perror(oldname);
 }

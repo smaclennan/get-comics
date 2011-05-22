@@ -294,13 +294,13 @@ void write_request(struct connection *conn)
 	}
 }
 
-
 /* State function */
 int read_reply(struct connection *conn)
 {
 	char *p, *fname;
 	int status = 1;
 	int chunked = 0;
+	int needopen = 1;
 
 	p = strstr(conn->buf, "\n\r\n");
 	if (p) {
@@ -402,10 +402,9 @@ int read_reply(struct connection *conn)
 		return status;
 	}
 
-	fname = conn->outname;
 	if (conn->regexp && !conn->matched)
 		fname = conn->regfname;
-	else if (fname == NULL) {
+	else if (conn->outname == NULL) {
 		/* User did not supply a filename. Get it from the URL. */
 		p = strrchr(conn->url, '/');
 		if (p) {
@@ -416,16 +415,20 @@ int read_reply(struct connection *conn)
 				fname = "index.html";
 		} else
 			fname = conn->url;
-	}
+	} else
+		needopen = 0; /* defer open */
 
-	conn->out = fopen(fname, "wb");
-	if (!conn->out) {
-		my_perror(fname);
-		return 1;
-	}
+	if (needopen) {
+		conn->out = open(fname, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0664);
+		if (conn->out < 0) {
+			my_perror(fname);
+			return 1;
+		}
 
-	if (verbose > 1)
-		printf("Output %s -> %s\n", conn->url, fname);
+		if (verbose > 1)
+			printf("Output %s -> %s\n", conn->url, fname);
+	} else if (verbose > 1)
+		printf("Output %s deferred\n", conn->url);
 
 	if (chunked) {
 		conn->cstate = CS_DIGITS;
@@ -442,6 +445,27 @@ int read_reply(struct connection *conn)
 	return 0;
 }
 
+/* This is the only place we write to the output file */
+static int write_output(struct connection *conn, int bytes)
+{
+	if (conn->out == -1) { /* deferred open */
+		/* We alloced space for the extension in add_outname */
+		strcat(conn->outname, imgtype(conn));
+
+		conn->out = open(conn->outname, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0664);
+		if (conn->out < 0)
+			return 0;
+
+		if (verbose > 1)
+			printf("Output %s -> %s\n", conn->url, conn->outname);
+	}
+
+	if (write(conn->out, conn->curp, bytes) != bytes)
+		return 0;
+
+	return bytes;
+}
+
 
 /* State function */
 static int read_chunkblock(struct connection *conn)
@@ -453,7 +477,7 @@ static int read_chunkblock(struct connection *conn)
 		bytes = conn->length;
 
 	if (bytes > 0) {
-		if (fwrite(conn->curp, 1, bytes, conn->out) != bytes) {
+		if (!write_output(conn, bytes)) {
 			printf("Write error\n");
 			return 1;
 		}
@@ -578,7 +602,7 @@ static int read_file_unsized(struct connection *conn)
 
 	bytes = conn->endp - conn->curp;
 	if (bytes > 0) {
-		if (fwrite(conn->curp, 1, bytes, conn->out) != bytes) {
+		if (!write_output(conn, bytes)) {
 			printf("Write error\n");
 			return 1;
 		}
@@ -604,7 +628,7 @@ static int read_file(struct connection *conn)
 
 	bytes = conn->endp - conn->curp;
 	if (bytes > 0) {
-		if (fwrite(conn->curp, 1, bytes, conn->out) != bytes) {
+		if (!write_output(conn, bytes)) {
 			printf("Write error\n");
 			return 1;
 		}

@@ -4,11 +4,12 @@
 static struct tm *today;
 static unsigned wday;
 
-/* Helpers for the read_X_config functions */
 static void new_comic(struct connection **conn)
 {
-	if (*conn == NULL)
+	if (*conn == NULL) {
 		*conn = must_alloc(sizeof(struct connection));
+		(*conn)->out = -1;
+	}
 }
 
 static void sanity_check_comic(struct connection *new)
