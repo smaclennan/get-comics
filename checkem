@@ -5,5 +5,6 @@ sparse *.[ch]
 
 echo "Running checkpatch on files..."
 for f in *.[ch]; do
+    [ $f = JSON_parser.c -o $f = JSON_parser.h ] && continue
     checkpatch --file $f | fgrep -q "no obvious style problems" || echo "$f"
 done

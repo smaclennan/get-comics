@@ -106,6 +106,7 @@ extern int randomize;
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
+#define WRITE_FLAGS (O_CREAT | O_TRUNC | O_WRONLY | O_BINARY)
 
 static inline char *is_http(char *p)
 {

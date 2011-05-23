@@ -419,7 +419,7 @@ int read_reply(struct connection *conn)
 		needopen = 0; /* defer open */
 
 	if (needopen) {
-		conn->out = open(fname, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0664);
+		conn->out = open(fname, WRITE_FLAGS, 0664);
 		if (conn->out < 0) {
 			my_perror(fname);
 			return 1;
@@ -452,7 +452,7 @@ static int write_output(struct connection *conn, int bytes)
 		/* We alloced space for the extension in add_outname */
 		strcat(conn->outname, imgtype(conn));
 
-		conn->out = open(conn->outname, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0664);
+		conn->out = open(conn->outname, WRITE_FLAGS, 0664);
 		if (conn->out < 0)
 			return 0;
 
