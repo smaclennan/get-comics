@@ -38,7 +38,8 @@ helps reduce the number of timeouts. */
 },
 {/* Girls With Slingshots */
   "url": "http://www.girlswithslingshots.com",
-  "regexp": "comics/[0-9-]*GWS[0-9]+\\.jpg"
+  "regexp": "comics/[0-9-]*.*\\.jpg",
+  "output": "gws"
 },
 { /* Kevin and Kell */
   "url": "http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.gif"
