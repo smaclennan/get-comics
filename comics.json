@@ -11,44 +11,6 @@ helps reduce the number of timeouts. */
 
 "comics": [
 
-/* ucomics.com */
-
-{ /* Bound and Gagged */
-  "url": "http://images.ucomics.com/comics/tmbou/%Y/tmbou%y%m%d.gif",
-  "output": "bound-gagged"
-},
-{ /* Close to Home */
-  "url": "http://images.ucomics.com/comics/cl/%Y/cl%y%m%d.gif"
-},
-{ /* Duplex */
-  "url": "http://images.ucomics.com/comics/dp/%Y/dp%y%m%d.gif"
-},
-{ /* Free Range */
-  "url": "http://www.gocomics.com/freerange/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "free-range"
-},
-{ /* Lio */
-  "url": "http://images.ucomics.com/comics/lio/%Y/lio%y%m%d.gif"
-},
-{ /* Loose Parts */
-  "url": "http://images.ucomics.com/comics/tmloo/%Y/tmloo%y%m%d.gif",
-  "output": "loose-parts"
-},
-{ /* Red Meat */
-  "url": "http://www.redmeat.com/redmeat/current/index-1.gif",
-  "days": "XXXXXfX"
-},
-{ /* Tom the Dancing Bug */
-  "url": "http://images.ucomics.com/comics/td/%Y/td%y%m%d.gif",
-  "days": "XXXXXXs"
-},
-{ /* Working It Out */
-  "url": "http://www.gocomics.com/workingitout/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "workingitout"
-},
-
 /* Independents */
 
 { /* Aislin */
@@ -138,17 +100,24 @@ helps reduce the number of timeouts. */
   "days": "XmtwtfX"
 },
 
-/* comics.com */
+/* gocomics.com */
 
+{ /* Bound and Gagged */
+  "url": "http://images.ucomics.com/comics/tmbou/%Y/tmbou%y%m%d.gif",
+  "output": "bound-gagged"
+},
 { /* Brevity */
-  "url": "http://comics.com/brevity/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
+  "url": "http://www.gocomics.com/brevity/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "brevity"
 },
 { /* Candorville */
-  "url": "http://candorville.com/",
-  "regexp": "http://candorville\\.com/comics/.*\\.(gif|jpg)",
+  "url": "http://www.gocomics.com/candorville/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "candorville"
+},
+{ /* Close to Home */
+  "url": "http://images.ucomics.com/comics/cl/%Y/cl%y%m%d.gif"
 },
 { /* Dilbert */
   "url": "http://dilbert.com/",
@@ -163,34 +132,49 @@ helps reduce the number of timeouts. */
   "days": "sXXXXXX"
 },
 { /* Drabble */
-  "url": "http://comics.com/drabble/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
+  "url": "http://www.gocomics.com/drabble/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "drabble"
 },
+{ /* Duplex */
+  "url": "http://images.ucomics.com/comics/dp/%Y/dp%y%m%d.gif"
+},
 { /* F-minus */
-  "url": "http://comics.com/f_minus/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
+  "url": "http://www.gocomics.com/fminus/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "f_minus"
 },
 { /* Frank and Ernest */
-  "url": "http://comics.com/frank&ernest/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
+  "url": "http://www.gocomics.com/frankandernest/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "franknernest"
 },
+{ /* Free Range */
+  "url": "http://www.gocomics.com/freerange/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
+  "output": "free-range"
+},
 { /* Herman */
-  "url": "http://comics.com/herman/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
+  "url": "http://www.gocomics.com/herman/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "herman"
 },
+{ /* Lio */
+  "url": "http://images.ucomics.com/comics/lio/%Y/lio%y%m%d.gif"
+},
+{ /* Loose Parts */
+  "url": "http://images.ucomics.com/comics/tmloo/%Y/tmloo%y%m%d.gif",
+  "output": "loose-parts"
+},
 {/* Moderately Confused */
-  "url": "http://comics.com/moderately_confused/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
-  "output": "moderatlyconfused",
+  "url": "http://www.gocomics.com/moderately-confused/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
+  "output": "moderatly-confused",
   "days": "mtwtfsX"
 },
 { /* Monty */
-  "url": "http://comics.com/monty/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
+  "url": "http://www.gocomics.com/monty/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "monty"
 },
 { /* Natural Selection */
@@ -199,8 +183,8 @@ helps reduce the number of timeouts. */
   "output": "naturalselection"
 },
 { /* Off the Mark */
-  "url": "http://comics.com/off_the_mark/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
+  "url": "http://www.gocomics.com/offthemark/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "offthemark"
 },
 { /* Reality Check */
@@ -208,20 +192,33 @@ helps reduce the number of timeouts. */
   "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
   "output": "realitycheck"
 },
+{ /* Red Meat */
+  "url": "http://www.redmeat.com/redmeat/current/index-1.gif",
+  "days": "XXXXXfX"
+},
 { /* Rubes */
-  "url": "http://comics.com/rubes/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
+  "url": "http://www.gocomics.com/rubes/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "rubes"
 },
 { /* Speed Bump */
-  "url": "http://comics.com/speed_bump/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
+  "url": "http://www.gocomics.com/speedbump/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "speedbump"
 },
 { /* Strange Brew */
-  "url": "http://comics.com/strange_brew/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
+  "url": "http://www.gocomics.com/strangebrew/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "strangebrew"
+},
+{ /* Tom the Dancing Bug */
+  "url": "http://images.ucomics.com/comics/td/%Y/td%y%m%d.gif",
+  "days": "XXXXXXs"
+},
+{ /* Working It Out */
+  "url": "http://www.gocomics.com/workingitout/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
+  "output": "workingitout"
 },
 {/* Working Daze */
   "url": "http://comics.com/working_daze/",
@@ -229,9 +226,9 @@ helps reduce the number of timeouts. */
   "output": "working_daze"
 },
 { /* Zack Hill */
-  "url": "http://comics.com/zack_hill/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]+\\.full\\.gif",
-  "output": "zack"
+  "url": "http://www.gocomics.com/zackhill/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
+  "output": "zackhill"
 }
 
 ] /* comics */
