@@ -2,6 +2,4 @@
 .*.o.d
 get-comics
 get-comics.html
-json2xml
-comics.xml
 TAGS
