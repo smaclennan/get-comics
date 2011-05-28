@@ -213,9 +213,11 @@ helps reduce the number of timeouts. */
   "output": "strangebrew"
 },
 { /* Tom the Dancing Bug */
-  "url": "http://images.ucomics.com/comics/td/%Y/td%y%m%d.gif",
-  "days": "XXXXXXs"
-},
+  "url": "http://www.gocomics.com/tomthedancingbug/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
+  "output": "tombug"
+  "days": "XXXXXfX"
+}
 { /* Working It Out */
   "url": "http://www.gocomics.com/workingitout/",
   "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
