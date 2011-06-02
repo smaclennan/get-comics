@@ -15,7 +15,8 @@ static void new_comic(struct connection **conn)
 static void sanity_check_comic(struct connection *new)
 {
 	if (!new)
-		printf("WARNING: Empty comic entry\n");
+		/* Empty entries are allowed */
+		return;
 	else if (!new->url) {
 		printf("ERROR: comic with no url!\n");
 		exit(1);

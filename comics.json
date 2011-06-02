@@ -178,19 +178,14 @@ helps reduce the number of timeouts. */
   "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "monty"
 },
-{ /* Natural Selection */
-  "url": "http://comics.com/natural_selection/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
-  "output": "naturalselection"
-},
 { /* Off the Mark */
   "url": "http://www.gocomics.com/offthemark/",
   "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "offthemark"
 },
 { /* Reality Check */
-  "url": "http://comics.com/reality_check/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
+  "url": "http://www.gocomics.com/realitycheck/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "realitycheck"
 },
 { /* Red Meat */
@@ -215,18 +210,18 @@ helps reduce the number of timeouts. */
 { /* Tom the Dancing Bug */
   "url": "http://www.gocomics.com/tomthedancingbug/",
   "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "tombug"
+  "output": "tombug",
   "days": "XXXXXfX"
-}
+},
 { /* Working It Out */
   "url": "http://www.gocomics.com/workingitout/",
   "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "workingitout"
 },
 {/* Working Daze */
-  "url": "http://comics.com/working_daze/",
-  "regexp": "http://[a-z0-9.]*\\.com/dyn/str_strip/[0-9/]*.full.gif",
-  "output": "working_daze"
+  "url": "http://www.gocomics.com/working-daze/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
+  "output": "working-daze"
 },
 { /* Zack Hill */
   "url": "http://www.gocomics.com/zackhill/",
