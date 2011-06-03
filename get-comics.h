@@ -174,10 +174,13 @@ void write_comic(struct connection *conn);
 /* export from http.c */
 void set_proxy(char *proxystr);
 char *get_proxy(void);
-void check_connect(struct connection *conn);
 void write_request(struct connection *conn);
 int read_reply(struct connection *conn);
 int build_request(struct connection *conn);
+
+/* export from socket.c */
+int connect_socket(struct connection *conn, char *hostname, int port);
+void check_connect(struct connection *conn);
 
 /* export from log.c */
 void log_add(struct connection *conn, char *fmt, ...);

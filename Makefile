@@ -9,7 +9,7 @@ CFLAGS += -DLOGGING
 # Comment in to enable https via openssl
 CFLAGS += -DWANT_SSL
 
-OBJS := get-comics.o http.o config.o log.o openssl.o JSON_parser.o
+OBJS := get-comics.o http.o config.o log.o openssl.o JSON_parser.o socket.o
 
 # Optionaly add openssl
 ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
