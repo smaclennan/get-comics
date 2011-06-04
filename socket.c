@@ -13,6 +13,9 @@
 #define IPV4
 */
 
+#define USE_CACHE
+
+
 static int tcp_connected(struct connection *conn)
 {
 #ifdef WANT_SSL
@@ -108,47 +111,113 @@ int connect_socket(struct connection *conn, char *hostname, char *port_in)
 		return tcp_connected(conn);
 }
 #else
+
+static struct addrinfo *cache;
+
+static struct addrinfo *get_cache(char *hostname)
+{
+#ifdef USE_CACHE
+	struct addrinfo *r;
+
+	for (r = cache; r; r = r->ai_next)
+		if (strcmp(hostname, r->ai_canonname) == 0)
+			return r;
+#endif
+
+	return NULL;
+}
+
+/* It is not fatal if this fails since it is only for performance. */
+static void add_cache(char *hostname, struct addrinfo *r)
+{
+#ifdef USE_CACHE
+	struct addrinfo *new = malloc(sizeof(struct addrinfo));
+	if (!new)
+		return;
+
+	memcpy(new, r, sizeof(struct addrinfo));
+
+	new->ai_addr = calloc(1, r->ai_addrlen);
+	if (!new->ai_addr)
+		goto failed;
+
+	memcpy(new->ai_addr, r->ai_addr, r->ai_addrlen);
+
+	new->ai_canonname = strdup(hostname);
+	if (!new->ai_canonname)
+		goto failed;
+
+	/* Add to head since the default file tends to group hostnames */
+	new->ai_next = cache;
+	cache = new;
+	return;
+
+failed:
+	if (new->ai_addr)
+		free(new->ai_addr);
+	free(new);
+#endif
+}
+
+static int try_connect(struct addrinfo *r, int *deferred)
+{
+	int sock = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
+	if (sock < 0)
+		return -1;
+
+	if (set_non_blocking(sock))
+		return -1;
+
+	if (connect(sock, r->ai_addr, r->ai_addrlen) == 0) {
+		/* this almost never happens */
+		*deferred = 0;
+		return sock;
+	}
+
+	if (inprogress()) {
+		if (verbose > 1)
+			printf("Connection deferred\n");
+		*deferred = 1;
+		return sock;
+	}
+
+	close(sock);
+	return -1;
+}
+
 int connect_socket(struct connection *conn, char *hostname, char *port)
 {
-	int sock, deferred;
+	int sock = -1, deferred;
 	struct addrinfo hints, *result, *r;
 
-	/* We need this or we will get tcp and udp */
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_socktype = SOCK_STREAM;
+	r = get_cache(hostname);
+	if (r)
+		sock = try_connect(r, &deferred);
 
-	if (getaddrinfo(hostname, port, &hints, &result)) {
-		printf("Unable to get host %s\n", hostname);
-		return -1;
-	}
+	if (sock < 0) {
+		/* We need this or we will get tcp and udp */
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_socktype = SOCK_STREAM;
 
-	for (r = result; r; r = r->ai_next) {
-		sock = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
-		if (sock < 0)
-			continue;
-
-		if (set_non_blocking(sock))
-			continue;
-
-		if (connect(sock, r->ai_addr, r->ai_addrlen)) {
-			if (inprogress()) {
-				if (verbose > 1)
-					printf("Connection deferred\n");
-				deferred = 1;
-				break; /* got one */
-			} else
-				close(sock);
-		} else {
-			deferred = 0;
-			break; /* got one */
+		if (getaddrinfo(hostname, port, &hints, &result)) {
+			printf("Unable to get host %s\n", hostname);
+			return -1;
 		}
-	}
 
-	freeaddrinfo(result);
+		for (r = result; r; r = r->ai_next) {
+			sock = try_connect(r, &deferred);
+			if (sock >= 0)
+				break;
+		}
 
-	if (!r) {
-		printf("Unable to get socket for host %s\n", hostname);
-		return -1;
+		freeaddrinfo(result);
+
+		if (!r) {
+			printf("Unable to get socket for host %s\n", hostname);
+			return -1;
+		}
+
+		add_cache(hostname, r);
 	}
 
 	if (!set_conn_socket(conn, sock)) {
