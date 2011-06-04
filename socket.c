@@ -9,10 +9,12 @@
 #endif
 
 
+/* Only define this if your OS does not support getaddrinfo.
+#define IPV4
+*/
+
 static int tcp_connected(struct connection *conn)
 {
-	set_writable(conn);
-
 #ifdef WANT_SSL
 	if (is_https(conn->url)) {
 		if (openssl_connect(conn)) {
@@ -26,16 +28,42 @@ static int tcp_connected(struct connection *conn)
 	return 0;
 }
 
-int connect_socket(struct connection *conn, char *hostname, int port)
+static int set_non_blocking(int sock)
+{
+#ifdef _WIN32
+	u_long optval = 1;
+	if (ioctlsocket(sock, FIONBIO, &optval)) {
+		printf("ioctlsocket FIONBIO failed\n");
+		close(sock);
+		return -1;
+	}
+#else
+	int optval = fcntl(sock, F_GETFL, 0);
+	if (optval == -1 || fcntl(sock, F_SETFL, optval | O_NONBLOCK)) {
+		my_perror("fcntl O_NONBLOCK");
+		close(sock);
+		return -1;
+	}
+#endif
+	return 0;
+}
+
+static inline int inprogress(void)
+{
+#ifdef _WIN32
+	return WSAGetLastError() == WSAEWOULDBLOCK;
+#else
+	return errno == EINPROGRESS;
+#endif
+}
+
+#ifdef IPV4
+int connect_socket(struct connection *conn, char *hostname, char *port_in)
 {
 	struct sockaddr_in sock_name;
 	int sock;
-#ifdef _WIN32
-	u_long optval;
-#else
-	int optval;
-#endif
 	struct hostent *host;
+	int port = strtol(port_in, NULL, 10);
 
 	host = gethostbyname(hostname);
 	if (!host) {
@@ -49,21 +77,8 @@ int connect_socket(struct connection *conn, char *hostname, int port)
 		return -1;
 	}
 
-#ifdef _WIN32
-	optval = 1;
-	if (ioctlsocket(sock, FIONBIO, &optval)) {
-		printf("ioctlsocket FIONBIO failed\n");
-		close(sock);
+	if (set_non_blocking(sock))
 		return -1;
-	}
-#else
-	optval = fcntl(sock, F_GETFL, 0);
-	if (optval == -1 || fcntl(sock, F_SETFL, optval | O_NONBLOCK)) {
-		my_perror("fcntl O_NONBLOCK");
-		close(sock);
-		return -1;
-	}
-#endif
 
 	if (!set_conn_socket(conn, sock)) {
 		printf("Problems! Could not set socket\n");
@@ -80,7 +95,6 @@ int connect_socket(struct connection *conn, char *hostname, int port)
 		if (inprogress()) {
 			if (verbose > 1)
 				printf("Connection deferred\n");
-			set_writable(conn);
 			return 0;
 		} else {
 			char errstr[100];
@@ -93,6 +107,62 @@ int connect_socket(struct connection *conn, char *hostname, int port)
 	} else
 		return tcp_connected(conn);
 }
+#else
+int connect_socket(struct connection *conn, char *hostname, char *port)
+{
+	int sock, deferred;
+	struct addrinfo hints, *result, *res;
+
+	/* We need this or we will get tcp and udp */
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_socktype = SOCK_STREAM;
+
+	if (getaddrinfo(hostname, port, &hints, &result)) {
+		printf("Unable to get host %s\n", hostname);
+		return -1;
+	}
+
+	for (res = result; res; res = res->ai_next) {
+		sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+		if (sock < 0)
+			continue;
+
+		if (set_non_blocking(sock))
+			continue;
+
+		if (connect(sock, res->ai_addr, res->ai_addrlen)) {
+			if (inprogress()) {
+				if (verbose > 1)
+					printf("Connection deferred\n");
+				deferred = 1;
+				break; /* got one */
+			} else
+				close(sock);
+		} else {
+			deferred = 0;
+			break; /* got one */
+		}
+	}
+
+	freeaddrinfo(result);
+
+	if (!res) {
+		printf("Unable to get socket for host %s\n", hostname);
+		return -1;
+	}
+
+	if (!set_conn_socket(conn, sock)) {
+		printf("Problems! Could not set socket\n");
+		close(sock);
+		return -1;
+	}
+
+	if (deferred)
+		return 0;
+	else
+		return tcp_connected(conn);
+}
+#endif
 
 /* This should only be called if conn->connected == 0 */
 void check_connect(struct connection *conn)

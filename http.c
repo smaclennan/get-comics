@@ -15,7 +15,7 @@
 #endif
 
 static char *proxy;
-static int proxy_port = 3128;
+static char *proxy_port = "3128";
 
 static char *http = "HTTP/1.1";
 
@@ -33,7 +33,7 @@ void set_proxy(char *proxystr)
 
 	if (proxy) {
 		if (verbose)
-			printf("WARNING: proxy set to %s:%d. Ignoring %s\n",
+			printf("WARNING: proxy set to %s:%s. Ignoring %s\n",
 				   proxy, proxy_port, proxystr);
 		return;
 	}
@@ -41,13 +41,13 @@ void set_proxy(char *proxystr)
 	p = strrchr(proxystr, ':');
 	if (p) {
 		*p++ = '\0';
-		proxy_port = strtol(p, NULL, 10);
+		proxy_port = must_strdup(p);
 	}
 
 	proxy = must_strdup(proxystr);
 
 	if (verbose)
-		printf("Proxy %s:%d\n", proxy, proxy_port);
+		printf("Proxy %s:%s\n", proxy, proxy_port);
 }
 
 
@@ -63,7 +63,7 @@ char *get_proxy(void)
 
 	p = malloc(len);
 	if (p)
-		sprintf(p, "%s:%d", proxy, proxy_port);
+		sprintf(p, "%s:%s", proxy, proxy_port);
 
 	return p;
 }
@@ -108,13 +108,13 @@ int build_request(struct connection *conn)
 		}
 		sprintf(conn->buf, "GET http://%s %s %s\r\n", host, url, http);
 	} else {
-		int port = is_https(conn->url) ? 443 : 80;
+		char *port = is_https(conn->url) ? "443" : "80";
 
 		p = strchr(host, ':');
 		if (p) {
 			/* port specified */
 			*p++ = '\0';
-			port = strtol(p, NULL, 10);
+			port = p;
 		}
 
 		if (connect_socket(conn, host, port)) {

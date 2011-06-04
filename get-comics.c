@@ -447,8 +447,7 @@ int main(int argc, char *argv[])
 
 	while (head || outstanding) {
 
-		if (outstanding == 0)
-			start_next_comic();
+		start_next_comic();
 
 		n = poll(ufds, npoll, timeout);
 		if (n < 0) {
@@ -572,7 +571,8 @@ int set_conn_socket(struct connection *conn, int sock)
 		if (ufds[i].fd == -1) {
 			conn->poll = &ufds[i];
 			conn->poll->fd = sock;
-			conn->poll->events = POLLIN;
+			/* All sockets start out writable */
+			conn->poll->events = POLLOUT;
 			return 1;
 		}
 

@@ -20,7 +20,7 @@
 
 
 /* Limit the number of concurrent sockets. */
-#define THREAD_LIMIT	10
+#define THREAD_LIMIT	6
 
 /*
  * Maximum length of time to wait for a read
@@ -151,16 +151,6 @@ static inline void set_writable(struct connection *conn)
 	conn->poll->events = POLLOUT;
 }
 
-static inline int inprogress(void)
-{
-#ifdef _WIN32
-	return WSAGetLastError() == WSAEWOULDBLOCK;
-#else
-	return errno == EINPROGRESS;
-#endif
-}
-
-
 int set_conn_socket(struct connection *conn, int sock);
 void add_comic(struct connection *comic);
 char *must_strdup(char *str);
@@ -179,7 +169,7 @@ int read_reply(struct connection *conn);
 int build_request(struct connection *conn);
 
 /* export from socket.c */
-int connect_socket(struct connection *conn, char *hostname, int port);
+int connect_socket(struct connection *conn, char *hostname, char *port);
 void check_connect(struct connection *conn);
 
 /* export from log.c */
