@@ -111,7 +111,7 @@ int connect_socket(struct connection *conn, char *hostname, char *port_in)
 int connect_socket(struct connection *conn, char *hostname, char *port)
 {
 	int sock, deferred;
-	struct addrinfo hints, *result, *res;
+	struct addrinfo hints, *result, *r;
 
 	/* We need this or we will get tcp and udp */
 	memset(&hints, 0, sizeof(hints));
@@ -122,15 +122,15 @@ int connect_socket(struct connection *conn, char *hostname, char *port)
 		return -1;
 	}
 
-	for (res = result; res; res = res->ai_next) {
-		sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+	for (r = result; r; r = r->ai_next) {
+		sock = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
 		if (sock < 0)
 			continue;
 
 		if (set_non_blocking(sock))
 			continue;
 
-		if (connect(sock, res->ai_addr, res->ai_addrlen)) {
+		if (connect(sock, r->ai_addr, r->ai_addrlen)) {
 			if (inprogress()) {
 				if (verbose > 1)
 					printf("Connection deferred\n");
@@ -146,7 +146,7 @@ int connect_socket(struct connection *conn, char *hostname, char *port)
 
 	freeaddrinfo(result);
 
-	if (!res) {
+	if (!r) {
 		printf("Unable to get socket for host %s\n", hostname);
 		return -1;
 	}
