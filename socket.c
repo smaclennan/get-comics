@@ -2,7 +2,6 @@
 #include <fcntl.h>
 
 #ifndef _WIN32
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -37,14 +36,12 @@ static int set_non_blocking(int sock)
 	u_long optval = 1;
 	if (ioctlsocket(sock, FIONBIO, &optval)) {
 		printf("ioctlsocket FIONBIO failed\n");
-		close(sock);
 		return -1;
 	}
 #else
 	int optval = fcntl(sock, F_GETFL, 0);
 	if (optval == -1 || fcntl(sock, F_SETFL, optval | O_NONBLOCK)) {
 		my_perror("fcntl O_NONBLOCK");
-		close(sock);
 		return -1;
 	}
 #endif
@@ -81,12 +78,11 @@ int connect_socket(struct connection *conn, char *hostname, char *port_in)
 	}
 
 	if (set_non_blocking(sock))
-		return -1;
+		goto failed;
 
 	if (!set_conn_socket(conn, sock)) {
 		printf("Problems! Could not set socket\n");
-		close(sock);
-		return -1;
+		goto failed;
 	}
 
 	memset(&sock_name, 0, sizeof(sock_name));
@@ -104,11 +100,13 @@ int connect_socket(struct connection *conn, char *hostname, char *port_in)
 
 			sprintf(errstr, "connect %.80s", hostname);
 			my_perror(errstr);
-			close(sock);
-			return -1;
 		}
 	} else
 		return tcp_connected(conn);
+
+failed:
+	closesocket(sock);
+	return -1;
 }
 #else
 
@@ -165,8 +163,10 @@ static int try_connect(struct addrinfo *r, int *deferred)
 	if (sock < 0)
 		return -1;
 
-	if (set_non_blocking(sock))
+	if (set_non_blocking(sock)) {
+		closesocket(sock);
 		return -1;
+	}
 
 	if (connect(sock, r->ai_addr, r->ai_addrlen) == 0) {
 		/* this almost never happens */
@@ -181,7 +181,7 @@ static int try_connect(struct addrinfo *r, int *deferred)
 		return sock;
 	}
 
-	close(sock);
+	closesocket(sock);
 	return -1;
 }
 
@@ -222,7 +222,7 @@ int connect_socket(struct connection *conn, char *hostname, char *port)
 
 	if (!set_conn_socket(conn, sock)) {
 		printf("Problems! Could not set socket\n");
-		close(sock);
+		closesocket(sock);
 		return -1;
 	}
 
@@ -253,6 +253,3 @@ void check_connect(struct connection *conn)
 	    so_error == 0)
 		tcp_connected(conn);
 }
-
-
-

@@ -11,9 +11,9 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/poll.h>
+#include <sys/socket.h>
 #endif
 #include <sys/stat.h>
-
 
 #define HTTP_PORT		80
 #define JSON_FILE		"/usr/share/get-comics/comics.json"
@@ -107,6 +107,10 @@ extern int randomize;
 #define O_BINARY 0
 #endif
 #define WRITE_FLAGS (O_CREAT | O_TRUNC | O_WRONLY | O_BINARY)
+
+#ifndef _WIN32
+#define closesocket close
+#endif
 
 static inline char *is_http(char *p)
 {

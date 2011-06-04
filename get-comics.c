@@ -157,7 +157,7 @@ int release_connection(struct connection *conn)
 	openssl_close(conn);
 
 	if (conn->poll && conn->poll->fd != -1) {
-		close(conn->poll->fd);
+		closesocket(conn->poll->fd);
 		conn->poll->fd = -1;
 	}
 	conn->poll = NULL;
@@ -305,7 +305,7 @@ static void read_conn(struct connection *conn)
 			return;
 	} else
 #endif
-		n = read(conn->poll->fd, conn->curp, conn->rlen);
+		n = recv(conn->poll->fd, conn->curp, conn->rlen, 0);
 	if (n >= 0) {
 		if (verbose > 1)
 			printf("+ Read %d\n", n);
@@ -480,12 +480,8 @@ int main(int argc, char *argv[])
 					time(&conn->access);
 					write_request(conn);
 				}
-			} else if (conn->poll->revents & POLLIN) {
-				if (!conn->connected)
-					check_connect(conn);
-				else
-					read_conn(conn);
-			}
+			} else if (conn->poll->revents & POLLIN)
+				read_conn(conn);
 	}
 
 	if (links_only)
