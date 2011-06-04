@@ -4,7 +4,7 @@
 #include <winsock2.h>
 /* Only needed for getaddrinfo. If you set IPV4 in socket.c, you can
  * remove this include. */
-#include <w2tcpip.h>
+#include <ws2tcpip.h>
 #include <windows.h>
 #include <io.h>
 #include <direct.h> /* for chdir */
@@ -12,6 +12,9 @@
 #define socklen_t int
 
 #define open _open
+#define read _read
+#define write _write
+#define close _close
 #define unlink _unlink
 #define strdup _strdup
 #define chdir _chdir
