@@ -1,15 +1,4 @@
-{
-/* The comics in this file tend to be grouped by provider. Because
-of this, a given provider tends to get hit all at once. This causes
-connections to fail even though the comic exists (throttling?). By
-randomizing the comics, we lessen this problem.  */
-/* "randomize": 1, */
-
-/* For slow links it helps to limit the number of threads. This
-helps reduce the number of timeouts. */
-/* "threads": 4, */
-
-"comics": [
+{ "comics": [
 
 /* Independents */
 
@@ -118,7 +107,9 @@ helps reduce the number of timeouts. */
   "output": "candorville"
 },
 { /* Close to Home */
-  "url": "http://images.ucomics.com/comics/cl/%Y/cl%y%m%d.gif"
+  "url": "http://www.gocomics.com/closetohome/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
+  "output": "closetohome"
 },
 { /* Dilbert */
   "url": "http://dilbert.com/",
@@ -138,7 +129,9 @@ helps reduce the number of timeouts. */
   "output": "drabble"
 },
 { /* Duplex */
-  "url": "http://images.ucomics.com/comics/dp/%Y/dp%y%m%d.gif"
+  "url": "http://www.gocomics.com/duplex/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
+  "output": "duplex"
 },
 { /* F-minus */
   "url": "http://www.gocomics.com/fminus/",
@@ -161,7 +154,9 @@ helps reduce the number of timeouts. */
   "output": "herman"
 },
 { /* Lio */
-  "url": "http://images.ucomics.com/comics/lio/%Y/lio%y%m%d.gif"
+  "url": "http://www.gocomics.com/lio/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
+  "output": "lio"
 },
 { /* Loose Parts */
   "url": "http://images.ucomics.com/comics/tmloo/%Y/tmloo%y%m%d.gif",
@@ -227,7 +222,6 @@ helps reduce the number of timeouts. */
   "url": "http://www.gocomics.com/zackhill/",
   "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "zackhill"
-}
+},
 
-] /* comics */
-}
+{} ] }
