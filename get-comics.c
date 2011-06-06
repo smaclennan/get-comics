@@ -480,8 +480,13 @@ int main(int argc, char *argv[])
 					time(&conn->access);
 					write_request(conn);
 				}
-			} else if (conn->poll->revents & POLLIN)
-				read_conn(conn);
+			} else if (conn->poll->revents & POLLIN) {
+				/* This check is needed for openssl */
+				if (!conn->connected)
+					check_connect(conn);
+				else
+					read_conn(conn);
+			}
 	}
 
 	if (links_only)
