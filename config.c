@@ -3,6 +3,7 @@
 
 static struct tm *today;
 static unsigned wday;
+static char *gocomics_regexp;
 
 static void new_comic(struct connection **conn)
 {
@@ -120,6 +121,21 @@ static void add_referer(struct connection **conn, char *referer)
 		(*conn)->referer = must_strdup(referer);
 }
 
+static void add_gocomic(struct connection **conn, char *comic)
+{
+	char url[1024];
+
+	if (!gocomics_regexp) {
+		puts("ERROR: gocomic entry but gocomics-regexp not set");
+		exit(1);
+	}
+
+	snprintf(url, sizeof(url), "http://www.gocomics.com/%s/", comic);
+	add_url(conn, url);
+	add_regexp(conn, gocomics_regexp);
+	add_outname(conn, comic);
+}
+
 void write_comic(struct connection *conn) {}
 
 static char s_key[80];
@@ -139,6 +155,8 @@ static void parse_top_str(char *key, char *val)
 			comics_dir = strdup(val);
 	} else if (strcmp(key, "proxy") == 0)
 		set_proxy(val);
+	else if (strcmp(key, "gocomics-regexp") == 0)
+		gocomics_regexp = must_strdup(val);
 	else
 		printf("Unexpected element '%s'\n", key);
 }
@@ -176,6 +194,8 @@ static void parse_comic_str(char *key, char *val)
 		add_base_href(&new, val);
 	else if (strcmp(key, "referer") == 0)
 		add_referer(&new, val);
+	else if (strcmp(key, "gocomic") == 0)
+		add_gocomic(&new, val);
 	else
 		printf("Unexpected entry %s\n", key);
 }

@@ -1,4 +1,6 @@
-{ "comics": [
+{
+"gocomics-regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
+"comics": [
 
 /* Independents */
 
@@ -92,26 +94,10 @@
 
 /* gocomics.com */
 
-{ /* Bound and Gagged */
-  "url": "http://www.gocomics.com/boundandgagged/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "bound-gagged"
-},
-{ /* Brevity */
-  "url": "http://www.gocomics.com/brevity/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "brevity"
-},
-{ /* Candorville */
-  "url": "http://www.gocomics.com/candorville/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "candorville"
-},
-{ /* Close to Home */
-  "url": "http://www.gocomics.com/closetohome/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "closetohome"
-},
+{ "gocomic": "boundandgagged" },
+{ "gocomic": "brevity" },
+{ "gocomic": "candorville" },
+{ "gocomic": "closetohome" },
 { /* Dilbert */
   "url": "http://dilbert.com/",
   "regexp": "http://dilbert.com/dyn/str_strip/[0-9/]*.strip.gif",
@@ -124,105 +110,32 @@
   "output": "dilbert",
   "days": "sXXXXXX"
 },
-{ /* Drabble */
-  "url": "http://www.gocomics.com/drabble/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "drabble"
-},
-{ /* Duplex */
-  "url": "http://www.gocomics.com/duplex/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "duplex"
-},
-{ /* F-minus */
-  "url": "http://www.gocomics.com/fminus/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "f_minus"
-},
-{ /* Frank and Ernest */
-  "url": "http://www.gocomics.com/frankandernest/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "franknernest"
-},
-{ /* Free Range */
-  "url": "http://www.gocomics.com/freerange/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "free-range"
-},
-{ /* Herman */
-  "url": "http://www.gocomics.com/herman/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "herman"
-},
-{ /* Lio */
-  "url": "http://www.gocomics.com/lio/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "lio"
-},
-{ /* Loose Parts */
-  "url": "http://images.ucomics.com/comics/tmloo/%Y/tmloo%y%m%d.gif",
-  "output": "loose-parts"
-},
-{/* Moderately Confused */
-  "url": "http://www.gocomics.com/moderately-confused/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "moderatly-confused",
+{ "gocomic": "drabble" },
+{ "gocomic": "duplex" },
+{ "gocomic": "fminus" },
+{ "gocomic": "frankandernest" },
+{ "gocomic": "freerange" },
+{ "gocomic": "herman" },
+{ "gocomic": "lio" },
+{ "gocomic": "looseparts" },
+{ "gocomic": "moderately-confused",
   "days": "mtwtfsX"
 },
-{ /* Monty */
-  "url": "http://www.gocomics.com/monty/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "monty"
-},
-{ /* Off the Mark */
-  "url": "http://www.gocomics.com/offthemark/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "offthemark"
-},
-{ /* Reality Check */
-  "url": "http://www.gocomics.com/realitycheck/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "realitycheck"
-},
+{ "gocomic": "monty" },
+{ "gocomic": "offthemark" },
+{ "gocomic": "realitycheck" },
 { /* Red Meat */
   "url": "http://www.redmeat.com/redmeat/current/index-1.gif",
   "days": "XXXXXfX"
 },
-{ /* Rubes */
-  "url": "http://www.gocomics.com/rubes/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "rubes"
-},
-{ /* Speed Bump */
-  "url": "http://www.gocomics.com/speedbump/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "speedbump"
-},
-{ /* Strange Brew */
-  "url": "http://www.gocomics.com/strangebrew/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "strangebrew"
-},
-{ /* Tom the Dancing Bug */
-  "url": "http://www.gocomics.com/tomthedancingbug/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "tombug",
+{ "gocomic": "rubes" },
+{ "gocomic": "speedbump" },
+{ "gocomic": "strangebrew" },
+{ "gocomic": "tomthedancingbug",
   "days": "XXXXXfX"
 },
-{ /* Working It Out */
-  "url": "http://www.gocomics.com/workingitout/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "workingitout"
-},
-{/* Working Daze */
-  "url": "http://www.gocomics.com/working-daze/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "working-daze"
-},
-{ /* Zack Hill */
-  "url": "http://www.gocomics.com/zackhill/",
-  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
-  "output": "zackhill"
-},
+{ "gocomic": "workingitout" },
+{ "gocomic": "working-daze" },
+{ "gocomic": "zackhill" },
 
 {} ] }
