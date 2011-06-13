@@ -118,24 +118,20 @@
 { "gocomic": "herman" },
 { "gocomic": "lio" },
 { "gocomic": "looseparts" },
-{ "gocomic": "moderately-confused",
-  "days": "mtwtfsX"
-},
+{ "gocomic": "moderately-confused", "days": "mtwtfsX" },
 { "gocomic": "monty" },
 { "gocomic": "offthemark" },
 { "gocomic": "realitycheck" },
+{ "gocomic": "rubes" },
+{ "gocomic": "speedbump" },
+{ "gocomic": "strangebrew" },
+{ "gocomic": "tomthedancingbug", "days": "XXXXXfX" },
+{ "gocomic": "workingitout" },
+{ "gocomic": "working-daze" },
+{ "gocomic": "zackhill" },
 { /* Red Meat */
   "url": "http://www.redmeat.com/redmeat/current/index-1.gif",
   "days": "XXXXXfX"
 },
-{ "gocomic": "rubes" },
-{ "gocomic": "speedbump" },
-{ "gocomic": "strangebrew" },
-{ "gocomic": "tomthedancingbug",
-  "days": "XXXXXfX"
-},
-{ "gocomic": "workingitout" },
-{ "gocomic": "working-daze" },
-{ "gocomic": "zackhill" },
 
 {} ] }
