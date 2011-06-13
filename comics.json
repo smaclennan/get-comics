@@ -22,6 +22,18 @@
   "regexp": "/h?strips/[^.]+.(png|gif)",
   "output": "diesel"
 },
+{ /* Dilbert */
+  "url": "http://dilbert.com/",
+  "regexp": "http://dilbert.com/dyn/str_strip/[0-9/]*.strip.gif",
+  "output": "dilbert",
+  "days": "Xmtwtfs"
+},
+{ /* Dilbert - Sunday */
+  "url": "http://dilbert.com/",
+  "regexp": "http://dilbert.com/dyn/str_strip/[0-9/]*.strip.sunday.gif",
+  "output": "dilbert",
+  "days": "sXXXXXX"
+},
 { /* Freefall */
   "url": "http://freefall.purrsia.com/",
   "days": "XmXwXfX",
@@ -98,18 +110,6 @@
 { "gocomic": "brevity" },
 { "gocomic": "candorville" },
 { "gocomic": "closetohome" },
-{ /* Dilbert */
-  "url": "http://dilbert.com/",
-  "regexp": "http://dilbert.com/dyn/str_strip/[0-9/]*.strip.gif",
-  "output": "dilbert",
-  "days": "Xmtwtfs"
-},
-{ /* Dilbert - Sunday */
-  "url": "http://dilbert.com/",
-  "regexp": "http://dilbert.com/dyn/str_strip/[0-9/]*.strip.sunday.gif",
-  "output": "dilbert",
-  "days": "sXXXXXX"
-},
 { "gocomic": "drabble" },
 { "gocomic": "duplex" },
 { "gocomic": "fminus" },
