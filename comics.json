@@ -93,7 +93,8 @@
 /* gocomics.com */
 
 { /* Bound and Gagged */
-  "url": "http://images.ucomics.com/comics/tmbou/%Y/tmbou%y%m%d.gif",
+  "url": "http://www.gocomics.com/boundandgagged/",
+  "regexp": "http://.*\\.uclick\\.com/c2/[0-9a-f]+",
   "output": "bound-gagged"
 },
 { /* Brevity */
