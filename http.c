@@ -122,8 +122,23 @@ int build_request(struct connection *conn)
 			free(host);
 			return 1;
 		}
-		sprintf(conn->buf, "GET %s %s\r\nHost: %s\r\n",
-			url, http, host);
+
+		if (strchr(url, ' ')) {
+			/* Some sites cannot handle spaces in the url. */
+			char *in = url, *out = conn->buf + 4;
+			strcpy(conn->buf, "GET ");
+			while (*in)
+				if (*in == ' ') {
+					*out++ = '%';
+					*out++ = '2';
+					*out++ = '0';
+					++in;
+				} else
+					*out++ = *in++;
+			sprintf(out, " %s\r\nHost: %s\r\n", http, host);
+		} else
+			sprintf(conn->buf, "GET %s %s\r\nHost: %s\r\n",
+				url, http, host);
 	}
 
 	free(host);
