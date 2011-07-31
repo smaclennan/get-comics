@@ -662,9 +662,6 @@ char *lazy_imgtype(struct connection *conn)
 	};
 	int i;
 
-	for (i = 0; i < 4; ++i)
-		printf("%02x\n", conn->curp[i]);
-
 	for (i = 0; i < sizeof(hdrs) / sizeof(struct header); ++i)
 		if (memcmp(conn->curp, hdrs[i].hdr, 4) == 0)
 			return hdrs[i].ext;
