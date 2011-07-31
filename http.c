@@ -348,7 +348,7 @@ static int write_output(struct connection *conn, int bytes)
 {
 	if (conn->out == -1) { /* deferred open */
 		/* We alloced space for the extension in add_outname */
-		strcat(conn->outname, imgtype(conn));
+		strcat(conn->outname, lazy_imgtype(conn));
 
 		conn->out = open(conn->outname, WRITE_FLAGS, 0664);
 		if (conn->out < 0)

@@ -159,7 +159,7 @@ int set_conn_socket(struct connection *conn, int sock);
 void add_comic(struct connection *comic);
 char *must_strdup(char *str);
 void *must_alloc(int size);
-char *imgtype(struct connection *conn);
+char *lazy_imgtype(struct connection *conn);
 
 /* export from config.c */
 int read_config(char *fname);
