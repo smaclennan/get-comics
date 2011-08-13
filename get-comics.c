@@ -25,10 +25,16 @@
 #include <signal.h>
 
 
+/* I am still not 100% certain this is a good idea. So I am leaving it
+ * turned off by default.
+#define WANT_RESETS
+ */
+
 int read_timeout = SOCKET_TIMEOUT;
 
 char *comics_dir;
 int skipped;
+static int resets;
 
 static struct connection *comics;
 int n_comics;
@@ -174,6 +180,28 @@ int release_connection(struct connection *conn)
 	return 0;
 }
 
+/* Reset connection - try again */
+int reset_connection(struct connection *conn)
+{
+#ifdef WANT_RESETS
+	++conn->reset;
+	if (conn->reset == 1)
+		++resets; /* only count each connection once */
+	printf("RESET CONNECTION %d: %s\n", conn->reset, conn->url); /* SAM DBG */
+	if (conn->reset > 2)
+		return fail_connection(conn);
+
+	release_connection(conn);
+
+	if (build_request(conn))
+		return fail_connection(conn);
+#else
+	printf("Read error %s: %d\n", conn->url, errno);
+	fail_connection(conn);
+#endif
+
+	return 0;
+}
 
 /* Normal way to close connection */
 int close_connection(struct connection *conn)
@@ -315,10 +343,8 @@ static void read_conn(struct connection *conn)
 
 		if (conn->func && conn->func(conn))
 			fail_connection(conn);
-	} else if (n < 0) {
-		printf("Read error %s: %d (%d)\n", conn->url, n, errno);
-		fail_connection(conn);
-	}
+	} else if (n < 0)
+		reset_connection(conn); /* Try again */
 }
 
 int main(int argc, char *argv[])
@@ -493,6 +519,8 @@ int main(int argc, char *argv[])
 		fclose(links_only);
 
 	printf("Got %d of %d (%d skipped)\n", gotit, n_comics, skipped);
+	if (resets)
+		printf("\t%d reset\n", resets);
 
 	/* Dump the missed comics */
 	for (conn = comics; conn; conn = conn->next)

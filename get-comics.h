@@ -62,6 +62,7 @@ struct connection {
 	char *referer; /* king features needs this */
 	unsigned days; /* bitmask */
 	int   gotit;
+	int reset;
 
 	struct pollfd *poll;
 	int connected;
@@ -140,6 +141,7 @@ static inline void my_perror(char *str)
 #define perror(s)	Do_not_use_perror
 
 int close_connection(struct connection *conn);
+int reset_connection(struct connection *conn);
 int fail_connection(struct connection *conn);
 int fail_redirect(struct connection *conn);
 int release_connection(struct connection *conn);
