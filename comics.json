@@ -13,7 +13,7 @@
 },
 {/* Biff */
   "url": "http://www.thebookofbiff.com",
-  "regexp": "http://bookofbiff\\.[^/]+/comics/.*\\.png",
+  "regexp": "http://bookofbiff\\.[^/]+/comics/.*\\.(png|gif)",
   "output": "biff",
   "days": "XmtwtfX"
 },
