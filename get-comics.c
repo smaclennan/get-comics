@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
 	int i, n, timeout = 250, verify = 0;
 	struct connection *conn;
 
-	while ((i = getopt(argc, argv, "d:kl:p:rt:vV")) != -1)
+	while ((i = getopt(argc, argv, "d:kl:p:rt:vT:V")) != -1)
 		switch ((char)i) {
 		case 'd':
 			comics_dir = optarg;
@@ -380,6 +380,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'v':
 			verbose++;
+			break;
+		case 'T':
+			read_timeout = strtol(optarg, NULL, 0);
 			break;
 		case 'V':
 			verify = 1;
