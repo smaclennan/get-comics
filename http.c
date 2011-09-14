@@ -171,7 +171,7 @@ void write_request(struct connection *conn)
 			return;
 	} else
 #endif
-		n = send(conn->poll->fd, conn->curp, conn->length, 0);
+		n = send(conn->poll->fd, conn->curp, conn->length, MSG_NOSIGNAL);
 
 	if (n == conn->length) {
 		if (verbose > 2)
