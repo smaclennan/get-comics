@@ -58,6 +58,10 @@
   "output": "questionable",
   "days": "XmtwtfX"
 },
+{ /* SMBC */
+  "url": "http://www.smbc-comics.com/comics/%Y%m%d.gif",
+  "output": "smbc"
+},
 /* Something Positive */
 /* http://www.somethingpositive.net/arch/sp%m%d%Y.gif */
 { /* Userfriendly */
