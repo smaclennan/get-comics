@@ -485,14 +485,12 @@ int main(int argc, char *argv[])
 		}
 
 		if (n == 0) {
-			if (!start_next_comic()) {
+			timeout_connections();
+			if (!start_next_comic())
 				/* Once we have all the comics
-				 * started, start checking for
-				 * timeouts. We also increase the
-				 * timeout period. */
-				timeout_connections();
+				 * started, increase the timeout
+				 * period. */
 				timeout = 1000;
-			}
 			continue;
 		}
 
