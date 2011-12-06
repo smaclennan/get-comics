@@ -25,11 +25,6 @@
 #include <signal.h>
 
 
-/* I am still not 100% certain this is a good idea. So I am leaving it
- * turned off by default.
-#define WANT_RESETS
- */
-
 int read_timeout = SOCKET_TIMEOUT;
 
 char *comics_dir;

@@ -1,5 +1,5 @@
 /*
- * get-comics.c - download comics from the net
+ * link-check.c - check a list of urls
  * Copyright (C) 2002-2011 Sean MacLennan <seanm@seanm.ca>
  * Revision: 1.3
  *
@@ -24,11 +24,6 @@
 #include <getopt.h>
 #include <signal.h>
 
-
-/* I am still not 100% certain this is a good idea. So I am leaving it
- * turned off by default.
-#define WANT_RESETS
- */
 
 int read_timeout = SOCKET_TIMEOUT;
 
