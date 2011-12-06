@@ -1,5 +1,5 @@
 *.o
 .*.o.d
 get-comics
-get-comics.html
+link-check
 TAGS

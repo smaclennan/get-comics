@@ -1,4 +1,5 @@
-CFLAGS += -O3 -Wall -g
+# SAM CFLAGS += -O3 -Wall -g
+CFLAGS += -Wall -g
 
 # For dependencies
 CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
@@ -10,6 +11,7 @@ CFLAGS += -DLOGGING
 CFLAGS += -DWANT_SSL
 
 OBJS := get-comics.o http.o config.o log.o openssl.o JSON_parser.o socket.o
+LC_OBJS := link-check.o http.o log.o openssl.o socket.o
 
 # Optionaly add openssl
 ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
@@ -27,10 +29,13 @@ QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
 
-all: 	get-comics
+all:	get-comics link-check
 
 get-comics: $(OBJS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $(OBJS) $(LIBS)
+
+link-check: $(LC_OBJS)
+	$(QUIET_LINK)$(CC) $(CFLAGS) -o link-check $(LC_OBJS) $(LIBS)
 
 *.o: get-comics.h
 

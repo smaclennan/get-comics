@@ -136,8 +136,6 @@ static void add_gocomic(struct connection **conn, char *comic)
 	add_outname(conn, comic);
 }
 
-void write_comic(struct connection *conn) {}
-
 static char s_key[80];
 static int s_iskey;
 

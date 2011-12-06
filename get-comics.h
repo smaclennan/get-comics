@@ -104,6 +104,8 @@ extern int threads_set;
 extern int read_timeout;
 extern int randomize;
 
+extern const char *method;
+
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -165,7 +167,7 @@ char *lazy_imgtype(struct connection *conn);
 
 /* export from config.c */
 int read_config(char *fname);
-void write_comic(struct connection *conn);
+static inline void write_comic(struct connection *conn) {}
 
 /* export from http.c */
 void set_proxy(char *proxystr);

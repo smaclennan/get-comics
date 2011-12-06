@@ -14,6 +14,8 @@
 #define EINPROGRESS WSAEWOULDBLOCK
 #endif
 
+const char *method = "GET";
+
 static char *proxy;
 static char *proxy_port = "3128";
 
@@ -106,7 +108,7 @@ int build_request(struct connection *conn)
 			free(host);
 			return 1;
 		}
-		sprintf(conn->buf, "GET http://%s %s %s\r\n", host, url, http);
+		sprintf(conn->buf, "%s http://%s %s %s\r\n", method, host, url, http);
 	} else {
 		char *port = is_https(conn->url) ? "443" : "80";
 
@@ -126,7 +128,8 @@ int build_request(struct connection *conn)
 		if (strchr(url, ' ')) {
 			/* Some sites cannot handle spaces in the url. */
 			char *in = url, *out = conn->buf + 4;
-			strcpy(conn->buf, "GET ");
+			strcpy(conn->buf, method);
+			strcat(conn->buf, " ");
 			while (*in)
 				if (*in == ' ') {
 					*out++ = '%';
@@ -137,8 +140,8 @@ int build_request(struct connection *conn)
 					*out++ = *in++;
 			sprintf(out, " %s\r\nHost: %s\r\n", http, host);
 		} else
-			sprintf(conn->buf, "GET %s %s\r\nHost: %s\r\n",
-				url, http, host);
+			sprintf(conn->buf, "%s %s %s\r\nHost: %s\r\n",
+				method, url, http, host);
 	}
 
 	free(host);
@@ -286,6 +289,8 @@ int read_reply(struct connection *conn)
 				 * Closes error if it fails. */
 				if (build_request(conn))
 					return fail_redirect(conn);
+
+				return 0;
 			}
 		}
 		printf("%s: %d with no new location\n", conn->host, status);
@@ -298,6 +303,12 @@ int read_reply(struct connection *conn)
 	default:
 		printf("%d: %s\n", status, conn->url);
 		return status;
+	}
+
+	if (*method == 'H') {
+		/* for head request we are done */
+		close_connection(conn);
+		return 0;
 	}
 
 	if (conn->regexp && !conn->matched)
