@@ -286,6 +286,8 @@ int read_reply(struct connection *conn)
 				 * Closes error if it fails. */
 				if (build_request(conn))
 					return fail_redirect(conn);
+
+				return 0;
 			}
 		}
 		printf("%s: %d with no new location\n", conn->host, status);
