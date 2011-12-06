@@ -103,6 +103,9 @@ extern int threads_set;
 extern int read_timeout;
 extern int randomize;
 
+extern int outstanding;
+extern int gotit;
+
 extern const char *method;
 
 #ifndef O_BINARY
@@ -141,10 +144,8 @@ static inline void my_perror(char *str)
 }
 #define perror(s)	Do_not_use_perror
 
-int close_connection(struct connection *conn);
 int reset_connection(struct connection *conn);
 int fail_connection(struct connection *conn);
-int fail_redirect(struct connection *conn);
 int release_connection(struct connection *conn);
 int process_html(struct connection *conn);
 

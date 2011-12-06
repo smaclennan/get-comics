@@ -21,12 +21,110 @@ static char *proxy_port = "3128";
 
 static char *http = "HTTP/1.1";
 
+int outstanding;
+int gotit;
 
 #define MIN(a, b)	((a) < (b) ? (a) : (b))
 
 static int read_file(struct connection *conn);
 static int read_file_unsized(struct connection *conn);
 static int read_file_chunked(struct connection *conn);
+
+
+/* This is only for 2 stage comics and redirects */
+int release_connection(struct connection *conn)
+{
+	if (verbose > 2)
+		printf("Release %s\n", conn->url);
+
+	openssl_close(conn);
+
+	if (conn->poll && conn->poll->fd != -1) {
+		closesocket(conn->poll->fd);
+		conn->poll->fd = -1;
+	}
+	conn->poll = NULL;
+
+	if (conn->out >= 0) {
+		close(conn->out);
+		conn->out = -1;
+	}
+
+	conn->func = NULL;
+
+	conn->connected = 0;
+
+	return 0;
+}
+
+/* Normal way to close connection */
+static int close_connection(struct connection *conn)
+{
+	if (conn->poll) {
+		++gotit;
+		conn->gotit = 1;
+		--outstanding;
+		if (verbose > 1)
+			printf("Closed %s (%d)\n", conn->url, outstanding);
+	} else
+		printf("Multiple Closes: %s\n", conn->url);
+	log_clear(conn);
+	return release_connection(conn);
+}
+
+
+/* Abnormal way to close connection */
+int fail_connection(struct connection *conn)
+{
+	if (conn->poll) {
+		write_comic(conn);
+		--outstanding;
+		if (verbose > 1)
+			printf("Failed %s (%d)\n", conn->url, outstanding);
+	} else
+		printf("Multiple Closes: %s\n", conn->url);
+	log_clear(conn);
+	return release_connection(conn);
+}
+
+/* Fail a redirect. We have already released the connection. */
+int fail_redirect(struct connection *conn)
+{
+	if (conn->poll)
+		printf("Failed redirect not closed: %s\n", conn->url);
+	else {
+		write_comic(conn);
+		--outstanding;
+		if (verbose > 1)
+			printf("Failed redirect %s (%d)\n",
+			       conn->url, outstanding);
+	}
+	log_clear(conn);
+	return 0;
+}
+
+/* Reset connection - try again */
+int reset_connection(struct connection *conn)
+{
+#ifdef WANT_RESETS
+	++conn->reset;
+	if (conn->reset == 1)
+		++resets; /* only count each connection once */
+	printf("RESET CONNECTION %d: %s\n", conn->reset, conn->url); /* SAM DBG */
+	if (conn->reset > 2)
+		return fail_connection(conn);
+
+	release_connection(conn);
+
+	if (build_request(conn))
+		return fail_connection(conn);
+#else
+	printf("Read error %s: %d\n", conn->url, errno);
+	fail_connection(conn);
+#endif
+
+	return 0;
+}
 
 
 void set_proxy(char *proxystr)
@@ -586,4 +684,24 @@ static int read_file(struct connection *conn)
 	conn->curp = conn->buf;
 	conn->rlen = conn->bufn;
 	return 0;
+}
+
+char *must_strdup(char *old)
+{
+	char *new = strdup(old);
+	if (!new) {
+		printf("OUT OF MEMORY\n");
+		exit(1);
+	}
+	return new;
+}
+
+void *must_calloc(int nmemb, int size)
+{
+	void *new = calloc(nmemb, size);
+	if (!new) {
+		printf("OUT OF MEMORY\n");
+		exit(1);
+	}
+	return new;
 }
