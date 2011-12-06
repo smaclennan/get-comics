@@ -298,6 +298,51 @@ void write_request(struct connection *conn)
 	}
 }
 
+static int redirect(struct connection *conn, int status)
+{
+	char *p = strstr(conn->buf, "Location:");
+	if (p) {
+		char *e;
+
+		for (p += 9; isspace(*p); ++p)
+			;
+		e = strchr(p, '\n');
+		if (e) {
+			while (isspace(*(e - 1)))
+				--e;
+			*e = '\0';
+			printf("WARNING: %s redirected to %s\n", conn->url, p);
+			release_connection(conn);
+			free(conn->url);
+
+			if (is_http(p))
+				conn->url = strdup(p);
+			else { /* Relative URL */
+				int len = strlen(conn->host) + strlen(p) + 2;
+				conn->url = malloc(len);
+				if (conn->url)
+					sprintf(conn->url, "%s/%s",
+						conn->host, p);
+			}
+
+			if (!conn->url) {
+				printf("Out of memory\n");
+				return 1;
+			}
+
+			/* This will cause a bogus Multiple
+			 * Closes error if it fails. */
+			if (build_request(conn))
+				return fail_redirect(conn);
+
+			return 0;
+		}
+	}
+
+	printf("%s: %d with no new location\n", conn->host, status);
+	return status;
+}
+
 /* State function */
 int read_reply(struct connection *conn)
 {
@@ -367,37 +412,7 @@ int read_reply(struct connection *conn)
 
 	case 301: /* Moved Permanently */
 	case 302: /* Moved Temporarily */
-		p = strstr(conn->buf, "Location:");
-		if (p) {
-			char *e;
-
-			for (p += 9; isspace(*p); ++p)
-				;
-			e = strchr(p, '\n');
-			if (e) {
-				while (isspace(*(e - 1)))
-					--e;
-				*e = '\0';
-				printf("WARNING: %s redirected to %s\n",
-				       conn->url, p);
-				release_connection(conn);
-				free(conn->url);
-				conn->url = strdup(p);
-				if (!conn->url) {
-					printf("Out of memory\n");
-					return 1;
-				}
-
-				/* This will cause a bogus Multiple
-				 * Closes error if it fails. */
-				if (build_request(conn))
-					return fail_redirect(conn);
-
-				return 0;
-			}
-		}
-		printf("%s: %d with no new location\n", conn->host, status);
-		return status;
+		return redirect(conn, status);
 
 	case 0:
 		printf("HUH? NO STATUS\n");
