@@ -40,8 +40,9 @@
 
 /* I seem to get 1360 byte "chunks"
  * This seems a good compromise
+ * http://www.parts-express.com/index.cfm is 2155
  */
-#define BUFSIZE		2048
+#define BUFSIZE		2222
 
 struct log {
 	char **events;
