@@ -96,7 +96,6 @@ struct connection {
 };
 
 extern char *comics_dir;
-extern int n_comics;
 extern int skipped;
 extern int verbose;
 extern int thread_limit;
@@ -162,8 +161,8 @@ static inline void set_writable(struct connection *conn)
 int set_conn_socket(struct connection *conn, int sock);
 void add_comic(struct connection *comic);
 char *must_strdup(char *str);
-void *must_alloc(int size);
-char *lazy_imgtype(struct connection *conn);
+void *must_calloc(int nmemb, int size);
+static inline void *must_alloc(int size) { return must_calloc(1, size); }
 
 /* export from config.c */
 int read_config(char *fname);

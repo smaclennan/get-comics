@@ -32,22 +32,18 @@
 
 int read_timeout = SOCKET_TIMEOUT;
 
-char *comics_dir;
 int skipped;
 static int resets;
 
 static struct connection *comics;
-int n_comics;
+static int n_comics;
 static int outstanding;
 static int gotit;
 
 static struct connection *head;
 
-static int unlink_index = 1;
 int verbose;
 int thread_limit = THREAD_LIMIT;
-int randomize;
-static FILE *links_only;
 
 /* If the user specified this on the command line we do not want the
  * config file to override */
@@ -57,16 +53,16 @@ int threads_set;
 static struct pollfd *ufds;
 static int npoll;
 
-static void user_command(void);
-static void dump_outstanding(int sig);
-static void randomize_comics(void);
-
-/* link-check specific */
 static void add_url(char *url)
 {
 	static struct connection *tail;
 	char *e;
 	struct connection *conn = must_alloc(sizeof(struct connection));
+
+	/* Hack for BME files. */
+	e = strchr(url, ' ');
+	if (e)
+		*e = '\0';
 
 	conn->out = -1;
 	conn->url = must_strdup(url);
@@ -88,11 +84,8 @@ static void add_url(char *url)
 		comics = head = conn;
 	tail = conn;
 	++n_comics;
-
-	printf("host '%s' url '%s'\n", conn->host, conn->url); // SAM DBG
 }
 
-/* link-check specific */
 int read_link_file(char *fname)
 {
 	char line[1024];
@@ -115,83 +108,10 @@ int read_link_file(char *fname)
 	return 0;
 }
 
-/* -------------------------------------------------------------- */
-
-static char *find_regexp(struct connection *conn)
-{
-	FILE *fp;
-	regex_t regex;
-	regmatch_t match[MATCH_DEPTH];
-	int err, mn = conn->regmatch;
-	/* Max line I have seen is 114k from comics.com! */
-	char buf[128 * 1024];
-
-	err = regcomp(&regex, conn->regexp, REG_EXTENDED);
-	if (err) {
-		char errstr[200];
-
-		regerror(err, &regex, errstr, sizeof(errstr));
-		printf("%s\n", errstr);
-		regfree(&regex);
-		return NULL;
-	}
-
-	fp = fopen(conn->regfname, "r");
-	if (!fp) {
-		my_perror(conn->regfname);
-		return NULL;
-	}
-
-	while (fgets(buf, sizeof(buf), fp)) {
-		if (regexec(&regex, buf, MATCH_DEPTH, match, 0) == 0) {
-			/* got a match */
-			fclose(fp);
-			if (unlink_index)
-				unlink(conn->regfname);
-
-			if (match[mn].rm_so == -1) {
-				printf("%s matched regexp but did "
-				       "not have match %d\n",
-				       conn->url, mn);
-				return NULL;
-			}
-
-			*(buf + match[mn].rm_eo) = '\0';
-			strcpy(conn->buf, buf + match[mn].rm_so);
-			return conn->buf;
-		}
-	}
-
-	if (ferror(fp))
-		printf("PROBLEMS\n");
-
-	fclose(fp);
-
-	printf("%s DID NOT MATCH REGEXP\n", conn->url);
-
-	return NULL;
-}
-
-
-static void add_link(struct connection *conn)
-{
-	if (verbose)
-		printf("Add link %s\n", conn->url);
-
-	fprintf(links_only, "%s\n", conn->url);
-
-	conn->gotit = 1;
-	++gotit;
-}
-
 static int start_next_comic(void)
 {
-	while (head && outstanding < thread_limit) {
-		if (links_only && !head->regexp) {
-			add_link(head);
-			head = head->next;
-			continue;
-		} else if (build_request(head) == 0) {
+	while (head && outstanding < thread_limit)
+		if (build_request(head) == 0) {
 			time(&head->access);
 			if (verbose)
 				printf("Started %s (%d)\n",
@@ -199,11 +119,10 @@ static int start_next_comic(void)
 			++outstanding;
 			head = head->next;
 			return 1;
+		} else {
+			printf("build_request %s failed\n", head->url);
+			head = head->next;
 		}
-
-		printf("build_request %s failed\n", head->url);
-		head = head->next;
-	}
 
 	return head != NULL;
 }
@@ -306,57 +225,10 @@ int fail_redirect(struct connection *conn)
 }
 
 int process_html(struct connection *conn)
-{
-	char *p;
-
-	if (conn->out >= 0) {
-		close(conn->out);
-		conn->out = -1;
-	}
-
-	p = find_regexp(conn);
-	if (p == NULL)
-		return 1;
-
-	/* We are done with this socket, but not this connection */
-	release_connection(conn);
-
-	if (verbose > 1)
-		printf("Matched %s\n", p);
-
-	/* For the writer we need to know if url was modified */
-	conn->matched = 1;
-
-	if (is_http(p))
-		/* fully rooted */
-		conn->url = strdup(p);
-	else {
-		char imgurl[1024];
-
-		if (conn->base_href)
-			sprintf(imgurl, "%s%s", conn->base_href, p);
-		else if (*p == '/')
-			sprintf(imgurl, "%s%s", conn->host, p);
-		else
-			sprintf(imgurl, "%s/%s", conn->host, p);
-		conn->url = strdup(imgurl);
-	}
-
-	if (links_only) {
-		add_link(conn);
-		--outstanding;
-		return 0;
-	}
-
-	if (build_request(conn) == 0)
-		set_writable(conn);
-	else
-		printf("build_request %s failed\n", conn->url);
-
-	if (verbose)
-		printf("Started %s\n", conn->url);
-
-	return 0;
+{	/* Should never be called with HEAD method */
+	printf("Internal Error: %s called\n", __func__);
+	fail_connection(conn);
+	return 1;
 }
 
 
@@ -405,34 +277,18 @@ static void read_conn(struct connection *conn)
 int main(int argc, char *argv[])
 {
 	char *env;
-	int i, n, timeout = 250, verify = 0;
+	int i, n, timeout = 250;
 	struct connection *conn;
 
 	method = "HEAD";
 
-	while ((i = getopt(argc, argv, "c:d:kl:p:rt:vT:V")) != -1)
+	while ((i = getopt(argc, argv, "c:p:t:vT:")) != -1)
 		switch ((char)i) {
 		case 'c':
 			read_link_file(optarg);
 			break;
-		case 'd':
-			comics_dir = optarg;
-			break;
-		case 'k':
-			unlink_index = 0;
-			break;
-		case 'l':
-			links_only = fopen(optarg, "w");
-			if (!links_only) {
-				my_perror(optarg);
-				exit(1);
-			}
-			break;
 		case 'p':
 			set_proxy(optarg);
-			break;
-		case 'r':
-			randomize = 1;
 			break;
 		case 't':
 			thread_limit = strtol(optarg, NULL, 0);
@@ -444,20 +300,13 @@ int main(int argc, char *argv[])
 		case 'T':
 			read_timeout = strtol(optarg, NULL, 0);
 			break;
-		case 'V':
-			verify = 1;
-			break;
 		case 'h':
 		default:
-			puts("usage: get-comics [-krvV]"
-			     "[-d comics_dir] [-l links_file] "
-			     "[-p proxy]");
-			puts("                  [-t threads] "
-			     "[config-file ...]");
-			puts("Where: -k  keep index files");
-			puts("       -r  randomize");
-			puts("       -v  verbose");
-			puts("       -V  verify config");
+			// SAM FIXME
+			puts("usage: link-check [-v]"
+			     "[-c link_file] [-p proxy]");
+			puts("                  [-t threads] [-T read_timeout]"
+			     "[url ...]");
 			exit(1);
 		}
 
@@ -466,15 +315,6 @@ int main(int argc, char *argv[])
 			add_url(argv[optind]);
 			++optind;
 		}
-
-	if (randomize)
-		randomize_comics();
-
-	if (verify) {
-		if (verbose)
-			dump_outstanding(0);
-		return 0;
-	}
 
 	/* set_proxy will not use this if proxy already set */
 	env = getenv("COMICS_PROXY");
@@ -489,43 +329,14 @@ int main(int argc, char *argv[])
 	if (thread_limit > n_comics)
 		thread_limit = n_comics;
 
-	if (!comics_dir) {
-		char *home = getenv("HOME");
-
-		if (home) {
-			comics_dir = must_alloc(strlen(home) + 10);
-			sprintf(comics_dir, "%s/comics", home);
-		} else
-			comics_dir = "comics";
-	}
-
-	if (chdir(comics_dir)) {
-		my_perror(comics_dir);
-		exit(1);
-	}
-
 #ifdef _WIN32
 	win32_init();
-#else
-	signal(SIGTERM, dump_outstanding);
 #endif
 
 	npoll = thread_limit + 1; /* add one for stdin */
-	ufds = calloc(npoll, sizeof(struct pollfd));
-	if (!ufds) {
-		printf("Out of poll memory\n");
-		exit(1);
-	}
+	ufds = must_calloc(npoll, sizeof(struct pollfd));
 	for (i = 0; i < npoll; ++i)
 		ufds[i].fd = -1;
-
-#ifndef _WIN32
-	/* Add stdin - windows can poll only on sockets */
-	if (isatty(0)) {
-		ufds[0].fd = 0;
-		ufds[0].events = POLLIN;
-	}
-#endif
 
 	while (head || outstanding) {
 
@@ -547,9 +358,6 @@ int main(int argc, char *argv[])
 			continue;
 		}
 
-		if (ufds[0].revents)
-			user_command();
-
 		for (conn = comics; conn; conn = conn->next)
 			if (!conn->poll)
 				continue;
@@ -569,9 +377,6 @@ int main(int argc, char *argv[])
 			}
 	}
 
-	if (links_only)
-		fclose(links_only);
-
 	printf("Got %d of %d (%d skipped)\n", gotit, n_comics, skipped);
 	if (resets)
 		printf("\t%d reset\n", resets);
@@ -585,70 +390,12 @@ int main(int argc, char *argv[])
 				printf("  %s\n", conn->url);
 		}
 
-	return 0;
-}
-
-static void dump_outstanding(int sig)
-{
-	struct connection *conn;
-	struct tm *atime;
-	time_t now = time(NULL);
-
-	atime = localtime(&now);
-	printf("\nTotal %d Outstanding: %d @ %2d:%02d:%02d\n",
-	       n_comics, outstanding,
-	       atime->tm_hour, atime->tm_min, atime->tm_sec);
-	for (conn = comics; conn; conn = conn->next) {
-		if (!conn->poll)
-			continue;
-		printf("> %s = %s\n", conn->url,
-		       conn->connected ? "connected" : "not connected");
-		if (conn->regexp)
-			printf("  %s %s\n",
-			       conn->matched ? "matched" : "regexp",
-			       conn->regexp);
-		atime = localtime(&conn->access);
-		printf("  %2d:%02d:%02d\n",
-		       atime->tm_hour, atime->tm_min, atime->tm_sec);
-	}
-	for (conn = head; conn; conn = conn->next)
-		printf("Q %s\n", conn->url);
-	fflush(stdout);
-}
-
-static void user_command(void)
-{
-	char buf[80], *p;
-	struct connection *conn;
-
-	if (!fgets(buf, sizeof(buf), stdin)) {
-		printf("Hmmmmm no user input\n");
-		return;
-	}
-
-	for (p = buf; isspace(*p); ++p)
-		;
-
-	if (*p == 'd')
-		dump_outstanding(0);
-	else if (*p == 'b') {
-		int queued = 0;
-		for (conn = head; conn; conn = conn->next)
-			++queued;
-		printf("Total %d Got %d Outstanding %d Queued %d\n",
-		       n_comics, gotit, outstanding, queued);
-	} else if (*p)
-		printf("Unexpected command %s", buf);
+	return n_comics != gotit;
 }
 
 int set_conn_socket(struct connection *conn, int sock)
 {
 	int i;
-
-	if (conn->poll) { /* SAM DBG */
-		printf("PROBLEMS! conn->poll set!\n");
-		return 0;
-	}
 
 	for (i = 1; i < npoll; ++i)
 		if (ufds[i].fd == -1) {
@@ -662,50 +409,6 @@ int set_conn_socket(struct connection *conn, int sock)
 	return 0;
 }
 
-void add_comic(struct connection *new)
-{
-	static struct connection *tail;
-
-	if (comics)
-		tail->next = new;
-	else
-		comics = head = new;
-	tail = new;
-	++n_comics;
-}
-
-static void randomize_comics(void)
-{
-	struct connection **array, *tmp;
-	int i, n;
-
-	srand((unsigned)time(NULL));
-
-	array = calloc(n_comics, sizeof(struct connection *));
-	if (!array) {
-		printf("Out of memory\n");
-		exit(1);
-	}
-
-	for (i = 0, tmp = comics; tmp; tmp = tmp->next, ++i)
-		array[i] = tmp;
-
-	for (i = 0; i < n_comics; ++i) {
-		n = (rand() >> 3) % n_comics;
-		tmp = array[i];
-		array[i] = array[n];
-		array[n] = tmp;
-	}
-
-	for (i = 0; i < n_comics - 1; ++i)
-		array[i]->next = array[i + 1];
-	array[i]->next = NULL;
-
-	comics = head = array[0];
-
-	free(array);
-}
-
 char *must_strdup(char *old)
 {
 	char *new = strdup(old);
@@ -716,38 +419,12 @@ char *must_strdup(char *old)
 	return new;
 }
 
-void *must_alloc(int size)
+void *must_calloc(int nmemb, int size)
 {
-	void *new = calloc(1, size);
+	void *new = calloc(nmemb, size);
 	if (!new) {
 		printf("OUT OF MEMORY\n");
 		exit(1);
 	}
 	return new;
-}
-
-/* This is a very lazy checking heuristic since we expect the files to
- * be one of the four formats and well formed. Yes, Close To Home
- * actually used TIFF. TIFF is only tested on little endian machine. */
-char *lazy_imgtype(struct connection *conn)
-{
-	static struct header {
-		char *ext;
-		unsigned char hdr[4];
-	} hdrs[] = {
-		{ ".gif", { 'G', 'I', 'F', '8' } }, /* gif89 and gif87a */
-		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe0 } }, /* jfif */
-		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe1 } }, /* exif */
-		{ ".png", { 0x89, 'P', 'N', 'G' } },
-		{ ".tif", { 'M', 'M', 0, 42 } }, /* big endian */
-		{ ".tif", { 'I', 'I', 42, 0 } }, /* little endian */
-	};
-	int i;
-
-	for (i = 0; i < sizeof(hdrs) / sizeof(struct header); ++i)
-		if (memcmp(conn->curp, hdrs[i].hdr, 4) == 0)
-			return hdrs[i].ext;
-
-	printf("WARNING: Unknown file type %s\n", conn->outname);
-	return ".xxx";
 }

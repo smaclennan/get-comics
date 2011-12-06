@@ -80,12 +80,14 @@ static void add_days(struct connection **conn, char *days)
 
 static void add_regexp(struct connection **conn, char *regexp)
 {
+	static int unique;
+
 	new_comic(conn);
 	(*conn)->regexp = must_strdup(regexp);
 	if ((*conn)->regfname == NULL) {
 		char fname[20];
 
-		sprintf(fname, "index-%08x.html", n_comics);
+		sprintf(fname, "index-%08x.html", ++unique);
 		(*conn)->regfname = must_strdup(fname);
 	}
 }

@@ -37,7 +37,7 @@ int skipped;
 static int resets;
 
 static struct connection *comics;
-int n_comics;
+static int n_comics;
 static int outstanding;
 static int gotit;
 
@@ -458,11 +458,7 @@ int main(int argc, char *argv[])
 #endif
 
 	npoll = thread_limit + 1; /* add one for stdin */
-	ufds = calloc(npoll, sizeof(struct pollfd));
-	if (!ufds) {
-		printf("Out of poll memory\n");
-		exit(1);
-	}
+	ufds = must_calloc(npoll, sizeof(struct pollfd));
 	for (i = 0; i < npoll; ++i)
 		ufds[i].fd = -1;
 
@@ -628,11 +624,7 @@ static void randomize_comics(void)
 
 	srand((unsigned)time(NULL));
 
-	array = calloc(n_comics, sizeof(struct connection *));
-	if (!array) {
-		printf("Out of memory\n");
-		exit(1);
-	}
+	array = must_calloc(n_comics, sizeof(struct connection *));
 
 	for (i = 0, tmp = comics; tmp; tmp = tmp->next, ++i)
 		array[i] = tmp;
@@ -663,38 +655,12 @@ char *must_strdup(char *old)
 	return new;
 }
 
-void *must_alloc(int size)
+void *must_calloc(int nmemb, int size)
 {
-	void *new = calloc(1, size);
+	void *new = calloc(nmemb, size);
 	if (!new) {
 		printf("OUT OF MEMORY\n");
 		exit(1);
 	}
 	return new;
-}
-
-/* This is a very lazy checking heuristic since we expect the files to
- * be one of the four formats and well formed. Yes, Close To Home
- * actually used TIFF. TIFF is only tested on little endian machine. */
-char *lazy_imgtype(struct connection *conn)
-{
-	static struct header {
-		char *ext;
-		unsigned char hdr[4];
-	} hdrs[] = {
-		{ ".gif", { 'G', 'I', 'F', '8' } }, /* gif89 and gif87a */
-		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe0 } }, /* jfif */
-		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe1 } }, /* exif */
-		{ ".png", { 0x89, 'P', 'N', 'G' } },
-		{ ".tif", { 'M', 'M', 0, 42 } }, /* big endian */
-		{ ".tif", { 'I', 'I', 42, 0 } }, /* little endian */
-	};
-	int i;
-
-	for (i = 0; i < sizeof(hdrs) / sizeof(struct header); ++i)
-		if (memcmp(conn->curp, hdrs[i].hdr, 4) == 0)
-			return hdrs[i].ext;
-
-	printf("WARNING: Unknown file type %s\n", conn->outname);
-	return ".xxx";
 }

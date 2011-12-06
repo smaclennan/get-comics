@@ -354,6 +354,33 @@ int read_reply(struct connection *conn)
 	return 0;
 }
 
+
+/* This is a very lazy checking heuristic since we expect the files to
+ * be one of the four formats and well formed. Yes, Close To Home
+ * actually used TIFF. TIFF is only tested on little endian machine. */
+static char *lazy_imgtype(struct connection *conn)
+{
+	static struct header {
+		char *ext;
+		unsigned char hdr[4];
+	} hdrs[] = {
+		{ ".gif", { 'G', 'I', 'F', '8' } }, /* gif89 and gif87a */
+		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe0 } }, /* jfif */
+		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe1 } }, /* exif */
+		{ ".png", { 0x89, 'P', 'N', 'G' } },
+		{ ".tif", { 'M', 'M', 0, 42 } }, /* big endian */
+		{ ".tif", { 'I', 'I', 42, 0 } }, /* little endian */
+	};
+	int i;
+
+	for (i = 0; i < sizeof(hdrs) / sizeof(struct header); ++i)
+		if (memcmp(conn->curp, hdrs[i].hdr, 4) == 0)
+			return hdrs[i].ext;
+
+	printf("WARNING: Unknown file type %s\n", conn->outname);
+	return ".xxx";
+}
+
 /* This is the only place we write to the output file */
 static int write_output(struct connection *conn, int bytes)
 {
