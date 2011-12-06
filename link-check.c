@@ -79,24 +79,26 @@ static void add_url(char *url)
 	++n_comics;
 }
 
-int read_link_file(char *fname)
+static void read_urls(FILE *fp)
 {
-	char line[1024];
-	FILE *fp = fopen(fname, "r");
-	if (!fp) {
-		my_perror(fname);
-		exit(1);
-	}
+	char line[1024], *p;
 
 	while (fgets(line, sizeof(line), fp)) {
-		char *p = strchr(line, '\n');
+		p = strrchr(line, '\n');
 		if (p)
 			*p = '\0';
-
 		add_url(line);
 	}
+}
 
-	fclose(fp);
+static int read_link_file(char *fname)
+{
+	FILE *fp = fopen(fname, "r");
+	if (fp) {
+		read_urls(fp);
+		fclose(fp);
+	} else
+		my_perror(fname);
 
 	return 0;
 }
@@ -179,11 +181,8 @@ int main(int argc, char *argv[])
 
 	method = "HEAD";
 
-	while ((i = getopt(argc, argv, "c:p:t:vT:")) != -1)
+	while ((i = getopt(argc, argv, "p:t:vT:")) != -1)
 		switch ((char)i) {
-		case 'c':
-			read_link_file(optarg);
-			break;
 		case 'p':
 			set_proxy(optarg);
 			break;
@@ -201,17 +200,17 @@ int main(int argc, char *argv[])
 		default:
 			// SAM FIXME
 			puts("usage: link-check [-v]"
-			     "[-c link_file] [-p proxy]");
+			     "[-p proxy]");
 			puts("                  [-t threads] [-T read_timeout]"
-			     "[url ...]");
+			     "[link_file ...]");
 			exit(1);
 		}
 
 	if (optind < argc)
-		while (optind < argc) {
-			add_url(argv[optind]);
-			++optind;
-		}
+		while (optind < argc)
+			read_link_file(argv[optind++]);
+	else
+		read_urls(stdin);
 
 	/* set_proxy will not use this if proxy already set */
 	env = getenv("COMICS_PROXY");
