@@ -54,12 +54,12 @@
 },
 {/* Questionable Content */
   "url": "http://www.questionablecontent.net",
-  "regexp": "http://www.questionablecontent.net/comics/[0-9]*\\.(png|gif)",
+  "regexp": "http://www.questionablecontent.net/comics/[0-9]*\\.(png|gif|jpg)",
   "output": "questionable",
   "days": "XmtwtfX"
 },
 { /* SMBC */
-  "url": "http://www.smbc-comics.com/comics/%Y%m%d.gif",
+  "url": "http://zs1.smbc-comics.com/comics/%Y%m%d.gif",
   "output": "smbc"
 },
 /* Something Positive */
@@ -70,7 +70,7 @@
 },
 {/* xkcd */
   "url": "http://xkcd.com/",
-  "regexp": "http://imgs.xkcd.com/comics/[^.]*\\.(jpg|png)",
+  "regexp": "http://imgs.xkcd.com/comics/[^.]*\\.(jpg|png|gif)",
   "output": "xkcd",
   "days": "XmXwXfX"
 },
@@ -135,6 +135,7 @@
 { "gocomic": "zackhill" },
 { /* Red Meat */
   "url": "http://www.redmeat.com/redmeat/current/index-1.gif",
+  "output": "redmeat",
   "days": "XXXXXfX"
 },
 
