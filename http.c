@@ -11,8 +11,8 @@
 
 /* I am still not 100% certain this is a good idea. So I am leaving it
  * turned off by default.
-#define WANT_RESETS
  */
+#define WANT_RESETS
 
 #ifdef _WIN32
 /* #define errno WSAGetLastError() */
