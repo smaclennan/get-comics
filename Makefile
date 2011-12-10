@@ -12,6 +12,7 @@ CFLAGS += -DWANT_SSL
 
 OBJS    := get-comics.o http.o log.o openssl.o socket.o config.o JSON_parser.o
 LC_OBJS := link-check.o http.o log.o openssl.o socket.o
+HG_OBJS := http-get.o http.o log.o openssl.o socket.o
 
 # Optionaly add openssl
 ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
@@ -29,13 +30,16 @@ QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
 
-all:	get-comics link-check TAGS
+all:	get-comics link-check http-get TAGS
 
 get-comics: $(OBJS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $(OBJS) $(LIBS)
 
 link-check: $(LC_OBJS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o link-check $(LC_OBJS) $(LIBS)
+
+http-get: $(HG_OBJS)
+	$(QUIET_LINK)$(CC) $(CFLAGS) -o http-get $(HG_OBJS) $(LIBS)
 
 TAGS: $(OBJS) $(LC_OBJS)
 	@if [ -x /usr/bin/etags1 ]; then /usr/bin/etags *.c *.h; else touch TAGS; fi
