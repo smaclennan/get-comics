@@ -93,7 +93,7 @@ int fail_connection(struct connection *conn)
 }
 
 /* Fail a redirect. We have already released the connection. */
-int fail_redirect(struct connection *conn)
+static int fail_redirect(struct connection *conn)
 {
 	if (conn->poll)
 		printf("Failed redirect not closed: %s\n", conn->url);
@@ -115,7 +115,6 @@ int reset_connection(struct connection *conn)
 	++conn->reset;
 	if (conn->reset == 1)
 		++resets; /* only count each connection once */
-	printf("RESET CONNECTION %d: %s\n", conn->reset, conn->url); /* SAM DBG */
 	if (conn->reset > 2)
 		return fail_connection(conn);
 
@@ -173,6 +172,28 @@ char *get_proxy(void)
 	return p;
 }
 
+static void add_full_header(struct connection *conn)
+{
+#define FULL_HEADER
+#ifdef FULL_HEADER
+	/* Header strings taken from Firefox. 260 bytes. */
+	int n = strlen(conn->buf);
+
+	n += snprintf(conn->buf, BUFSIZE - n,
+		      "User-Agent: Mozilla/5.0 (X11; Linux i686; rv:6.0.2) "
+		      "Gecko/20100101 Firefox/6.0.2\r\n");
+	n += snprintf(conn->buf, BUFSIZE - n,
+		      "Accept: text/html,application/xhtml+xml,application/"
+		      "xml;q=0.9,*/*;q=0.8\r\n");
+	n += snprintf(conn->buf, BUFSIZE - n,
+		      "Accept-Language: en-us,en;q=0.5\r\n");
+	n += snprintf(conn->buf, BUFSIZE - n,
+		      "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n");
+	n += snprintf(conn->buf, BUFSIZE - n,
+		      "Connection: keep-alive\r\n");
+#endif
+}
+
 int build_request(struct connection *conn)
 {
 	char *url, *host, *p;
@@ -211,7 +232,8 @@ int build_request(struct connection *conn)
 			free(host);
 			return 1;
 		}
-		sprintf(conn->buf, "%s http://%s %s %s\r\n", method, host, url, http);
+		sprintf(conn->buf, "%s http://%s %s %s\r\n",
+			method, host, url, http);
 	} else {
 		char *port = is_https(conn->url) ? "443" : "80";
 
@@ -245,6 +267,8 @@ int build_request(struct connection *conn)
 		} else
 			sprintf(conn->buf, "%s %s %s\r\nHost: %s\r\n",
 				method, url, http, host);
+
+		add_full_header(conn);
 	}
 
 	free(host);
@@ -255,6 +279,7 @@ int build_request(struct connection *conn)
 	if (conn->referer)
 		sprintf(conn->buf + strlen(conn->buf),
 			"Referer: %.200s\r\n", conn->referer);
+
 	strcat(conn->buf, "\r\n");
 
 	conn->curp = conn->buf;
@@ -277,7 +302,8 @@ void write_request(struct connection *conn)
 			return;
 	} else
 #endif
-		n = send(conn->poll->fd, conn->curp, conn->length, MSG_NOSIGNAL);
+		n = send(conn->poll->fd, conn->curp, conn->length,
+			 MSG_NOSIGNAL);
 
 	if (n == conn->length) {
 		if (verbose > 2)

@@ -1,7 +1,9 @@
 #!/bin/sh
 
+# By running the files one at a time we get around the
+# get-comics/link_check function redeclaration warnings
 echo "Running sparse on files..."
-sparse *.[ch]
+for f in *.[ch]; do sparse $f; done
 
 echo "Running checkpatch on files..."
 for f in *.[ch]; do

@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 
 	method = "HEAD";
 
-	while ((i = getopt(argc, argv, "p:t:vT:")) != -1)
+	while ((i = getopt(argc, argv, "hp:t:vT:")) != -1)
 		switch ((char)i) {
 		case 'p':
 			set_proxy(optarg);
@@ -198,11 +198,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'h':
 		default:
-			// SAM FIXME
-			puts("usage: link-check [-v]"
-			     "[-p proxy]");
-			puts("                  [-t threads] [-T read_timeout]"
-			     "[link_file ...]");
+			puts("usage: link-check [-dv] [-p proxy]"
+			     " [-t threads] [-T timeout]"
+			     " [link_file ...]");
 			exit(1);
 		}
 
