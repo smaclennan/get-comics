@@ -34,6 +34,7 @@ int gotit;
 static int read_file(struct connection *conn);
 static int read_file_unsized(struct connection *conn);
 static int read_file_chunked(struct connection *conn);
+static int read_file_gzip(struct connection *conn);
 
 
 /* This is only for 2 stage comics and redirects */
@@ -506,8 +507,8 @@ int read_reply(struct connection *conn)
 		conn->cstate = CS_DIGITS;
 		NEXT_STATE(conn, read_file_chunked);
 		conn->length = 0; /* paranoia */
-	} else if (gzipped) {
-		NEXT_STATE(conn, ungzip_file);
+	} else if (gzip) {
+		NEXT_STATE(conn, read_file_gzip);
 	} else if (conn->length == 0)
 		NEXT_STATE(conn, read_file_unsized);
 	else
@@ -695,6 +696,13 @@ static int read_file_chunked(struct connection *conn)
 	return 0;
 }
 
+
+/* State function */
+static int read_file_gzip(struct connection *conn)
+{
+	printf("NOT SUPPORTED\n");
+	exit(1);
+}
 
 /* State function */
 static int read_file_unsized(struct connection *conn)
