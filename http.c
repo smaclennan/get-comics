@@ -34,7 +34,10 @@ int gotit;
 static int read_file(struct connection *conn);
 static int read_file_unsized(struct connection *conn);
 static int read_file_chunked(struct connection *conn);
+#ifdef WANT_GZIP
+static int gzip_init(struct connection *conn);
 static int read_file_gzip(struct connection *conn);
+#endif
 
 
 /* This is only for 2 stage comics and redirects */
@@ -191,7 +194,7 @@ static void add_full_header(struct connection *conn)
 	n += snprintf(conn->buf + n, BUFSIZE - n,
 		      "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n");
 
-#if 1
+#ifdef WANT_GZIP
 	n += snprintf(conn->buf + n, BUFSIZE - n,
 		      "Accept-Encoding: gzip, deflate\r\n");
 #endif
@@ -382,7 +385,6 @@ int read_reply(struct connection *conn)
 	char *p, *fname;
 	int status = 1;
 	int chunked = 0;
-	int gzip = 0;
 	int needopen = 1;
 
 	p = strstr(conn->buf, "\n\r\n");
@@ -445,9 +447,15 @@ int read_reply(struct connection *conn)
 			while (isspace(*p))
 				++p;
 			if (strncmp(p, "gzip", 4) == 0) {
+#ifdef WANT_GZIP
 				if (verbose > 1)
 					printf("GZIP\n");
-				gzip = 1;
+				if (gzip_init(conn))
+					return 1;
+#else
+				printf("No GZIP support\n");
+				return 1;
+#endif
 			} else
 				printf("OH oh. %s: %s", conn->host, p);
 		}
@@ -507,8 +515,10 @@ int read_reply(struct connection *conn)
 		conn->cstate = CS_DIGITS;
 		NEXT_STATE(conn, read_file_chunked);
 		conn->length = 0; /* paranoia */
-	} else if (gzip) {
+#ifdef WANT_GZIP
+	} else if (conn->zs) {
 		NEXT_STATE(conn, read_file_gzip);
+#endif
 	} else if (conn->length == 0)
 		NEXT_STATE(conn, read_file_unsized);
 	else
@@ -562,7 +572,10 @@ static int write_output(struct connection *conn, int bytes)
 			printf("Output %s -> %s\n", conn->url, conn->outname);
 	}
 
-	if (write(conn->out, conn->curp, bytes) != bytes)
+	if (conn->zs) {
+		if (write(conn->out, conn->zs_buf, bytes) != bytes)
+			return 0;
+	} else if (write(conn->out, conn->curp, bytes) != bytes)
 		return 0;
 
 	return bytes;
@@ -696,13 +709,106 @@ static int read_file_chunked(struct connection *conn)
 	return 0;
 }
 
+#ifdef WANT_GZIP
+static int gzip_init(struct connection *conn)
+{
+	conn->zs = calloc(1, sizeof(z_stream));
+	if (!conn->zs) {
+		printf("Out of memory\n");
+		return 1;
+	}
+
+	conn->zs_buf = malloc(BUFSIZE);
+	if (!conn->zs_buf) {
+		printf("Out of memory\n");
+		return 1;
+	}
+
+	if (inflateInit2(conn->zs, 15 + 32)) {
+		printf("inflateInit failed\n");
+		free(conn->zs_buf);
+		free(conn->zs);
+		conn->zs = NULL;
+		return 1;
+	}
+
+//	conn->zs->data_type = Z_TEXT;
+
+	return 0;
+}
 
 /* State function */
 static int read_file_gzip(struct connection *conn)
 {
-	printf("NOT SUPPORTED\n");
-	exit(1);
+	z_stream *zs = conn->zs;
+	size_t bytes, zs_bytes;
+	int rc;
+
+	bytes = conn->endp - conn->curp;
+	if (bytes > 0) {
+		printf("==> next_in %p avail_in %u total_in %lu\n",
+		       zs->next_in, zs->avail_in, zs->total_in);
+		printf("    next_out %p avail_out %u total_out %lu\n",
+		       zs->next_out, zs->avail_out, zs->total_out);
+
+		zs->next_in = (unsigned char *)conn->curp;
+		zs->avail_in = conn->endp - conn->curp;
+
+		do {
+			zs->next_out = conn->zs_buf;
+			zs->avail_out = BUFSIZE;
+
+
+			rc = inflate(zs, Z_SYNC_FLUSH);
+
+			printf("--> next_in %p avail_in %u total_in %lu\n",
+			       zs->next_in, zs->avail_in, zs->total_in);
+			printf("    next_out %p avail_out %u total_out %lu\n",
+			       zs->next_out, zs->avail_out, zs->total_out);
+			printf("rc %d\n", rc);
+
+			if (rc == Z_BUF_ERROR)
+				break; /* not fatal */
+
+			if (rc == Z_OK || rc == Z_STREAM_END) {
+				zs_bytes = BUFSIZE - zs->avail_out;
+
+				if (!write_output(conn, zs_bytes)) {
+					printf("Write error\n");
+					return 1;
+				}
+			} else {
+#if 0
+				int fd = open("/tmp/http-dump", O_WRONLY|O_TRUNC|O_CREAT, 0666);
+				write(fd, conn->curp, bytes);
+				close(fd);
+#endif
+				printf("Inflate failed: %d\n", rc);
+				return 1;
+			}
+		} while (zs->avail_out == 0);
+
+
+		conn->length -= bytes;
+		if (conn->length <= 0) {
+			if (verbose)
+				printf("OK %s\n", conn->url);
+			if (conn->regexp && !conn->matched)
+				return process_html(conn);
+			close_connection(conn);
+			return 0;
+		}
+	} else {
+		printf("Read file problems %d for %s!\n",
+		       bytes, conn->url);
+		return 1;
+	}
+
+	conn->curp = conn->buf;
+	conn->rlen = conn->bufn;
+	return 0;
 }
+#endif
 
 /* State function */
 static int read_file_unsized(struct connection *conn)

@@ -12,6 +12,10 @@
 #include <sys/time.h>
 #include <sys/poll.h>
 #include <sys/socket.h>
+
+# ifdef WANT_GZIP
+# include <zlib.h>
+# endif
 #endif
 #include <sys/stat.h>
 
@@ -75,6 +79,10 @@ struct connection {
 	int  rlen;
 	char *curp; /* for chunking */
 	char *endp; /* for chunking */
+#ifdef WANT_GZIP
+	z_stream *zs; /* for gzip */
+	unsigned char *zs_buf; /* for gzip */
+#endif
 	int  length; /* content length if available */
 	enum {
 		CS_NONE,

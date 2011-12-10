@@ -10,6 +10,9 @@ CFLAGS += -DLOGGING
 # Comment in to enable https via openssl
 CFLAGS += -DWANT_SSL
 
+# Comment in to enable gzip encoding
+CFLAGS += -DWANT_GZIP
+
 OBJS    := get-comics.o http.o log.o openssl.o socket.o config.o JSON_parser.o
 LC_OBJS := link-check.o http.o log.o openssl.o socket.o
 HG_OBJS := http-get.o http.o log.o openssl.o socket.o
@@ -17,6 +20,11 @@ HG_OBJS := http-get.o http.o log.o openssl.o socket.o
 # Optionaly add openssl
 ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
 LIBS += -lssl
+endif
+
+# Optionaly add gzip
+ifneq ($(findstring WANT_GZIP,$(CFLAGS)),)
+LIBS += -lz
 endif
 
 #
