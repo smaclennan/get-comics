@@ -167,8 +167,6 @@ static void read_conn(struct connection *conn)
 		conn->rlen -= n;
 		*conn->endp = '\0';
 
-		fputs(conn->curp, stdout);
-
 		if (conn->func && conn->func(conn))
 			fail_connection(conn);
 	} else if (n < 0)

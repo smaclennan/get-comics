@@ -34,10 +34,8 @@ int gotit;
 static int read_file(struct connection *conn);
 static int read_file_unsized(struct connection *conn);
 static int read_file_chunked(struct connection *conn);
-#ifdef WANT_GZIP
 static int gzip_init(struct connection *conn);
 static int read_file_gzip(struct connection *conn);
-#endif
 
 
 /* This is only for 2 stage comics and redirects */
@@ -62,6 +60,14 @@ int release_connection(struct connection *conn)
 	conn->func = NULL;
 
 	conn->connected = 0;
+
+	if (conn->zs) {
+		inflateEnd(conn->zs);
+		free(conn->zs);
+		conn->zs = NULL;
+		if (conn->zs_buf)
+			free(conn->zs_buf);
+	}
 
 	return 0;
 }
@@ -193,12 +199,14 @@ static void add_full_header(struct connection *conn)
 		      "Accept-Language: en-us,en;q=0.5\r\n");
 	n += snprintf(conn->buf + n, BUFSIZE - n,
 		      "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n");
+#endif
 
 #ifdef WANT_GZIP
 	n += snprintf(conn->buf + n, BUFSIZE - n,
 		      "Accept-Encoding: gzip, deflate\r\n");
 #endif
 
+#ifdef FULL_HEADER
 	n += snprintf(conn->buf + n, BUFSIZE - n,
 		      "Connection: keep-alive\r\n");
 #endif
@@ -447,15 +455,10 @@ int read_reply(struct connection *conn)
 			while (isspace(*p))
 				++p;
 			if (strncmp(p, "gzip", 4) == 0) {
-#ifdef WANT_GZIP
 				if (verbose > 1)
 					printf("GZIP\n");
 				if (gzip_init(conn))
 					return 1;
-#else
-				printf("No GZIP support\n");
-				return 1;
-#endif
 			} else
 				printf("OH oh. %s: %s", conn->host, p);
 		}
@@ -515,10 +518,8 @@ int read_reply(struct connection *conn)
 		conn->cstate = CS_DIGITS;
 		NEXT_STATE(conn, read_file_chunked);
 		conn->length = 0; /* paranoia */
-#ifdef WANT_GZIP
 	} else if (conn->zs) {
 		NEXT_STATE(conn, read_file_gzip);
-#endif
 	} else if (conn->length == 0)
 		NEXT_STATE(conn, read_file_unsized);
 	else
@@ -724,15 +725,10 @@ static int gzip_init(struct connection *conn)
 		return 1;
 	}
 
-	if (inflateInit2(conn->zs, 15 + 32)) {
-		printf("inflateInit failed\n");
-		free(conn->zs_buf);
-		free(conn->zs);
-		conn->zs = NULL;
+	/* Window size 15 is default for zlib. Adding 32 allows us to
+	 * handle gzip format. */
+	if (inflateInit2(conn->zs, 15 + 32))
 		return 1;
-	}
-
-//	conn->zs->data_type = Z_TEXT;
 
 	return 0;
 }
@@ -741,72 +737,70 @@ static int gzip_init(struct connection *conn)
 static int read_file_gzip(struct connection *conn)
 {
 	z_stream *zs = conn->zs;
-	size_t bytes, zs_bytes;
+	size_t bytes;
 	int rc;
 
 	bytes = conn->endp - conn->curp;
-	if (bytes > 0) {
-		printf("==> next_in %p avail_in %u total_in %lu\n",
-		       zs->next_in, zs->avail_in, zs->total_in);
-		printf("    next_out %p avail_out %u total_out %lu\n",
-		       zs->next_out, zs->avail_out, zs->total_out);
+	if (bytes <= 0) {
+		printf("Read file problems %d for %s!\n", bytes, conn->url);
+		return 1;
+	}
 
-		zs->next_in = (unsigned char *)conn->curp;
-		zs->avail_in = conn->endp - conn->curp;
+	zs->next_in = (unsigned char *)conn->curp;
+	zs->avail_in = bytes;
 
-		do {
-			zs->next_out = conn->zs_buf;
-			zs->avail_out = BUFSIZE;
+	/* Inflate and write all output until we are done with the
+	 * input buffer. */
+	/* SAM Should we do one write then switch to another state? */
+	do {
+		zs->next_out = conn->zs_buf;
+		zs->avail_out = BUFSIZE;
 
+		rc = inflate(zs, Z_SYNC_FLUSH);
 
-			rc = inflate(zs, Z_SYNC_FLUSH);
+		switch (rc) {
+		case Z_BUF_ERROR:
+			break; /* not a problem */
 
-			printf("--> next_in %p avail_in %u total_in %lu\n",
-			       zs->next_in, zs->avail_in, zs->total_in);
-			printf("    next_out %p avail_out %u total_out %lu\n",
-			       zs->next_out, zs->avail_out, zs->total_out);
-			printf("rc %d\n", rc);
-
-			if (rc == Z_BUF_ERROR)
-				break; /* not fatal */
-
-			if (rc == Z_OK || rc == Z_STREAM_END) {
-				zs_bytes = BUFSIZE - zs->avail_out;
-
-				if (!write_output(conn, zs_bytes)) {
-					printf("Write error\n");
-					return 1;
-				}
-			} else {
-#if 0
-				int fd = open("/tmp/http-dump", O_WRONLY|O_TRUNC|O_CREAT, 0666);
-				write(fd, conn->curp, bytes);
-				close(fd);
-#endif
-				printf("Inflate failed: %d\n", rc);
+		case Z_OK:
+		case Z_STREAM_END:
+			if (!write_output(conn, BUFSIZE - zs->avail_out)) {
+				printf("Write error\n");
 				return 1;
 			}
-		} while (zs->avail_out == 0);
+			break;
 
-
-		conn->length -= bytes;
-		if (conn->length <= 0) {
-			if (verbose)
-				printf("OK %s\n", conn->url);
-			if (conn->regexp && !conn->matched)
-				return process_html(conn);
-			close_connection(conn);
-			return 0;
+		default:
+			printf("Inflate failed: %d\n", rc);
+			return 1;
 		}
-	} else {
-		printf("Read file problems %d for %s!\n",
-		       bytes, conn->url);
-		return 1;
+	} while (zs->avail_out == 0);
+
+
+	conn->length -= bytes;
+	if (conn->length <= 0 || rc == Z_STREAM_END) {
+		if (verbose)
+			printf("OK %s\n", conn->url);
+		if (conn->regexp && !conn->matched)
+			return process_html(conn);
+		close_connection(conn);
+		return 0;
 	}
 
 	conn->curp = conn->buf;
 	conn->rlen = conn->bufn;
 	return 0;
+}
+#else
+static int gzip_init(struct connection *conn)
+{
+	puts("Sorry, no GZIP support.");
+	return 1;
+}
+
+static int read_file_gzip(struct connection *conn)
+{
+	return 1;
 }
 #endif
 

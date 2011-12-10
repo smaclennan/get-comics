@@ -12,12 +12,17 @@
 #include <sys/time.h>
 #include <sys/poll.h>
 #include <sys/socket.h>
-
-# ifdef WANT_GZIP
-# include <zlib.h>
-# endif
 #endif
 #include <sys/stat.h>
+
+
+#ifdef WANT_GZIP
+#include <zlib.h>
+#else
+#define z_stream void
+static inline int inflateEnd(void *strm) { return -1; }
+#endif
+
 
 #define HTTP_PORT		80
 #define JSON_FILE		"/usr/share/get-comics/comics.json"
@@ -55,6 +60,7 @@ struct log {
 	int failed;
 };
 
+
 struct connection {
 	char *url;
 	char *host; /* filled by read_config */
@@ -79,10 +85,8 @@ struct connection {
 	int  rlen;
 	char *curp; /* for chunking */
 	char *endp; /* for chunking */
-#ifdef WANT_GZIP
 	z_stream *zs; /* for gzip */
 	unsigned char *zs_buf; /* for gzip */
-#endif
 	int  length; /* content length if available */
 	enum {
 		CS_NONE,
