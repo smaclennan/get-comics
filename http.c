@@ -179,6 +179,24 @@ static void add_full_header(struct connection *conn)
 	/* Header strings taken from Firefox. 260 bytes. */
 	int n = strlen(conn->buf);
 
+	n += snprintf(conn->buf + n, BUFSIZE - n,
+		      "User-Agent: Mozilla/5.0 (X11; Linux i686; rv:6.0.2) "
+		      "Gecko/20100101 Firefox/6.0.2\r\n");
+	n += snprintf(conn->buf + n, BUFSIZE - n,
+		      "Accept: text/html,application/xhtml+xml,application/"
+		      "xml;q=0.9,*/*;q=0.8\r\n");
+	n += snprintf(conn->buf + n, BUFSIZE - n,
+		      "Accept-Language: en-us,en;q=0.5\r\n");
+	n += snprintf(conn->buf + n, BUFSIZE - n,
+		      "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n");
+
+#if 0
+	n += snprintf(conn->buf + n, BUFSIZE - n,
+		      "Accept-Encoding: gzip, deflate\r\n");
+#endif
+
+	n += snprintf(conn->buf + n, BUFSIZE - n,
+		      "Connection: keep-alive\r\n");
 	n += snprintf(conn->buf, BUFSIZE - n,
 		      "User-Agent: Mozilla/5.0 (X11; Linux i686; rv:6.0.2) "
 		      "Gecko/20100101 Firefox/6.0.2\r\n");
