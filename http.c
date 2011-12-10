@@ -751,7 +751,6 @@ static int read_file_gzip(struct connection *conn)
 
 	/* Inflate and write all output until we are done with the
 	 * input buffer. */
-	/* SAM Should we do one write then switch to another state? */
 	do {
 		zs->next_out = conn->zs_buf;
 		zs->avail_out = BUFSIZE;
