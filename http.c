@@ -490,6 +490,12 @@ int read_reply(struct connection *conn)
 		return 0;
 	}
 
+	if (chunked == 1 && conn->zs) {
+		puts("Warning: We currently do not support chunked and gzip");
+		fail_connection(conn);
+		return 0;
+	}
+
 	if (conn->regexp && !conn->matched)
 		fname = conn->regfname;
 	else if (conn->outname == NULL) {
