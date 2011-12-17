@@ -40,6 +40,7 @@ static int read_file_unsized(struct connection *conn);
 static int read_file_chunked(struct connection *conn);
 static int gzip_init(struct connection *conn);
 static int read_file_gzip(struct connection *conn);
+static int write_output_gzipped(struct connection *conn, size_t bytes);
 
 
 /* This is only for 2 stage comics and redirects */
@@ -490,12 +491,6 @@ int read_reply(struct connection *conn)
 		return 0;
 	}
 
-	if (chunked == 1 && conn->zs) {
-		puts("Warning: We currently do not support chunked and gzip");
-		fail_connection(conn);
-		return 0;
-	}
-
 	if (conn->regexp && !conn->matched)
 		fname = conn->regfname;
 	else if (conn->outname == NULL) {
@@ -603,7 +598,12 @@ static int read_chunkblock(struct connection *conn)
 		bytes = conn->length;
 
 	if (bytes > 0) {
-		if (!write_output(conn, bytes)) {
+		if (conn->zs) {
+			if (write_output_gzipped(conn, bytes) < 0) {
+				printf("Gzipped write error\n");
+				return 1;
+			}
+		} else if (!write_output(conn, bytes)) {
 			printf("Write error\n");
 			return 1;
 		}
@@ -743,19 +743,10 @@ static int gzip_init(struct connection *conn)
 	return 0;
 }
 
-/* State function */
-static int read_file_gzip(struct connection *conn)
+static int write_output_gzipped(struct connection *conn, size_t bytes)
 {
-	z_stream *zs = conn->zs;
-	size_t bytes;
 	int rc;
-
-	bytes = conn->endp - conn->curp;
-	if (bytes <= 0) {
-		printf("Read file problems %d for %s!\n", bytes, conn->url);
-		return 1;
-	}
-
+	z_stream *zs = conn->zs;
 	zs->next_in = (unsigned char *)conn->curp;
 	zs->avail_in = bytes;
 
@@ -775,16 +766,34 @@ static int read_file_gzip(struct connection *conn)
 		case Z_STREAM_END:
 			if (!write_output(conn, BUFSIZE - zs->avail_out)) {
 				printf("Write error\n");
-				return 1;
+				return rc;
 			}
 			break;
 
 		default:
 			printf("Inflate failed: %d\n", rc);
-			return 1;
+			return -1;
 		}
 	} while (zs->avail_out == 0);
 
+	return rc;
+}
+
+/* State function */
+static int read_file_gzip(struct connection *conn)
+{
+	size_t bytes;
+	int rc;
+
+	bytes = conn->endp - conn->curp;
+	if (bytes <= 0) {
+		printf("Read file problems %d for %s!\n", bytes, conn->url);
+		return 1;
+	}
+
+	rc = write_output_gzipped(conn, bytes);
+	if (rc < 0)
+		return 1;
 
 	conn->length -= bytes;
 	if (conn->length <= 0 || rc == Z_STREAM_END) {
@@ -810,6 +819,11 @@ static int gzip_init(struct connection *conn)
 static int read_file_gzip(struct connection *conn)
 {
 	return 1;
+}
+
+static int write_output_gzipped(struct connection *conn, size_t bytes)
+{
+	return -1;
 }
 #endif
 
