@@ -118,6 +118,7 @@ extern int randomize;
 
 extern int outstanding;
 extern int gotit;
+extern int resets;
 
 extern const char *method;
 

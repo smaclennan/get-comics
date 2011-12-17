@@ -29,7 +29,6 @@ int read_timeout = SOCKET_TIMEOUT;
 
 char *comics_dir;
 int skipped;
-static int resets;
 
 static struct connection *comics;
 static int n_comics;
@@ -37,7 +36,6 @@ static int n_comics;
 static struct connection *head;
 
 static int unlink_index = 1;
-int verbose;
 int thread_limit = THREAD_LIMIT;
 int randomize;
 static FILE *links_only;

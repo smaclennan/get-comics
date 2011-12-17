@@ -27,21 +27,12 @@
 
 int read_timeout = SOCKET_TIMEOUT;
 
-int skipped;
-static int resets;
-
 static struct connection *comics;
 static int n_comics;
 
 static struct connection *head;
 
-int verbose;
 int thread_limit = THREAD_LIMIT;
-
-/* If the user specified this on the command line we do not want the
- * config file to override */
-int threads_set;
-
 
 static struct pollfd *ufds;
 static int npoll;
@@ -186,7 +177,6 @@ int main(int argc, char *argv[])
 			break;
 		case 't':
 			thread_limit = strtol(optarg, NULL, 0);
-			threads_set = 1;
 			break;
 		case 'v':
 			verbose++;
@@ -269,7 +259,7 @@ int main(int argc, char *argv[])
 			}
 	}
 
-	printf("Got %d of %d (%d skipped)\n", gotit, n_comics, skipped);
+	printf("Got %d of %d\n", gotit, n_comics);
 	if (resets)
 		printf("\t%d reset\n", resets);
 

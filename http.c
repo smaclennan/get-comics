@@ -26,8 +26,11 @@ static char *proxy_port = "3128";
 
 static char *http = "HTTP/1.1";
 
+int verbose;
+
 int outstanding;
 int gotit;
+int resets;
 
 #define MIN(a, b)	((a) < (b) ? (a) : (b))
 
