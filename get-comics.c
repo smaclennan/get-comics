@@ -31,7 +31,6 @@ char *comics_dir;
 int skipped;
 
 static struct connection *comics;
-static int n_comics;
 
 static struct connection *head;
 
@@ -410,18 +409,7 @@ int main(int argc, char *argv[])
 	if (links_only)
 		fclose(links_only);
 
-	printf("Got %d of %d (%d skipped)\n", gotit, n_comics, skipped);
-	if (resets)
-		printf("\t%d reset\n", resets);
-
-	/* Dump the missed comics */
-	for (conn = comics; conn; conn = conn->next)
-		if (!conn->gotit) {
-			if (conn->outname)
-				printf("  %s (%s)\n", conn->url, conn->outname);
-			else
-				printf("  %s\n", conn->url);
-		}
+	out_results(comics, skipped);
 
 	return 0;
 }

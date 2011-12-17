@@ -30,7 +30,8 @@ int verbose;
 
 int outstanding;
 int gotit;
-int resets;
+int n_comics;
+static int resets;
 
 #define MIN(a, b)	((a) < (b) ? (a) : (b))
 
@@ -881,4 +882,24 @@ void *must_calloc(int nmemb, int size)
 		exit(1);
 	}
 	return new;
+}
+
+void out_results(struct connection *conn, int skipped)
+{
+	printf("Got %d of %d", gotit, n_comics);
+	if (skipped)
+		printf(" (Skipped %d)", skipped);
+	if (resets)
+		printf(" (Reset %d)", resets);
+	putchar('\n');
+
+	/* Dump the missed comics */
+	for ( ; conn; conn = conn->next)
+		if (!conn->gotit) {
+			if (conn->outname)
+				printf("  %s (%s)\n", conn->url, conn->outname);
+			else
+				printf("  %s\n", conn->url);
+		}
+
 }

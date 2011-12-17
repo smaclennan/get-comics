@@ -109,6 +109,7 @@ struct connection {
 };
 
 extern char *comics_dir;
+extern int n_comics;
 extern int skipped;
 extern int verbose;
 extern int thread_limit;
@@ -118,7 +119,6 @@ extern int randomize;
 
 extern int outstanding;
 extern int gotit;
-extern int resets;
 
 extern const char *method;
 
@@ -189,6 +189,7 @@ char *get_proxy(void);
 void write_request(struct connection *conn);
 int read_reply(struct connection *conn);
 int build_request(struct connection *conn);
+void out_results(struct connection *comics, int skipped);
 
 /* export from socket.c */
 int connect_socket(struct connection *conn, char *hostname, char *port);
