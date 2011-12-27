@@ -756,7 +756,7 @@ static int gzip_init(struct connection *conn)
 
 static int write_output_gzipped(struct connection *conn, size_t bytes)
 {
-	int rc;
+	int rc, sz;
 	z_stream *zs = conn->zs;
 	zs->next_in = (unsigned char *)conn->curp;
 	zs->avail_in = bytes;
@@ -775,7 +775,10 @@ static int write_output_gzipped(struct connection *conn, size_t bytes)
 
 		case Z_OK:
 		case Z_STREAM_END:
-			if (!write_output(conn, BUFSIZE - zs->avail_out))
+			sz = BUFSIZE - zs->avail_out;
+			if (sz <= 0)
+				return rc;
+			if (!write_output(conn, sz))
 				return -1;
 			break;
 
