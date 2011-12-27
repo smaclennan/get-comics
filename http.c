@@ -566,23 +566,36 @@ static char *lazy_imgtype(struct connection *conn)
 /* This is the only place we write to the output file */
 static int write_output(struct connection *conn, int bytes)
 {
+	int n;
+
 	if (conn->out == -1) { /* deferred open */
 		/* We alloced space for the extension in add_outname */
 		strcat(conn->outname, lazy_imgtype(conn));
 
 		conn->out = open(conn->outname, WRITE_FLAGS, 0664);
-		if (conn->out < 0)
+		if (conn->out < 0) {
+			my_perror(conn->outname);
 			return 0;
+		}
 
 		if (verbose > 1)
 			printf("Output %s -> %s\n", conn->url, conn->outname);
 	}
 
-	if (conn->zs) {
-		if (write(conn->out, conn->zs_buf, bytes) != bytes)
-			return 0;
-	} else if (write(conn->out, conn->curp, bytes) != bytes)
+	if (conn->zs)
+		n = write(conn->out, conn->zs_buf, bytes);
+	else
+		n = write(conn->out, conn->curp, bytes);
+
+	if (n != bytes) {
+		if (n < 0)
+			printf("%s: Write error: %s\n",
+			       conn->outname, strerror(errno));
+		else
+			printf("%s: Write error: %d/%d\n",
+			       conn->outname, n, bytes);
 		return 0;
+	}
 
 	return bytes;
 }
@@ -603,10 +616,8 @@ static int read_chunkblock(struct connection *conn)
 				printf("Gzipped write error\n");
 				return 1;
 			}
-		} else if (!write_output(conn, bytes)) {
-			printf("Write error\n");
+		} else if (!write_output(conn, bytes))
 			return 1;
-		}
 	}
 
 	if (bytes >= 0) {
@@ -764,10 +775,8 @@ static int write_output_gzipped(struct connection *conn, size_t bytes)
 
 		case Z_OK:
 		case Z_STREAM_END:
-			if (!write_output(conn, BUFSIZE - zs->avail_out)) {
-				printf("Write error\n");
-				return rc;
-			}
+			if (!write_output(conn, BUFSIZE - zs->avail_out))
+				return -1;
 			break;
 
 		default:
@@ -834,10 +843,8 @@ static int read_file_unsized(struct connection *conn)
 
 	bytes = conn->endp - conn->curp;
 	if (bytes > 0) {
-		if (!write_output(conn, bytes)) {
-			printf("Write error\n");
+		if (!write_output(conn, bytes))
 			return 1;
-		}
 	} else {
 		if (verbose)
 			printf("OK %s\n", conn->url);
@@ -860,10 +867,8 @@ static int read_file(struct connection *conn)
 
 	bytes = conn->endp - conn->curp;
 	if (bytes > 0) {
-		if (!write_output(conn, bytes)) {
-			printf("Write error\n");
+		if (!write_output(conn, bytes))
 			return 1;
-		}
 		conn->length -= bytes;
 		if (conn->length <= 0) {
 			if (verbose)
