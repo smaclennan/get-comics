@@ -9,11 +9,6 @@
  *   - rudimentary https support
  */
 
-/* I am still not 100% certain this is a good idea. So I am leaving it
- * turned off by default.
- */
-#define WANT_RESETS
-
 #ifdef _WIN32
 /* #define errno WSAGetLastError() */
 #define EINPROGRESS WSAEWOULDBLOCK
@@ -126,7 +121,6 @@ static int fail_redirect(struct connection *conn)
 /* Reset connection - try again */
 int reset_connection(struct connection *conn)
 {
-#ifdef WANT_RESETS
 	++conn->reset;
 	if (conn->reset == 1)
 		++resets; /* only count each connection once */
@@ -137,10 +131,6 @@ int reset_connection(struct connection *conn)
 
 	if (build_request(conn))
 		return fail_connection(conn);
-#else
-	printf("Read error %s: %d\n", conn->url, errno);
-	fail_connection(conn);
-#endif
 
 	return 0;
 }
