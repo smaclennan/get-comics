@@ -12,6 +12,8 @@
 #ifdef _WIN32
 /* #define errno WSAGetLastError() */
 #define EINPROGRESS WSAEWOULDBLOCK
+/* Windows doesn't support this. */
+#define MSG_NOSIGNAL 0
 #endif
 
 const char *method = "GET";
