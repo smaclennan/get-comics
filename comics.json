@@ -48,8 +48,8 @@
   "url": "http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.gif"
 },
 { /* PVP */
-  "url": "http://www.pvponline.com/",
-  "regexp": "http://www.pvponline.com/comics/pvp[0-9]+[a-z]*\\.(gif|png)",
+  "url": "http://www.pvponline.com/comic/",
+  "regexp": "http://[^.]+.pvponline.com/img/comic/pvp[0-9]+[a-z]*\\.(jpg|gif|png)",
   "output": "pvp"
 },
 {/* Questionable Content */
