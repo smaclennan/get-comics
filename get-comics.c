@@ -471,11 +471,6 @@ int set_conn_socket(struct connection *conn, int sock)
 {
 	int i;
 
-	if (conn->poll) { /* SAM DBG */
-		printf("PROBLEMS! conn->poll set!\n");
-		return 0;
-	}
-
 	for (i = 1; i < npoll; ++i)
 		if (ufds[i].fd == -1) {
 			conn->poll = &ufds[i];

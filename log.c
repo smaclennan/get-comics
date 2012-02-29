@@ -34,8 +34,6 @@ void log_add(struct connection *conn, char *fmt, ...)
 		log->events = new;
 	}
 
-	/* SAM timestamp? */
-
 	va_start(ap, fmt);
 	vsnprintf(txt, sizeof(txt), fmt, ap);
 	va_end(ap);
