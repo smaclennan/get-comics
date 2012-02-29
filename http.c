@@ -352,7 +352,9 @@ static int redirect(struct connection *conn, int status)
 			while (isspace(*(e - 1)))
 				--e;
 			*e = '\0';
-			printf("WARNING: %s redirected to %s\n", conn->url, p);
+			if (!conn->redirect_ok || verbose > 1)
+				printf("WARNING: %s redirected to %s\n",
+				       conn->url, p);
 			release_connection(conn);
 			free(conn->url);
 

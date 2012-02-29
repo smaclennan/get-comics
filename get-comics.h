@@ -74,6 +74,7 @@ struct connection {
 	unsigned days; /* bitmask */
 	int   gotit;
 	int reset;
+	int redirect_ok;
 
 	struct pollfd *poll;
 	int connected;

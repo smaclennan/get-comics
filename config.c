@@ -138,6 +138,12 @@ static void add_gocomic(struct connection **conn, char *comic)
 	add_outname(conn, comic);
 }
 
+static void add_redirect(struct connection **conn, int val)
+{
+	new_comic(conn);
+	(*conn)->redirect_ok = val;
+}
+
 static char s_key[80];
 static int s_iskey;
 
@@ -207,6 +213,8 @@ static void parse_comic_int(char *key, int val)
 
 	if (strcmp(key, "regmatch") == 0)
 		add_regmatch(&new, val);
+	else if (strcmp(key, "redirect") == 0)
+		add_redirect(&new, val);
 	else
 		printf("Unexpected entry %s\n", key);
 }
