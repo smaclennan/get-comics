@@ -185,9 +185,11 @@ int main(int argc, char *argv[])
 			break;
 		case 'h':
 		default:
-			puts("usage: link-check [-dv] [-p proxy]"
+			puts("usage: http-get [-v] [-p proxy]"
 			     " [-t threads] [-T timeout]"
 			     " [link_file ...]");
+			puts("\nIf no link_files are specified, "
+			     "read urls from stdin.");
 			exit(1);
 		}
 
