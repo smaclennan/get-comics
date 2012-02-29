@@ -408,7 +408,8 @@ int read_reply(struct connection *conn)
 		conn->curp = conn->endp;
 		return 0;
 	} else {
-		/* I have never seen this happen */
+		/* I have seen this once: the reply did not contain
+		 * CRs, just LFs */
 		printf("REPLY TOO LONG %s\n", conn->url);
 		return 1;
 	}
