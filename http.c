@@ -615,23 +615,17 @@ static int read_chunkblock(struct connection *conn)
 			return 1;
 	}
 
-	if (bytes >= 0) {
-		conn->length -= bytes;
-		if (conn->length <= 0) {
-			if (verbose > 1)
-				printf("Read block\n");
-			conn->curp += bytes;
-			conn->length = 0;
-			conn->cstate = CS_START_CR;
-			NEXT_STATE(conn, read_file_chunked);
-			if (conn->endp > conn->curp)
-				return read_file_chunked(conn);
-			return 0;
-		}
-	} else {
-		printf("Read chunk file problems %d for %s\n",
-		       bytes, conn->url);
-		return 1;
+	conn->length -= bytes;
+	if (conn->length <= 0) {
+		if (verbose > 1)
+			printf("Read block\n");
+		conn->curp += bytes;
+		conn->length = 0;
+		conn->cstate = CS_START_CR;
+		NEXT_STATE(conn, read_file_chunked);
+		if (conn->endp > conn->curp)
+			return read_file_chunked(conn);
+		return 0;
 	}
 
 	conn->curp = conn->buf;
