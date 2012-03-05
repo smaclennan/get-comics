@@ -17,6 +17,12 @@
   "output": "biff",
   "days": "XmtwtfX"
 },
+{ /* Cyanide & Happiness */
+  "url": "http://explosm.net/comics/",
+  "redirect": 1,
+  "regexp": "http://www.explosm.net/db/files/Comics/Matt/[a-zA-Z0-9-]+\\.(png|jpg)",
+  "output": "cyanide"
+},
 {/* Diesel Sweeties */
   "url": "http://www.dieselsweeties.com/",
   "regexp": "/h?strips/[^.]+.(png|gif)",
