@@ -50,14 +50,14 @@ http-get: $(HG_OBJS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o http-get $(HG_OBJS) $(LIBS)
 
 TAGS: $(OBJS) $(LC_OBJS)
-	@if [ -x /usr/bin/etags1 ]; then /usr/bin/etags *.c *.h; else touch TAGS; fi
+	@if [ -x /usr/bin/etags ]; then /usr/bin/etags *.c *.h; else touch TAGS; fi
 
 *.o: get-comics.h
 
 get-comics.html: get-comics.1
 	man2html get-comics.1 > get-comics.html
 
-install:
+install: all
 	install -D -s -m 755 get-comics $(DESTDIR)/usr/bin/get-comics
 	install -D -m 644 get-comics.1 $(DESTDIR)/usr/man/man1/get-comics.1
 	gzip $(DESTDIR)/usr/man/man1/get-comics.1
