@@ -20,7 +20,7 @@
 { /* Cyanide & Happiness */
   "url": "http://explosm.net/comics/",
   "redirect": 1,
-  "regexp": "http://www.explosm.net/db/files/Comics/(Matt|Kris|Dave|Rob)/[a-zA-Z0-9-]+\\.(png|jpg)",
+  "regexp": "http://www.explosm.net/db/files/Comics/(Matt|Kris|Dave|Rob)/[a-zA-Z0-9.!-]+\\.(png|jpg)",
   "output": "cyanide"
 },
 {/* Diesel Sweeties */
