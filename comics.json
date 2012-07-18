@@ -1,5 +1,5 @@
 {
-"gocomics-regexp": "http://[a-z0-9.]+\\.uclick\\.com/c2/[0-9a-f]+",
+"gocomics-regexp": "http://assets.amuniversal.com/[0-9a-f]{32}",
 "comics": [
 
 /* Independents */
