@@ -70,12 +70,6 @@
   "url": "http://zs1.smbc-comics.com/comics/%Y%m%d.gif",
   "output": "smbc"
 },
-/* Something Positive */
-/* http://www.somethingpositive.net/arch/sp%m%d%Y.gif */
-{ /* Userfriendly */
-  "url": "http://www.userfriendly.org/static/",
-  "regexp": "/cartoons/archives/[^/]+/xuf[0-9]+\\.gif"
-},
 {/* xkcd */
   "url": "http://xkcd.com/",
   "regexp": "http://imgs.xkcd.com/comics/[^.]*\\.(jpg|png|gif)",
