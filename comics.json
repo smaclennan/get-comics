@@ -21,7 +21,7 @@
   "url": "http://explosm.net/comics/",
   "redirect": 1,
   "regexp":
-     "http://(www.)?explosm\\.net/db/files/Comics/(Matt|Kris|Dave|Rob)/[a-zA-Z0-9.!-]+\\.(png|jpg|gif)",
+   "http://(www.)?explosm\\.net/db/files/Comics/(Matt|Kris|Dave|Rob)/[^/]+\\.(png|jpg|gif)",
   "output": "cyanide"
 },
 {/* Diesel Sweeties */
