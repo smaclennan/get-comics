@@ -163,6 +163,15 @@ static void read_conn(struct connection *conn)
 		reset_connection(conn); /* Try again */
 }
 
+static void usage(int rc)
+{
+	fputs("usage: http-get [-v] [-p proxy] [-t threads]", stdout);
+	puts(" [-T timeout] [link_file ...]");
+	puts("\nIf no link_files are specified, read urls from stdin.");
+	exit(rc);
+}
+
+
 int main(int argc, char *argv[])
 {
 	char *env;
@@ -171,6 +180,8 @@ int main(int argc, char *argv[])
 
 	while ((i = getopt(argc, argv, "hp:t:vT:")) != -1)
 		switch ((char)i) {
+		case 'h':
+			usage(0);
 		case 'p':
 			set_proxy(optarg);
 			break;
@@ -183,14 +194,8 @@ int main(int argc, char *argv[])
 		case 'T':
 			read_timeout = strtol(optarg, NULL, 0);
 			break;
-		case 'h':
 		default:
-			puts("usage: http-get [-v] [-p proxy]"
-			     " [-t threads] [-T timeout]"
-			     " [link_file ...]");
-			puts("\nIf no link_files are specified, "
-			     "read urls from stdin.");
-			exit(1);
+			usage(1);
 		}
 
 	if (optind < argc)
