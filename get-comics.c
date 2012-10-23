@@ -85,8 +85,7 @@ static char *find_regexp(struct connection *conn)
 				unlink(conn->regfname);
 
 			if (match[mn].rm_so == -1) {
-				printf("%s matched regexp but did "
-				       "not have match %d\n",
+				printf("%s did not have match %d\n",
 				       conn->url, mn);
 				return NULL;
 			}
@@ -241,6 +240,18 @@ static void read_conn(struct connection *conn)
 		reset_connection(conn); /* Try again */
 }
 
+static void usage(int rc)
+{
+	fputs("usage: get-comics [-krvV] [-d comics_dir]", stdout);
+	puts(" [-l links_file] [-p proxy]");
+	puts("                  [-t threads] [config-file ...]");
+	puts("Where: -k  keep index files");
+	puts("       -r  randomize");
+	puts("       -v  verbose");
+	puts("       -V  verify config");
+	exit(rc);
+}
+
 int main(int argc, char *argv[])
 {
 	char *env;
@@ -252,6 +263,8 @@ int main(int argc, char *argv[])
 		case 'd':
 			comics_dir = optarg;
 			break;
+		case 'h':
+			usage(0);
 		case 'k':
 			unlink_index = 0;
 			break;
@@ -281,18 +294,8 @@ int main(int argc, char *argv[])
 		case 'V':
 			verify = 1;
 			break;
-		case 'h':
 		default:
-			puts("usage: get-comics [-krvV]"
-			     "[-d comics_dir] [-l links_file] "
-			     "[-p proxy]");
-			puts("                  [-t threads] "
-			     "[config-file ...]");
-			puts("Where: -k  keep index files");
-			puts("       -r  randomize");
-			puts("       -v  verbose");
-			puts("       -V  verify config");
-			exit(1);
+			usage(1);
 		}
 
 	if (optind < argc)
