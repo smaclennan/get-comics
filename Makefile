@@ -19,7 +19,7 @@ HG_OBJS := http-get.o http.o log.o openssl.o socket.o
 
 # Optionaly add openssl
 ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
-LIBS += -lssl
+LIBS += -lssl -lcrypto
 endif
 
 # Optionaly add gzip
