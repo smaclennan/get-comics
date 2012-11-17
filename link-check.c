@@ -163,6 +163,34 @@ static void read_conn(struct connection *conn)
 		reset_connection(conn); /* Try again */
 }
 
+static void dump_outstanding(int sig)
+{
+	struct connection *conn;
+	struct tm *atime;
+	time_t now = time(NULL);
+
+	atime = localtime(&now);
+	printf("\nTotal %d Outstanding: %d @ %2d:%02d:%02d\n",
+	       n_comics, outstanding,
+	       atime->tm_hour, atime->tm_min, atime->tm_sec);
+	for (conn = comics; conn; conn = conn->next) {
+		if (!conn->poll)
+			continue;
+		printf("> %s = %s\n", conn->url,
+		       conn->connected ? "connected" : "not connected");
+		if (conn->regexp)
+			printf("  %s %s\n",
+			       conn->matched ? "matched" : "regexp",
+			       conn->regexp);
+		atime = localtime(&conn->access);
+		printf("  %2d:%02d:%02d\n",
+		       atime->tm_hour, atime->tm_min, atime->tm_sec);
+	}
+	for (conn = head; conn; conn = conn->next)
+		printf("Q %s\n", conn->url);
+	fflush(stdout);
+}
+
 static void usage(int rc)
 {
 	fputs("usage: link-check [-dv] [-p proxy] [-t threads]", stdout);
@@ -219,6 +247,9 @@ int main(int argc, char *argv[])
 
 #ifdef _WIN32
 	win32_init();
+#else
+	signal(SIGTERM, dump_outstanding);
+	signal(SIGHUP, dump_outstanding);
 #endif
 
 	npoll = thread_limit + 1; /* add one for stdin */

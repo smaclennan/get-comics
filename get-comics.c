@@ -352,6 +352,7 @@ int main(int argc, char *argv[])
 	win32_init();
 #else
 	signal(SIGTERM, dump_outstanding);
+	signal(SIGHUP, dump_outstanding);
 #endif
 
 	npoll = thread_limit + 1; /* add one for stdin */
