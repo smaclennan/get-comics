@@ -549,9 +549,10 @@ static char *lazy_imgtype(struct connection *conn)
 		{ ".tif", { 'I', 'I', 42, 0 } }, /* little endian */
 	};
 	int i;
+	char *buf = conn->zs ? (char *)conn->zs_buf : conn->curp;
 
 	for (i = 0; i < sizeof(hdrs) / sizeof(struct header); ++i)
-		if (memcmp(conn->curp, hdrs[i].hdr, 4) == 0)
+		if (memcmp(buf, hdrs[i].hdr, 4) == 0)
 			return hdrs[i].ext;
 
 	printf("WARNING: Unknown file type %s\n", conn->outname);
