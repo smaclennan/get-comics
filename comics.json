@@ -67,7 +67,7 @@
   "days": "XmtwtfX"
 },
 { /* SMBC */
-  "url": "http://zs1.smbc-comics.com/comics/%Y%m%d.gif",
+  "url": "http://www.smbc-comics.com/comics/%Y%m%d.gif",
   "output": "smbc"
 },
 {/* xkcd */
