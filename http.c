@@ -761,6 +761,7 @@ static int write_output_gzipped(struct connection *conn, size_t bytes)
 
 		switch (rc) {
 		case Z_BUF_ERROR:
+			rc = 0;
 			break; /* not a problem */
 
 		case Z_OK:
