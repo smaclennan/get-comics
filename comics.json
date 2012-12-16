@@ -81,7 +81,7 @@
 
 { /* The Devil's Panties */
   "url": "http://thedevilspanties.com/",
-  "regexp": "/comics/[0-9]+[a-z]?\\.(gif|jpg)",
+  "regexp": "/comics/[0-9]+[a-z]?\\.(gif|jpg|png)",
   "referer": "url",
   "output": "devilspanties"
 },
