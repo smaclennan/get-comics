@@ -81,20 +81,18 @@ static void add_days(struct connection **conn, char *days)
 static void add_regexp(struct connection **conn, char *regexp)
 {
 	static int unique;
-	char outreg[256];
+	char out[256];
 
-	if (strftime(outreg, sizeof(outreg), regexp, today) == 0) {
+	if (strftime(out, sizeof(out), regexp, today) == 0) {
 		printf("strftime failed for '%s'\n", regexp);
 		exit(1);
 	}
 
 	new_comic(conn);
-	(*conn)->regexp = must_strdup(outreg);
+	(*conn)->regexp = must_strdup(out);
 	if ((*conn)->regfname == NULL) {
-		char fname[20];
-
-		sprintf(fname, "index-%08x.html", ++unique);
-		(*conn)->regfname = must_strdup(fname);
+		sprintf(out, "index-%08x.html", ++unique);
+		(*conn)->regfname = must_strdup(out);
 	}
 }
 
