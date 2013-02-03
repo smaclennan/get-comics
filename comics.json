@@ -58,7 +58,8 @@
   "url": "http://www.pvponline.com/comic/",
   "regexp": "http://[^.]+.pvponline.com/img/comic/pvp[0-9]+[a-z]*\\.(jpg|gif|png)",
   "redirect": 1,
-  "output": "pvp"
+  "output": "pvp",
+  "days": "XmtwtfX"
 },
 {/* Questionable Content */
   "url": "http://www.questionablecontent.net",
