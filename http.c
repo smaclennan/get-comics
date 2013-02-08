@@ -306,7 +306,7 @@ int build_request(struct connection *conn)
 
 void write_request(struct connection *conn)
 {
-	size_t n;
+	ssize_t n; /* must be signed */
 
 #ifdef WANT_SSL
 	if (conn->ssl) {
