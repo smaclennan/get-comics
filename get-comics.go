@@ -10,19 +10,14 @@ import (
 	"os"
 	"regexp"
 	"strings"
-//	"strconv"
 	"time"
 )
 
-//const default_config = "/tmp/test.json"
 const default_config = "/usr/share/get-comics/comics.json"
-
 
 var comics_dir = flag.String("d", "", "Output directory for comics")
 var gocomics_regexp regexp.Regexp
 var thread_limit = 4
-var read_timeout = 500
-var randomize = 0
 
 var now = time.Now()
 var wday = weekday2int()
@@ -33,6 +28,7 @@ var got = 0
 var skipped = 0
 
 type Comic struct {
+	// From the config file
 	url string
 	host string
 	regexp regexp.Regexp
@@ -40,6 +36,8 @@ type Comic struct {
 	outname string
 	base_href string
 	referer string
+
+	running, done bool
 }
 
 var comics []Comic
@@ -110,8 +108,12 @@ func parse_comic(m map[string]interface{}, id int) {
 				} else {
 					comic.referer = val
 				}
+				fmt.Println("We don't support referer yet: ", comic.url)
+				skipped += 1
+				return
 			case "gocomic":
 				comic.url = "http://www.gocomics.com/" + val + "/"
+				comic.host = "http://www.gocomics.com"
 				comic.regexp = gocomics_regexp
 				comic.outname = val
 			default:
@@ -180,9 +182,9 @@ func read_config(configfile string) {
 			case "threads":
 				thread_limit = int(vv)
 			case "timeout":
-				read_timeout = int(vv)
+				fmt.Println("Warning: timeout not supported.")
 			case "randomize":
-				randomize = int(vv)
+				fmt.Println("Warning: randomize not supported.")
 			default:
 				fmt.Println("Unexpected element ", k)
 			}
@@ -300,11 +302,19 @@ func find_match(comic Comic, body []byte) string {
 	}
 }
 
-func get_comic(comic Comic) {
-	if comic.regexp.String() != "" {
-		body := gethttp(comic, false)
+func set_done(comic *Comic) {
+	comic.done = true
+	comic.running = false
+}
 
-		match := find_match(comic, body)
+func get_comic(comic *Comic) {
+	comic.running = true
+	defer set_done(comic)
+
+	if comic.regexp.String() != "" {
+		body := gethttp(*comic, false)
+
+		match := find_match(*comic, body)
 		if match == "" { return }
 
 		if strings.HasPrefix(match, "http") {
@@ -316,7 +326,7 @@ func get_comic(comic Comic) {
 		}
 	}
 
-	gethttp(comic, true)
+	gethttp(*comic, true)
 }
 
 func main() {
@@ -331,10 +341,32 @@ func main() {
 
 	if *comics_dir != "" { os.Chdir(*comics_dir) }
 
-	// Simple single threaded version
-	for i := range comics {
-		get_comic(comics[i])
+	/* Braindead multithreaded */
+	for {
+		running := 0
+		alldone := 0
+		for i := range comics {
+			if comics[i].done {
+				alldone += 1
+			} else if comics[i].running {
+				running += 1
+			}
+		}
+
+		if alldone == total { break }
+
+		for i := range comics {
+			if !comics[i].done && !comics[i].running && running < thread_limit {
+				go get_comic(&comics[i])
+				running += 1
+			}
+		}
+
+		fmt.Printf("Done %d Running %d Total %d\n", alldone, running, total)
+
+		time.Sleep(500 * time.Millisecond)
 	}
+
 
 	if skipped > 0 {
 		fmt.Printf("Got %d of %d (%d skipped)\n", got, total, skipped)
