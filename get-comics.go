@@ -27,7 +27,11 @@ var randomize = 0
 
 var now = time.Now()
 var wday = weekday2int()
-var skipping = 0
+
+// Counts
+var total = 0
+var got = 0
+var skipped = 0
 
 type Comic struct {
 	url string
@@ -36,7 +40,6 @@ type Comic struct {
 	outname string
 	base_href string
 	referer string
-	redirect_ok int
 }
 
 var comics []Comic
@@ -86,13 +89,13 @@ func parse_comic(m map[string]interface{}, id int) {
 				}
 				if u.Scheme != "http" && u.Scheme != "https" {
 					fmt.Println("Skipping not http: ", comic.url)
-					skipping += 1
+					skipped += 1
 					return
 				}
 			case "days":
 				if val[wday] == 'X' {
 					fmt.Println("Skipping: ", comic.url) // SAM DBG
-					skipping += 1
+					skipped += 1
 					return
 				}
 			case "regexp":
@@ -102,6 +105,9 @@ func parse_comic(m map[string]interface{}, id int) {
 				comic.outname = val
 			case "href":
 				comic.base_href = val
+				fmt.Println("We don't support href yet: ", comic.url)
+				skipped += 1
+				return
 			case "referer":
 				if val == "url" {
 					comic.referer = comic.url
@@ -119,8 +125,7 @@ func parse_comic(m map[string]interface{}, id int) {
 			switch k {
 			case "regmatch":
 				comic.regmatch = int(val)
-			case "redirect":
-				comic.redirect_ok = int(val)
+			case "redirect": /* redirects work silently */
 			default:
 				fmt.Println("Unexpected element ", k)
 			}
@@ -135,6 +140,7 @@ func parse_comic(m map[string]interface{}, id int) {
 	}
 
 	comics = append(comics, comic)
+	total += 1
 }
 
 func read_config(configfile string) {
@@ -201,7 +207,28 @@ func read_config(configfile string) {
 	}
 }
 
-func set_outname(comic Comic) string {
+/* This is a very lazy checking heuristic since we expect the files to
+ * be one of the four formats and well formed. Yes, Close To Home
+ * actually used TIFF. TIFF is only tested on little endian machine. */
+func lazy_imgtype(hdr []byte) string {
+	switch hdr[0] {
+	case 'G':
+		return ".gif"
+	case 0xff:
+		return ".jpg"
+	case 0x89:
+		return ".png"
+	case 'M':
+		return ".tif"
+	case 'I':
+		return ".tif"
+	default:
+		fmt.Println("Warning: Unknow file type: ", hdr)
+		return ".xxx"
+	}
+}
+
+func set_outname(comic Comic, hdr []byte) string {
 	if comic.outname == "" { // Get file name from url
 		ulen := len(comic.url)
 		index := strings.LastIndex(comic.url, "/") + 1
@@ -214,10 +241,16 @@ func set_outname(comic Comic) string {
 		}
 	}
 
+	i := strings.LastIndex(comic.outname, ".")
+	if i == -1 {
+		comic.outname += lazy_imgtype(hdr)
+	}
+
 	return comic.outname
 }
 
 func gethttp(comic Comic, writeit bool) []byte {
+	fmt.Println("GET: ", comic.url) // SAM DBG
 	resp, err := http.Get(comic.url)
 	if err != nil {
 		fmt.Println(comic.url, ": ", err)
@@ -239,7 +272,7 @@ func gethttp(comic Comic, writeit bool) []byte {
 
 	if !writeit { return body }
 
-	outname := set_outname(comic)
+	outname := set_outname(comic, body[0:4])
 	err = ioutil.WriteFile(outname, body, 0644)
 	if err != nil {
 		fmt.Println(outname, ": ", err)
@@ -252,19 +285,36 @@ func get_comic(comic Comic) {
 	if comic.regexp.String() != "" {
 		body := gethttp(comic, false)
 
-		matchb := comic.regexp.Find(body)
-		if matchb == nil {
-			fmt.Println(comic.url, ": No match.")
-			return
+		var match string
+		if comic.regmatch == 0 {
+			matchb := comic.regexp.Find(body)
+			if matchb == nil {
+				fmt.Println(comic.url, ": No match.")
+				return
+			}
+			match = string(matchb)
+		} else {
+			matchb := comic.regexp.FindSubmatch(body)
+			if matchb == nil {
+				fmt.Println(comic.url, ": No match.")
+				return
+			}
+			if len(matchb) - 1 < comic.regmatch {
+				fmt.Println(comic.url, ": No match for ", comic.regmatch)
+				return
+			}
+			match = string(matchb[comic.regmatch])
 		}
-
-		match := string(matchb)
 
 		if strings.HasPrefix(match, "http") {
 			comic.url = match
 		} else {
 			i := strings.LastIndex(comic.url, "/")
-			comic.url = comic.url[0:i] + "/" + match
+			if match[0] == '/' {
+				comic.url = comic.url[0:i] + match
+			} else {
+				comic.url = comic.url[0:i] + "/" + match
+			}
 		}
 	}
 
@@ -286,6 +336,13 @@ func main() {
 	// Simple single threaded version
 	for i := range comics {
 		get_comic(comics[i])
+	}
+
+	// SAM not done yet
+	if skipped > 0 {
+		fmt.Printf("Got %d of %d (%d skipped)\n", got, total, skipped)
+	} else {
+		fmt.Printf("Got %d of %d\n", got, total)
 	}
 }
 
