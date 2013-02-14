@@ -12,11 +12,10 @@ import (
 	"strings"
 //	"strconv"
 	"time"
-//	"os/user"
 )
 
-const default_config = "/tmp/test.json"
-//const default_config = "/usr/share/get-comics/comics.json"
+//const default_config = "/tmp/test.json"
+const default_config = "/usr/share/get-comics/comics.json"
 
 
 var comics_dir = flag.String("d", "", "Output directory for comics")
@@ -35,6 +34,7 @@ var skipped = 0
 
 type Comic struct {
 	url string
+	host string
 	regexp regexp.Regexp
 	regmatch int
 	outname string
@@ -87,11 +87,7 @@ func parse_comic(m map[string]interface{}, id int) {
 					fmt.Println("Invalid url: ", comic.url)
 					os.Exit(1)
 				}
-				if u.Scheme != "http" && u.Scheme != "https" {
-					fmt.Println("Skipping not http: ", comic.url)
-					skipped += 1
-					return
-				}
+				comic.host = u.Scheme + "://" + u.Host
 			case "days":
 				if val[wday] == 'X' {
 					fmt.Println("Skipping: ", comic.url) // SAM DBG
@@ -250,14 +246,12 @@ func set_outname(comic Comic, hdr []byte) string {
 }
 
 func gethttp(comic Comic, writeit bool) []byte {
-	fmt.Println("GET: ", comic.url) // SAM DBG
 	resp, err := http.Get(comic.url)
 	if err != nil {
 		fmt.Println(comic.url, ": ", err)
 		return nil
 	}
 
-	// SAM what about redirects!
 	if resp.Status != "200 OK" {
 		fmt.Println(comic.url, ": ", resp.Status)
 		return nil
@@ -276,45 +270,49 @@ func gethttp(comic Comic, writeit bool) []byte {
 	err = ioutil.WriteFile(outname, body, 0644)
 	if err != nil {
 		fmt.Println(outname, ": ", err)
+	} else {
+		got += 1
 	}
 
 	return nil
+}
+
+func find_match(comic Comic, body []byte) string {
+	if comic.regmatch == 0 {
+		matchb := comic.regexp.Find(body)
+		if matchb == nil {
+			fmt.Println(comic.url, ": No match.")
+			return ""
+		}
+
+		return string(matchb)
+	} else {
+		matchb := comic.regexp.FindSubmatch(body)
+		if matchb == nil {
+			fmt.Println(comic.url, ": No match.")
+			return ""
+		}
+		if len(matchb) - 1 < comic.regmatch {
+			fmt.Println(comic.url, ": No match for ", comic.regmatch)
+			return ""
+		}
+		return string(matchb[comic.regmatch])
+	}
 }
 
 func get_comic(comic Comic) {
 	if comic.regexp.String() != "" {
 		body := gethttp(comic, false)
 
-		var match string
-		if comic.regmatch == 0 {
-			matchb := comic.regexp.Find(body)
-			if matchb == nil {
-				fmt.Println(comic.url, ": No match.")
-				return
-			}
-			match = string(matchb)
-		} else {
-			matchb := comic.regexp.FindSubmatch(body)
-			if matchb == nil {
-				fmt.Println(comic.url, ": No match.")
-				return
-			}
-			if len(matchb) - 1 < comic.regmatch {
-				fmt.Println(comic.url, ": No match for ", comic.regmatch)
-				return
-			}
-			match = string(matchb[comic.regmatch])
-		}
+		match := find_match(comic, body)
+		if match == "" { return }
 
 		if strings.HasPrefix(match, "http") {
 			comic.url = match
+		} else if match[0] == '/' {
+			comic.url = comic.host + match
 		} else {
-			i := strings.LastIndex(comic.url, "/")
-			if match[0] == '/' {
-				comic.url = comic.url[0:i] + match
-			} else {
-				comic.url = comic.url[0:i] + "/" + match
-			}
+			comic.url = comic.host + "/" + match
 		}
 	}
 
@@ -338,7 +336,6 @@ func main() {
 		get_comic(comics[i])
 	}
 
-	// SAM not done yet
 	if skipped > 0 {
 		fmt.Printf("Got %d of %d (%d skipped)\n", got, total, skipped)
 	} else {
