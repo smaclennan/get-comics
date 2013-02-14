@@ -16,8 +16,8 @@ import (
 const default_config = "/usr/share/get-comics/comics.json"
 
 var comics_dir = flag.String("d", "", "Output directory for comics")
+var thread_limit = flag.Int("t", 4, "Maximum number of concurrent gets")
 var gocomics_regexp regexp.Regexp
-var thread_limit = 4
 
 var now = time.Now()
 var wday = weekday2int()
@@ -88,7 +88,6 @@ func parse_comic(m map[string]interface{}, id int) {
 				comic.host = u.Scheme + "://" + u.Host
 			case "days":
 				if val[wday] == 'X' {
-					fmt.Println("Skipping: ", comic.url) // SAM DBG
 					skipped += 1
 					return
 				}
@@ -99,7 +98,7 @@ func parse_comic(m map[string]interface{}, id int) {
 				comic.outname = val
 			case "href":
 				comic.base_href = val
-				fmt.Println("We don't support href yet: ", comic.url)
+				fmt.Println("Warning: We don't support href yet", comic.url)
 				skipped += 1
 				return
 			case "referer":
@@ -109,8 +108,6 @@ func parse_comic(m map[string]interface{}, id int) {
 					comic.referer = val
 				}
 				fmt.Println("We don't support referer yet: ", comic.url)
-				skipped += 1
-				return
 			case "gocomic":
 				comic.url = "http://www.gocomics.com/" + val + "/"
 				comic.host = "http://www.gocomics.com"
@@ -180,7 +177,7 @@ func read_config(configfile string) {
 		case float64:
 			switch k {
 			case "threads":
-				thread_limit = int(vv)
+				*thread_limit = int(vv)
 			case "timeout":
 				fmt.Println("Warning: timeout not supported.")
 			case "randomize":
@@ -356,7 +353,7 @@ func main() {
 		if alldone == total { break }
 
 		for i := range comics {
-			if !comics[i].done && !comics[i].running && running < thread_limit {
+			if !comics[i].done && !comics[i].running && running < *thread_limit {
 				go get_comic(&comics[i])
 				running += 1
 			}
