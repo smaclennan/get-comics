@@ -5,23 +5,23 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"os"
 	"regexp"
 	"strings"
-	"strconv"
+//	"strconv"
 	"time"
+//	"os/user"
 )
 
 const default_config = "/tmp/test.json"
 //const default_config = "/usr/share/get-comics/comics.json"
-var verbose = false
 
 
-var comics_dir string
-var gocomics_regexp string
+var comics_dir = flag.String("d", "", "Output directory for comics")
+var gocomics_regexp regexp.Regexp
 var thread_limit = 4
-var threads_set = false
 var read_timeout = 500
 var randomize = 0
 
@@ -31,9 +31,7 @@ var skipping = 0
 
 type Comic struct {
 	url string
-	host string /* filled by parse_comic */
-	regexp string
-	regfname string /* filled by parse_comic */
+	regexp regexp.Regexp
 	regmatch int
 	outname string
 	base_href string
@@ -91,7 +89,6 @@ func parse_comic(m map[string]interface{}, id int) {
 					skipping += 1
 					return
 				}
-				comic.host = u.Host
 			case "days":
 				if val[wday] == 'X' {
 					fmt.Println("Skipping: ", comic.url) // SAM DBG
@@ -99,8 +96,8 @@ func parse_comic(m map[string]interface{}, id int) {
 					return
 				}
 			case "regexp":
-				comic.regexp = strftime(val)
-				comic.regfname = "index-" + strconv.Itoa(id) + ".html"
+				val = strftime(val)
+				comic.regexp = *regexp.MustCompile(val)
 			case "output":
 				comic.outname = val
 			case "href":
@@ -113,7 +110,6 @@ func parse_comic(m map[string]interface{}, id int) {
 				}
 			case "gocomic":
 				comic.url = "http://www.gocomics.com/" + val + "/"
-				comic.host = "www.gocomics.com"
 				comic.regexp = gocomics_regexp
 				comic.outname = val
 			default:
@@ -159,8 +155,6 @@ func read_config(configfile string) {
 		os.Exit(1)
 	}
 
-	if verbose { fmt.Println(f) }
-
 	m := f.(map[string]interface{})
 
 	for k, v := range m {
@@ -169,22 +163,20 @@ func read_config(configfile string) {
 			switch k {
 			case "directory":
 				/* Do not override the command line option */
-				if comics_dir == "" {
-					comics_dir = vv
+				if *comics_dir == "" {
+					*comics_dir = vv
 				}
 			case "proxy":
 				fmt.Println("Warning: proxy not supported.")
 			case "gocomics-regexp":
-				gocomics_regexp = vv
+				gocomics_regexp = *regexp.MustCompile(vv)
 			default:
 				fmt.Println("Unexpected element ", k)
 			}
 		case float64:
 			switch k {
 			case "threads":
-				if !threads_set {
-					thread_limit = int(vv)
-				}
+				thread_limit = int(vv)
 			case "timeout":
 				read_timeout = int(vv)
 			case "randomize":
@@ -209,6 +201,76 @@ func read_config(configfile string) {
 	}
 }
 
+func set_outname(comic Comic) string {
+	if comic.outname == "" { // Get file name from url
+		ulen := len(comic.url)
+		index := strings.LastIndex(comic.url, "/") + 1
+		if index == 0 {
+			comic.outname = comic.url
+		} else if index >= ulen {
+			comic.outname = "index.html"
+		} else {
+			comic.outname = comic.url[index:ulen]
+		}
+	}
+
+	return comic.outname
+}
+
+func gethttp(comic Comic, writeit bool) []byte {
+	resp, err := http.Get(comic.url)
+	if err != nil {
+		fmt.Println(comic.url, ": ", err)
+		return nil
+	}
+
+	// SAM what about redirects!
+	if resp.Status != "200 OK" {
+		fmt.Println(comic.url, ": ", resp.Status)
+		return nil
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		fmt.Println(comic.url, ": ", err)
+		return nil
+	}
+
+	if !writeit { return body }
+
+	outname := set_outname(comic)
+	err = ioutil.WriteFile(outname, body, 0644)
+	if err != nil {
+		fmt.Println(outname, ": ", err)
+	}
+
+	return nil
+}
+
+func get_comic(comic Comic) {
+	if comic.regexp.String() != "" {
+		body := gethttp(comic, false)
+
+		matchb := comic.regexp.Find(body)
+		if matchb == nil {
+			fmt.Println(comic.url, ": No match.")
+			return
+		}
+
+		match := string(matchb)
+
+		if strings.HasPrefix(match, "http") {
+			comic.url = match
+		} else {
+			i := strings.LastIndex(comic.url, "/")
+			comic.url = comic.url[0:i] + "/" + match
+		}
+	}
+
+	gethttp(comic, true)
+}
+
 func main() {
 	flag.Parse()
 	if len(flag.Args()) > 0 {
@@ -217,6 +279,13 @@ func main() {
 		}
 	} else {
 		read_config(default_config)
+	}
+
+	if *comics_dir != "" { os.Chdir(*comics_dir) }
+
+	// Simple single threaded version
+	for i := range comics {
+		get_comic(comics[i])
 	}
 }
 
