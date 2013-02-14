@@ -13,6 +13,12 @@ CFLAGS += -DWANT_SSL
 # Comment in to enable gzip encoding
 CFLAGS += -DWANT_GZIP
 
+# Currently I use gccgo
+GO=$(shell which gccgo 2>/dev/null)
+ifneq ($(GO),)
+EXTRA+=go-get-comics
+endif
+
 OBJS    := get-comics.o http.o log.o openssl.o socket.o config.o JSON_parser.o
 LC_OBJS := link-check.o http.o log.o openssl.o socket.o
 HG_OBJS := http-get.o http.o log.o openssl.o socket.o
@@ -38,7 +44,7 @@ QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
 
-all:	get-comics link-check http-get TAGS
+all:	get-comics link-check http-get $(EXTRA) TAGS
 
 get-comics: $(OBJS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $(OBJS) $(LIBS)
@@ -48,6 +54,9 @@ link-check: $(LC_OBJS)
 
 http-get: $(HG_OBJS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o http-get $(HG_OBJS) $(LIBS)
+
+go-get-comics: get-comics.go
+	$(GO) -o $@ $+
 
 TAGS: $(OBJS) $(LC_OBJS)
 	@if [ -x /usr/bin/etags ]; then /usr/bin/etags *.c *.h; else touch TAGS; fi
