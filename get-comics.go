@@ -36,8 +36,6 @@ type Comic struct {
 	outname string
 	base_href string
 	referer string
-
-	running, done bool
 }
 
 var comics []Comic
@@ -312,14 +310,10 @@ func find_match(comic Comic, body []byte) string {
 	}
 }
 
-func set_done(comic *Comic) {
-	comic.done = true
-	comic.running = false
-}
+func set_done(comic *Comic, cs chan int) { cs <- 1 }
 
-func get_comic(comic *Comic) {
-	comic.running = true
-	defer set_done(comic)
+func get_comic(comic *Comic, cs chan int) {
+	defer set_done(comic, cs)
 
 	if comic.regexp.String() != "" {
 		body := gethttp(*comic, false)
@@ -351,32 +345,22 @@ func main() {
 
 	if *comics_dir != "" { os.Chdir(*comics_dir) }
 
-	/* Braindead multithreaded */
-	for {
-		running := 0
-		alldone := 0
-		for i := range comics {
-			if comics[i].done {
-				alldone += 1
-			} else if comics[i].running {
-				running += 1
-			}
-		}
+	cs := make(chan int)
 
-		if alldone == total { break }
-
-		for i := range comics {
-			if !comics[i].done && !comics[i].running && running < *thread_limit {
-				go get_comic(&comics[i])
-				running += 1
-			}
-		}
-
-		fmt.Printf("Done %d Running %d Total %d\n", alldone, running, total)
-
-		time.Sleep(500 * time.Millisecond)
+	// Start the first ones
+	var cur int
+	for cur = 0; cur < *thread_limit && cur < total; cur += 1 {
+		go get_comic(&comics[cur], cs)
 	}
 
+	for alldone := 0; alldone < total; alldone += 1 {
+		<- cs // block waiting for a comic to finish
+
+		if cur < total {
+			go get_comic(&comics[cur], cs)
+			cur += 1
+		}
+	}
 
 	if skipped > 0 {
 		fmt.Printf("Got %d of %d (%d skipped)\n", got, total, skipped)
