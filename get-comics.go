@@ -107,7 +107,6 @@ func parse_comic(m map[string]interface{}, id int) {
 				} else {
 					comic.referer = val
 				}
-				fmt.Println("We don't support referer yet: ", comic.url)
 			case "gocomic":
 				comic.url = "http://www.gocomics.com/" + val + "/"
 				comic.host = "http://www.gocomics.com"
@@ -245,7 +244,21 @@ func set_outname(comic Comic, hdr []byte) string {
 }
 
 func gethttp(comic Comic, writeit bool) []byte {
-	resp, err := http.Get(comic.url)
+	var resp *http.Response
+	var err error
+
+	if comic.referer != "" {
+		client := &http.Client {}
+
+		var req *http.Request
+		req, err = http.NewRequest("GET", comic.url, nil)
+		if err == nil {
+			req.Header.Add("Referer", comic.referer)
+			resp, err = client.Do(req)
+		}
+	} else {
+		resp, err = http.Get(comic.url)
+	}
 	if err != nil {
 		fmt.Println(comic.url, ": ", err)
 		return nil
