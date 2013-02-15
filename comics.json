@@ -56,7 +56,7 @@
 },
 { /* PVP */
   "url": "http://www.pvponline.com/comic/",
-  "regexp": "http://[^.]+.pvponline.com/img/comic/pvp[0-9]+[a-z]*\\.(jpg|gif|png)",
+  "regexp": "http://[^/]+/pvponlinenew/img/comic/%Y/%m/pvp[0-9]+[a-z]*\\.(jpg|gif|png)",
   "redirect": 1,
   "output": "pvp",
   "days": "XmtwtfX"
@@ -125,7 +125,7 @@
 { "gocomic": "herman" },
 { "gocomic": "lio" },
 { "gocomic": "looseparts" },
-{ "gocomic": "moderately-confused", "days": "mtwtfsX" },
+{ "gocomic": "moderately-confused", "days": "Xmtwtfs" },
 { "gocomic": "monty" },
 { "gocomic": "offthemark" },
 { "gocomic": "realitycheck" },
