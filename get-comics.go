@@ -245,7 +245,9 @@ func gethttp(comic Comic, writeit bool) []byte {
 	var resp *http.Response
 	var err error
 
-	if comic.referer != "" {
+	if comic.referer == "" {
+		resp, err = http.Get(comic.url)
+	} else {
 		client := &http.Client {}
 
 		var req *http.Request
@@ -254,8 +256,6 @@ func gethttp(comic Comic, writeit bool) []byte {
 			req.Header.Add("Referer", comic.referer)
 			resp, err = client.Do(req)
 		}
-	} else {
-		resp, err = http.Get(comic.url)
 	}
 	if err != nil {
 		fmt.Println(comic.url, ": ", err)
@@ -310,15 +310,17 @@ func find_match(comic Comic, body []byte) string {
 	}
 }
 
-func set_done(comic *Comic, cs chan int) { cs <- 1 }
+func set_done(cs chan int) { cs <- 1 }
 
-func get_comic(comic *Comic, cs chan int) {
-	defer set_done(comic, cs)
+func get_comic(cur int, cs chan int) {
+	defer set_done(cs)
+
+	comic := comics[cur]
 
 	if comic.regexp.String() != "" {
-		body := gethttp(*comic, false)
+		body := gethttp(comic, false)
 
-		match := find_match(*comic, body)
+		match := find_match(comic, body)
 		if match == "" { return }
 
 		if strings.HasPrefix(match, "http") {
@@ -330,7 +332,7 @@ func get_comic(comic *Comic, cs chan int) {
 		}
 	}
 
-	gethttp(*comic, true)
+	gethttp(comic, true)
 }
 
 func main() {
@@ -350,23 +352,19 @@ func main() {
 	// Start the first ones
 	var cur int
 	for cur = 0; cur < *thread_limit && cur < total; cur += 1 {
-		go get_comic(&comics[cur], cs)
+		go get_comic(cur, cs)
 	}
 
 	for alldone := 0; alldone < total; alldone += 1 {
 		<- cs // block waiting for a comic to finish
 
 		if cur < total {
-			go get_comic(&comics[cur], cs)
+			go get_comic(cur, cs)
 			cur += 1
 		}
 	}
 
-	if skipped > 0 {
-		fmt.Printf("Got %d of %d (%d skipped)\n", got, total, skipped)
-	} else {
-		fmt.Printf("Got %d of %d\n", got, total)
-	}
+	fmt.Printf("Got %d of %d (%d skipped)\n", got, total, skipped)
 }
 
 /*
