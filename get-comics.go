@@ -29,27 +29,35 @@ var skipped = 0
 
 type Comic struct {
 	// From the config file
-	url string
-	host string
-	regexp regexp.Regexp
-	regmatch int
-	outname string
+	url       string
+	host      string
+	regexp    regexp.Regexp
+	regmatch  int
+	outname   string
 	base_href string
-	referer string
+	referer   string
 }
 
 var comics []Comic
 
 func weekday2int() int {
 	switch now.Weekday() {
-	case time.Sunday:    return 0
-	case time.Monday:    return 1
-	case time.Tuesday:   return 2
-	case time.Wednesday: return 3
-	case time.Thursday:  return 4
-	case time.Friday:    return 5
-	case time.Saturday:  return 6
-	default:             return 0
+	case time.Sunday:
+		return 0
+	case time.Monday:
+		return 1
+	case time.Tuesday:
+		return 2
+	case time.Wednesday:
+		return 3
+	case time.Thursday:
+		return 4
+	case time.Friday:
+		return 5
+	case time.Saturday:
+		return 6
+	default:
+		return 0
 	}
 }
 
@@ -274,7 +282,9 @@ func gethttp(comic Comic, writeit bool) []byte {
 		return nil
 	}
 
-	if !writeit { return body }
+	if !writeit {
+		return body
+	}
 
 	outname := set_outname(comic, body[0:4])
 	err = ioutil.WriteFile(outname, body, 0644)
@@ -302,7 +312,7 @@ func find_match(comic Comic, body []byte) string {
 			fmt.Println(comic.url, ": No match.")
 			return ""
 		}
-		if len(matchb) - 1 < comic.regmatch {
+		if len(matchb)-1 < comic.regmatch {
 			fmt.Println(comic.url, ": No match for ", comic.regmatch)
 			return ""
 		}
@@ -321,7 +331,9 @@ func get_comic(cur int, cs chan int) {
 		body := gethttp(comic, false)
 
 		match := find_match(comic, body)
-		if match == "" { return }
+		if match == "" {
+			return
+		}
 
 		if strings.HasPrefix(match, "http") {
 			comic.url = match
@@ -345,7 +357,9 @@ func main() {
 		read_config(default_config)
 	}
 
-	if *comics_dir != "" { os.Chdir(*comics_dir) }
+	if *comics_dir != "" {
+		os.Chdir(*comics_dir)
+	}
 
 	cs := make(chan int)
 
@@ -356,7 +370,7 @@ func main() {
 	}
 
 	for alldone := 0; alldone < total; alldone += 1 {
-		<- cs // block waiting for a comic to finish
+		<-cs // block waiting for a comic to finish
 
 		if cur < total {
 			go get_comic(cur, cs)
