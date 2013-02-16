@@ -17,7 +17,7 @@ import (
 
 const default_config = "/usr/share/get-comics/comics.json"
 
-var comics_dir = flag.String("d", "", "Output directory for comics")
+var comics_dir = flag.String("d", os.Getenv("PWD"), "Output directory for comics")
 var thread_limit = flag.Int("t", 4, "Maximum number of concurrent gets")
 var gocomics_regexp regexp.Regexp
 
@@ -378,9 +378,7 @@ func main() {
 		read_config(default_config)
 	}
 
-	if *comics_dir != "" {
-		os.Chdir(*comics_dir)
-	}
+	os.Chdir(*comics_dir)
 
 	cs := make(chan int)
 
