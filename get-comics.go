@@ -365,11 +365,11 @@ func main() {
 
 	// Start the first ones
 	var cur int
-	for cur = 0; cur < *thread_limit && cur < total; cur += 1 {
+	for cur = 0; cur < *thread_limit && cur < total; cur++ {
 		go get_comic(cur, cs)
 	}
 
-	for alldone := 0; alldone < total; alldone += 1 {
+	for alldone := 0; alldone < total; alldone++ {
 		<-cs // block waiting for a comic to finish
 
 		if cur < total {
