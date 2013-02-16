@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
 	"regexp"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -36,6 +38,8 @@ type Comic struct {
 	outname   string
 	base_href string
 	referer   string
+
+	running   bool
 }
 
 var comics []Comic
@@ -207,6 +211,19 @@ func read_config(configfile string) {
 	}
 }
 
+func dump_outstanding() {
+	ch := make(chan os.Signal)
+	signal.Notify(ch, syscall.SIGHUP)
+	for {
+		<-ch
+		for i := range comics {
+			if comics[i].running {
+				fmt.Println("Running ", comics[i].url)
+			}
+		}
+	}
+}
+
 /* This is a very lazy checking heuristic since we expect the files to
  * be one of the four formats and well formed. Yes, Close To Home
  * actually used TIFF. TIFF is only tested on little endian machine. */
@@ -320,10 +337,14 @@ func find_match(comic Comic, body []byte) string {
 	}
 }
 
-func set_done(cs chan int) { cs <- 1 }
+func set_done(cur int, cs chan int) {
+	comics[cur].running = false
+	cs <- cur
+}
 
 func get_comic(cur int, cs chan int) {
-	defer set_done(cs)
+	comics[cur].running = true
+		defer set_done(cur, cs)
 
 	comic := comics[cur]
 
@@ -362,6 +383,8 @@ func main() {
 	}
 
 	cs := make(chan int)
+
+	go dump_outstanding()
 
 	// Start the first ones
 	var cur int
