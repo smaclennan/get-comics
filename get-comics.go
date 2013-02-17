@@ -401,9 +401,3 @@ func main() {
 
 	fmt.Printf("Got %d of %d (%d skipped)\n", got, total, skipped)
 }
-
-/*
- * Local Variables:
- * compile-command: "gccgo get-comics.go -o get-comics"
- * End:
- */
