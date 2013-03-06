@@ -56,7 +56,7 @@
 },
 { /* PVP */
   "url": "http://www.pvponline.com/comic/",
-  "regexp": "http://[^/]+/pvponlinenew/img/comic/%Y/%m/pvp[0-9]+[a-z]*\\.(jpg|gif|png)",
+  "regexp": "http://[^/]+/pvponlinenew/img/comic/%Y/[01][0-9]/pvp[0-9]+[a-z]*\\.(jpg|gif|png)",
   "redirect": 1,
   "output": "pvp",
   "days": "XmtwtfX"
