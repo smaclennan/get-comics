@@ -6,8 +6,7 @@
 
 { /* Aislin */
   "url": "http://www.montrealgazette.com/opinion/editorial-cartoons/index.html",
-  "regexp": "src=\"([0-9]+\\.bin\\?size=[0-9]+x[0-9]+)\"",
-  "regmatch": 1,
+  "regexp": "cms/binary/[0-9]+\\.jpg",
   "output": "aislin",
   "days": "Xmtwtfs"
 },
