@@ -51,11 +51,11 @@
   "output": "gws"
 },
 { /* Kevin and Kell */
-  "url": "http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.gif"
+  "url": "http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.jpg"
 },
 { /* PVP */
   "url": "http://www.pvponline.com/comic/",
-  "regexp": "http://[^/]+/pvponlinenew/img/comic/%Y/[01][0-9]/pvp[0-9]+[a-z]*\\.(jpg|gif|png)",
+  "regexp": "http://[^/]+/pvponlinenew/img/comic/%Y/%m/pvp[0-9]+[a-z]*\\.(jpg|gif|png)",
   "redirect": 1,
   "output": "pvp",
   "days": "XmtwtfX"
@@ -67,7 +67,7 @@
   "days": "XmtwtfX"
 },
 { /* SMBC */
-  "url": "http://www.smbc-comics.com/comics/%Y%m%d.gif",
+  "url": "http://www.smbc-comics.com/comics/%Y%m%d.png",
   "output": "smbc"
 },
 {/* xkcd */
@@ -91,9 +91,9 @@
   "days": "XmXwXwX"
 },
 { /* Out There */
-  "url": "http://outthere.keenspot.com/comics/%Y%m%d.gif",
+  "url": "http://outthere.keenspot.com/comics/%Y%m%d.jpg",
   "output": "out-there",
-  "days": "XmtwtfX"
+  "days": "XXXwXXX"
 },
 { /* Sinfest */
   "url": "http://www.sinfest.net/comikaze/comics/%Y-%m-%d.gif",
