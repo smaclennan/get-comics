@@ -45,6 +45,12 @@
   "days": "XmXwXfX",
   "regexp": "/ff[0-9]+/f[vc][0-9]+\\.(gif|png)"
 },
+{ /* The Frumps */
+  "url": "http://thefrumps.com",
+  "regexp": "comics/%Y-%m-%d-[^.]*\\.jpg",
+  "output": "frumps",
+  "days": "XmXXtXX"
+},
 {/* Girls With Slingshots */
   "url": "http://www.girlswithslingshots.com",
   "regexp": "comics/[GWS0-9-]*.*\\.jpg",
