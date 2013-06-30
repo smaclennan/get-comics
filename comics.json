@@ -59,6 +59,12 @@
 { /* Kevin and Kell */
   "url": "http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.jpg"
 },
+{/* Maximumble */
+  "url": "http://maximumble.thebookofbiff.com",
+  "regexp": "https://s3.amazonaws.com/maximumble/comics/.*\\.(png|gif)",
+  "output": "maxim",
+  "days": "XmtwtfX"
+},
 { /* PVP */
   "url": "http://www.pvponline.com/comic/",
   "regexp": "http://[^/]+/pvponlinenew/img/comic/%Y/%m/pvp[0-9]+[a-z]*\\.(jpg|gif|png)",
