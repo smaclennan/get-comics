@@ -11,8 +11,8 @@
   "days": "Xmtwtfs"
 },
 {/* Biff */
-  "url": "http://www.thebookofbiff.com",
-  "regexp": "http://bookofbiff\\.[^/]+/comics/.*\\.(png|gif)",
+  "url": "http://thebookofbiff.com",
+  "regexp": "http://thebookofbiff.com/comics/.*\\.(png|gif)",
   "output": "biff",
   "days": "XmtwtfX"
 },
@@ -61,7 +61,7 @@
 },
 {/* Maximumble */
   "url": "http://maximumble.thebookofbiff.com",
-  "regexp": "https://s3.amazonaws.com/maximumble/comics/.*\\.(png|gif)",
+  "regexp": "http://maximumble.thebookofbiff.com/comics/.*\\.(png|gif)",
   "output": "maxim",
   "days": "XmtwtfX"
 },
