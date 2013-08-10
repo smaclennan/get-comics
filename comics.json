@@ -87,6 +87,11 @@
   "url": "http://www.smbc-comics.com/comics/%Y%m%d.png",
   "output": "smbc"
 },
+{ /* Something Positive */
+  "url": "http://www.somethingpositive.net/",
+  "regexp": "sp[0-9]*\\.png",
+  "output": "somethingp"
+},
 { /* xkcd */
   "url": "http://xkcd.com/",
   "regexp": "http://imgs.xkcd.com/comics/[^.]*\\.(jpg|png|gif)",
