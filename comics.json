@@ -2,8 +2,6 @@
 "gocomics-regexp": "http://assets.amuniversal.com/[0-9a-f]{32}",
 "comics": [
 
-/* Independents */
-
 { /* Aislin */
   "url": "http://www.montrealgazette.com/opinion/editorial-cartoons/index.html",
   "regexp": "cms/binary/[0-9]+\\.jpg",
@@ -27,6 +25,12 @@
   "regexp":
    "http://(www.)?explosm\\.net/db/files/Comics/(Matt|Kris|Dave|Rob)/[^/]+\\.(png|jpg|gif)",
   "output": "cyanide"
+},
+{ /* The Devil's Panties */
+  "url": "http://thedevilspanties.com/",
+  "regexp": "/comics/[0-9]+[a-z]?\\.(gif|jpg|png)",
+  "referer": "url",
+  "output": "devilspanties"
 },
 { /* Diesel Sweeties */
   "url": "http://www.dieselsweeties.com/",
@@ -61,6 +65,11 @@
   "regexp": "comics/[GWS0-9-]*.*\\.jpg",
   "output": "gws"
 },
+{ /* GPF */
+  "url": "http://www.gpf-comics.com/",
+  "regexp": "/comics/gpf[^.]+\\.(gif|jpg|png)",
+  "days": "XmXwXwX"
+},
 { /* Kevin and Kell */
   "url": "http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.jpg"
 },
@@ -69,6 +78,11 @@
   "regexp": "http://maximumble.thebookofbiff.com/comics/.*\\.(png|gif)",
   "output": "maxim",
   "days": "XmtwtfX"
+},
+{ /* Out There */
+  "url": "http://outthere.keenspot.com/comics/%Y%m%d.jpg",
+  "output": "out-there",
+  "days": "XXXwXXX"
 },
 { /* PVP */
   "url": "http://www.pvponline.com/comic/",
@@ -83,6 +97,15 @@
   "output": "questionable",
   "days": "XmtwtfX"
 },
+{ /* Red Meat */
+  "url": "http://www.redmeat.com/redmeat/current/index-1.gif",
+  "output": "redmeat",
+  "days": "XXXXXfX"
+},
+{ /* Sinfest */
+  "url": "http://www.sinfest.net/comikaze/comics/%Y-%m-%d.gif",
+  "output": "sinfest"
+},
 { /* SMBC */
   "url": "http://www.smbc-comics.com/comics/%Y%m%d.png",
   "output": "smbc"
@@ -91,35 +114,6 @@
   "url": "http://www.somethingpositive.net/",
   "regexp": "sp[0-9]*\\.png",
   "output": "somethingp"
-},
-{ /* xkcd */
-  "url": "http://xkcd.com/",
-  "regexp": "http://imgs.xkcd.com/comics/[^.]*\\.(jpg|png|gif)",
-  "output": "xkcd",
-  "days": "XmXwXfX"
-},
-
-/* keenspace */
-
-{ /* The Devil's Panties */
-  "url": "http://thedevilspanties.com/",
-  "regexp": "/comics/[0-9]+[a-z]?\\.(gif|jpg|png)",
-  "referer": "url",
-  "output": "devilspanties"
-},
-{ /* GPF */
-  "url": "http://www.gpf-comics.com/",
-  "regexp": "/comics/gpf[^.]+\\.(gif|jpg|png)",
-  "days": "XmXwXwX"
-},
-{ /* Out There */
-  "url": "http://outthere.keenspot.com/comics/%Y%m%d.jpg",
-  "output": "out-there",
-  "days": "XXXwXXX"
-},
-{ /* Sinfest */
-  "url": "http://www.sinfest.net/comikaze/comics/%Y-%m-%d.gif",
-  "output": "sinfest"
 },
 { /* Two Lumps */
   "url": "http://www.twolumps.net/comics/%Y%m%d.jpg",
@@ -132,8 +126,12 @@
   "output": "ubersoft",
   "days": "XmtwtfX"
 },
-
-/* gocomics.com */
+{ /* xkcd */
+  "url": "http://xkcd.com/",
+  "regexp": "http://imgs.xkcd.com/comics/[^.]*\\.(jpg|png|gif)",
+  "output": "xkcd",
+  "days": "XmXwXfX"
+},
 
 { "gocomic": "boundandgagged" },
 { "gocomic": "brevity" },
@@ -157,10 +155,5 @@
 { "gocomic": "workingitout" },
 { "gocomic": "working-daze" },
 { "gocomic": "zackhill" },
-{ /* Red Meat */
-  "url": "http://www.redmeat.com/redmeat/current/index-1.gif",
-  "output": "redmeat",
-  "days": "XXXXXfX"
-},
 
 {} ] }
