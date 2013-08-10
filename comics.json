@@ -10,11 +10,16 @@
   "output": "aislin",
   "days": "Xmtwtfs"
 },
-{/* Biff */
+{ /* Biff */
   "url": "http://thebookofbiff.com",
   "regexp": "http://thebookofbiff.com/comics/.*\\.(png|gif)",
   "output": "biff",
   "days": "XmtwtfX"
+},
+{ /* Channelate */
+  "url": "http://www.channelate.com/",
+  "regexp": "comics/.*\\.png",
+  "output": "channelate"
 },
 { /* Cyanide & Happiness */
   "url": "http://explosm.net/comics/",
@@ -23,7 +28,7 @@
    "http://(www.)?explosm\\.net/db/files/Comics/(Matt|Kris|Dave|Rob)/[^/]+\\.(png|jpg|gif)",
   "output": "cyanide"
 },
-{/* Diesel Sweeties */
+{ /* Diesel Sweeties */
   "url": "http://www.dieselsweeties.com/",
   "regexp": "/h?strips/[^.]+.(png|gif)",
   "output": "diesel"
@@ -51,7 +56,7 @@
   "output": "frumps",
   "days": "XmXXtXX"
 },
-{/* Girls With Slingshots */
+{ /* Girls With Slingshots */
   "url": "http://www.girlswithslingshots.com",
   "regexp": "comics/[GWS0-9-]*.*\\.jpg",
   "output": "gws"
@@ -59,7 +64,7 @@
 { /* Kevin and Kell */
   "url": "http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.jpg"
 },
-{/* Maximumble */
+{ /* Maximumble */
   "url": "http://maximumble.thebookofbiff.com",
   "regexp": "http://maximumble.thebookofbiff.com/comics/.*\\.(png|gif)",
   "output": "maxim",
@@ -72,7 +77,7 @@
   "output": "pvp",
   "days": "XmtwtfX"
 },
-{/* Questionable Content */
+{ /* Questionable Content */
   "url": "http://www.questionablecontent.net",
   "regexp": "http://www.questionablecontent.net/comics/[0-9]*\\.(png|gif|jpg)",
   "output": "questionable",
@@ -82,7 +87,7 @@
   "url": "http://www.smbc-comics.com/comics/%Y%m%d.png",
   "output": "smbc"
 },
-{/* xkcd */
+{ /* xkcd */
   "url": "http://xkcd.com/",
   "regexp": "http://imgs.xkcd.com/comics/[^.]*\\.(jpg|png|gif)",
   "output": "xkcd",
@@ -111,7 +116,7 @@
   "url": "http://www.sinfest.net/comikaze/comics/%Y-%m-%d.gif",
   "output": "sinfest"
 },
-{/* Two Lumps */
+{ /* Two Lumps */
   "url": "http://www.twolumps.net/comics/%Y%m%d.jpg",
   "output": "twolumps",
   "days": "XmXwXfX"
