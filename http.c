@@ -913,7 +913,7 @@ void out_results(struct connection *conn, int skipped)
 	putchar('\n');
 
 	/* Dump the missed comics */
-	for ( ; conn; conn = conn->next)
+	for (; conn; conn = conn->next)
 		if (!conn->gotit) {
 			if (conn->outname)
 				printf("  %s (%s)\n", conn->url, conn->outname);
