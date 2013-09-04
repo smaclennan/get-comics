@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# configurable
+GET_COMICS=get-comics
+BASE=$HOME/comics
+OUT=`date +%Y%m%d`.html
+# end
+
+# For running from crontab
+mkdir -p $BASE
+cd $BASE || { echo "Problems with $BASE"; exit 1; }
+
+$GET_COMICS -d . -l links.out > output.log
+
+cat<<EOF >$OUT
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head><title>Comics for $DIR</title></head>
+<body>
+<center>
+<h1>Comics for $DIR</h1>
+
+<p><a href="http://seanm.ca/comics.html">Comics Page</a>
+
+EOF
+
+if [ -s output.log ] ; then
+  echo "<p><table><tr><td><pre>" >> $OUT
+  cat output.log >> $OUT
+  echo "</pre></table>" >> $OUT
+  echo "" >> $OUT
+fi
+
+echo "<p><table>" >> $OUT
+while read link; do
+    echo "<tr><td><img src=\"$link\">" >> $OUT
+done < links.out
+
+echo "</table>" >> $OUT
+
+cat<<EOF >>$OUT
+
+<p><a href="http://seanm.ca/comics.html">Comics Page</a>
+</center>
+</body>
+</html>
+EOF
+
+rm links.out output.log
+rm -f index.html
+ln -s $OUT index.html
