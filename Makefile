@@ -74,6 +74,7 @@ install: all
 
 clean:
 	rm -f get-comics link-check http-get *.o .*.o.d get-comics.html TAGS
+	rm -f go-get-comics
 
 DEP_FILES := $(wildcard .*.o.d)
 $(if $(DEP_FILES),$(eval include $(DEP_FILES)))

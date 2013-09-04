@@ -1,5 +1,7 @@
 #!/bin/sh
 
+checkpatch=/lib/modules/`uname -r`/source/scripts/checkpatch.pl
+
 # By running the files one at a time we get around the
 # get-comics/link_check function redeclaration warnings
 echo "Running sparse on files..."
@@ -8,5 +10,5 @@ for f in *.[ch]; do sparse $f; done
 echo "Running checkpatch on files..."
 for f in *.[ch]; do
     [ $f = JSON_parser.c -o $f = JSON_parser.h ] && continue
-    checkpatch --file $f | fgrep -q "no obvious style problems" || echo "$f"
+    $checkpatch --file $f | fgrep -q "no obvious style problems" || echo "$f"
 done
