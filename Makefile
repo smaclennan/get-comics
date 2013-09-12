@@ -1,3 +1,5 @@
+CC = clang -fno-color-diagnostics
+
 # SAM CFLAGS += -O3 -Wall -g
 CFLAGS += -Wall -g
 
@@ -5,7 +7,8 @@ CFLAGS += -Wall -g
 CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
 
 # Comment in to enable the log_* functions
-CFLAGS += -DLOGGING
+# Currently unused. Mainly for debugging.
+#CFLAGS += -DLOGGING
 
 # Comment in to enable https via openssl
 CFLAGS += -DWANT_SSL
@@ -19,9 +22,7 @@ ifneq ($(GO),)
 EXTRA+=go-get-comics
 endif
 
-OBJS    := get-comics.o http.o log.o openssl.o socket.o config.o JSON_parser.o
-LC_OBJS := link-check.o http.o log.o openssl.o socket.o
-HG_OBJS := http-get.o http.o log.o openssl.o socket.o
+COMMON  := http.o log.o openssl.o socket.o
 
 # Optionaly add openssl
 ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
@@ -44,22 +45,20 @@ QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
 
-all:	get-comics link-check http-get $(EXTRA) TAGS
+all:	get-comics link-check http-get $(EXTRA)
 
-get-comics: $(OBJS)
-	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $(OBJS) $(LIBS)
+get-comics: get-comics.o $(COMMON) config.o JSON_parser.o
+	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $+ $(LIBS)
+	@if [ -x /usr/bin/etags ]; then /usr/bin/etags *.c *.h; fi
 
-link-check: $(LC_OBJS)
-	$(QUIET_LINK)$(CC) $(CFLAGS) -o link-check $(LC_OBJS) $(LIBS)
+link-check: link-check.o $(COMMON)
+	$(QUIET_LINK)$(CC) $(CFLAGS) -o link-check $+ $(LIBS)
 
-http-get: $(HG_OBJS)
-	$(QUIET_LINK)$(CC) $(CFLAGS) -o http-get $(HG_OBJS) $(LIBS)
+http-get: http-get.o $(COMMON)
+	$(QUIET_LINK)$(CC) $(CFLAGS) -o http-get $+ $(LIBS)
 
 go-get-comics: get-comics.go
 	$(GO) -o $@ $+
-
-TAGS: $(OBJS) $(LC_OBJS)
-	@if [ -x /usr/bin/etags ]; then /usr/bin/etags *.c *.h; else touch TAGS; fi
 
 *.o: get-comics.h
 
@@ -76,5 +75,4 @@ clean:
 	rm -f get-comics link-check http-get *.o .*.o.d get-comics.html TAGS
 	rm -f go-get-comics
 
-DEP_FILES := $(wildcard .*.o.d)
-$(if $(DEP_FILES),$(eval include $(DEP_FILES)))
+include $(wildcard .*.o.d)
