@@ -35,8 +35,7 @@ get-comics 3
 
 The third version of get-comics used libcurl. I found that libcurl
 hangs too often. Since the second version has been reliable for years,
-I basically dropped this version in favour of the second version.
-
+I basically dropped this version in favor of the second version.
 
 JSON Parsers
 ------------
@@ -57,6 +56,12 @@ So I finally decided on JSON_parser.c. It is portable. And it has the
 big plus that it tells you the exact character in the file the syntax
 error was on.
 
+get-comics 4
+------------
+
+I rewrote get-comics in go just because I could ;) I used it
+exclusively for months. But it requires libgo, so I have reverted back
+to the C version.
 
 Documentation
 -------------
