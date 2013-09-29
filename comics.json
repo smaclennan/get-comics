@@ -14,6 +14,11 @@
   "output": "biff",
   "days": "XmtwtfX"
 },
+{ /* Bizarro via ArcaMax */
+  "url": "http://www.arcamax.com/thefunnies/bizarro/",
+  "regexp": "/newspics/cache/[a-z0-9]+/[0-9/]+\\.jpg",
+  "output": "bizarro"
+},
 { /* Channelate */
   "url": "http://www.channelate.com/",
   "regexp": "comics/.*\\.png",
