@@ -67,7 +67,7 @@
 },
 { /* Girls With Slingshots */
   "url": "http://www.girlswithslingshots.com",
-  "regexp": "comics/[GWS0-9-]*.*\\.jpg",
+  "regexp": "comics/[0-9]+-GWS[0-9]+\\.jpg",
   "output": "gws"
 },
 { /* GPF */
