@@ -61,7 +61,7 @@
 },
 { /* The Frumps */
   "url": "http://thefrumps.com",
-  "regexp": "comics/%Y-%m-%d-[^.]*\\.jpg",
+  "regexp": "wp-content/uploads/%Y/%m/%Y-%m-%d-[^.]*\\.jpg",
   "output": "frumps",
   "days": "XmXXtXX"
 },
