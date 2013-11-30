@@ -60,14 +60,14 @@
   "regexp": "/ff[0-9]+/f[vc][0-9]+\\.(gif|png)"
 },
 { /* The Frumps */
-  "url": "http://thefrumps.com",
+  "url": "http://www.thefrumps.com",
   "regexp": "wp-content/uploads/%Y/%m/%Y-%m-%d-[^.]*\\.jpg",
   "output": "frumps",
   "days": "XmXXtXX"
 },
 { /* Girls With Slingshots */
   "url": "http://www.girlswithslingshots.com",
-  "regexp": "comics/[0-9]+-GWS[0-9]+\\.jpg",
+  "regexp": "comics/[0-9]+-gws\\.jpeg",
   "output": "gws"
 },
 { /* GPF */
