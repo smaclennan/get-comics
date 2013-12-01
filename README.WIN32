@@ -2,7 +2,7 @@ GET-COMICS under WINDOWS
 ------------------------
 
 Get-comics should compile and run natively under Windows 95 and up. It
-uses winsocks 2.
+uses winsocks 2. Compile it from the win32 directory.
 
 Windows now uses JSON_parser.c and does not need any external
 libraries, only the standard SDK ones.
