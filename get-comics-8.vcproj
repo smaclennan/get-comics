@@ -203,40 +203,11 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\config.c"
+			RelativePath="..\config.c"
 			>
 		</File>
 		<File
-			RelativePath="get-comics.c"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath="get-comics.h"
-			>
-		</File>
-		<File
-			RelativePath="win32\getopt.h"
-			>
-		</File>
-		<File
-			RelativePath="http.c"
+			RelativePath="..\get-comics.c"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
@@ -257,27 +228,15 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\JSON_parser.c"
+			RelativePath="..\get-comics.h"
 			>
 		</File>
 		<File
-			RelativePath=".\JSON_parser.h"
+			RelativePath="getopt.h"
 			>
 		</File>
 		<File
-			RelativePath=".\log.c"
-			>
-		</File>
-		<File
-			RelativePath=".\openssl.c"
-			>
-		</File>
-		<File
-			RelativePath=".\win32\poll.c"
-			>
-		</File>
-		<File
-			RelativePath="win32\regex.c"
+			RelativePath="..\http.c"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
@@ -298,15 +257,27 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="win32\regex.h"
+			RelativePath="..\JSON_parser.c"
 			>
 		</File>
 		<File
-			RelativePath=".\socket.c"
+			RelativePath="..\JSON_parser.h"
 			>
 		</File>
 		<File
-			RelativePath="win32\win32.c"
+			RelativePath="..\log.c"
+			>
+		</File>
+		<File
+			RelativePath="..\openssl.c"
+			>
+		</File>
+		<File
+			RelativePath=".\poll.c"
+			>
+		</File>
+		<File
+			RelativePath=".\regex.c"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
@@ -327,7 +298,36 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\win32\win32.h"
+			RelativePath=".\regex.h"
+			>
+		</File>
+		<File
+			RelativePath="..\socket.c"
+			>
+		</File>
+		<File
+			RelativePath=".\win32.c"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\win32.h"
 			>
 		</File>
 	</Files>
