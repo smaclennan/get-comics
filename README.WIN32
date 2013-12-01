@@ -8,3 +8,4 @@ Windows now uses JSON_parser.c and does not need any external
 libraries, only the standard SDK ones.
 
 Tested May 2011 on Vista.
+Tested Nov 2013 on Windows 8.
