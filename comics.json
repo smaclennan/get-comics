@@ -16,7 +16,7 @@
 },
 { /* Bizarro via ArcaMax */
   "url": "http://www.arcamax.com/thefunnies/bizarro/",
-  "regexp": "/newspics/cache/[a-z0-9]+/[0-9/]+\\.jpg",
+  "regexp": "/newspics/[a-z0-9]+/[0-9/]+\\.(jpg|gif)",
   "output": "bizarro"
 },
 { /* Channelate */
