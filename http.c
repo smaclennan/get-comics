@@ -544,6 +544,7 @@ static char *lazy_imgtype(struct connection *conn)
 		{ ".gif", { 'G', 'I', 'F', '8' } }, /* gif89 and gif87a */
 		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe0 } }, /* jfif */
 		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe1 } }, /* exif */
+		{ ".jpg", { 0xff, 0xd8, 0xff, 0xee } }, /* Adobe */
 		{ ".png", { 0x89, 'P', 'N', 'G' } },
 		{ ".tif", { 'M', 'M', 0, 42 } }, /* big endian */
 		{ ".tif", { 'I', 'I', 42, 0 } }, /* little endian */
