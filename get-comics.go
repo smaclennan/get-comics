@@ -240,7 +240,7 @@ func lazy_imgtype(hdr []byte) string {
 	case 'I':
 		return ".tif"
 	default:
-		fmt.Println("Warning: Unknow file type: ", hdr)
+		fmt.Println("Warning: Unknown file type: ", hdr)
 		return ".xxx"
 	}
 }
