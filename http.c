@@ -535,7 +535,7 @@ int read_reply(struct connection *conn)
 
 /* This is a very lazy checking heuristic since we expect the files to
  * be one of the four formats and well formed. Yes, Close To Home
- * actually used TIFF. TIFF is only tested on little endian machine. */
+ * actually used TIFF. TIFF is only tested on little endian machines. */
 static char *lazy_imgtype(struct connection *conn)
 {
 	static struct header {
