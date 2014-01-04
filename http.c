@@ -399,7 +399,8 @@ int read_reply(struct connection *conn)
 		*(p + 1) = '\0';
 		conn->curp = p + 3;
 		if (verbose > 1)
-			printf("- Reply %ld bytes\n", conn->curp - conn->buf);
+			printf("- Reply %d bytes\n",
+			       (int)(conn->curp - conn->buf));
 	} else if (conn->curp == conn->endp) {
 		printf("Unexpected EOF %s\n", conn->url);
 		return 1;
@@ -791,7 +792,7 @@ static int read_file_gzip(struct connection *conn)
 
 	bytes = conn->endp - conn->curp;
 	if (bytes <= 0) {
-		printf("Read file problems %lu for %s!\n", bytes, conn->url);
+		printf("Read file problems %zu for %s!\n", bytes, conn->url);
 		return 1;
 	}
 
@@ -874,7 +875,7 @@ static int read_file(struct connection *conn)
 			return 0;
 		}
 	} else {
-		printf("Read file problems %lu for %s!\n",
+		printf("Read file problems %zu for %s!\n",
 		       bytes, conn->url);
 		return 1;
 	}
