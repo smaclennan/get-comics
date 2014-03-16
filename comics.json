@@ -19,6 +19,11 @@
   "regexp": "/newspics/[a-z0-9]+/[0-9/]+\\.(jpg|gif)",
   "output": "bizarro"
 },
+{ /* chainsawsuit */
+  "url": "http://chainsawsuit.com/",
+  "regexp": "wp-content/uploads/%Y/%m/[0-9a-zA-Z-]+.png",
+  "output": "chainsawsuit"
+},
 { /* Channelate */
   "url": "http://www.channelate.com/",
   "regexp": "comics/.*\\.png",
@@ -63,7 +68,7 @@
   "url": "http://www.thefrumps.com",
   "regexp": "wp-content/uploads/%Y/%m/%Y-%m-%d-[^.]*\\.jpg",
   "output": "frumps",
-  "days": "XmXXtXX"
+  "days": "XmXwXfX"
 },
 { /* Girls With Slingshots */
   "url": "http://www.girlswithslingshots.com",
@@ -74,6 +79,11 @@
   "url": "http://www.gpf-comics.com/",
   "regexp": "/comics/gpf[^.]+\\.(gif|jpg|png)",
   "days": "XmXwXwX"
+},
+{ /*invisible bread */
+  "url": "http://invisiblebread.com/",
+  "regexp": "comics/[0-9a-zA-Z-]+.png",
+  "output": "invisiblebread"
 },
 { /* Kevin and Kell */
   "url": "http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.jpg"
