@@ -17,7 +17,14 @@
 { /* Bizarro via ArcaMax */
   "url": "http://www.arcamax.com/thefunnies/bizarro/",
   "regexp": "/newspics/[a-z0-9]+/[0-9/]+\\.(jpg|gif)",
-  "output": "bizarro"
+  "output": "bizarro",
+  "days": "Xmtwtfs"
+},
+{ /* Bizarro via ArcaMax - Sunday */
+  "url": "http://www.arcamax.com/thefunnies/bizarro/",
+  "regexp": "/newspics/cache/[a-z0-9]+/[0-9/]+\\.(jpg|gif)",
+  "output": "bizarro",
+  "days": "sXXXXXX"
 },
 { /* chainsawsuit */
   "url": "http://chainsawsuit.com/",
