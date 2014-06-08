@@ -125,7 +125,7 @@
   "days": "XXXXXfX"
 },
 { /* Sinfest */
-  "url": "http://www.sinfest.net/comikaze/comics/%Y-%m-%d.gif",
+  "url": "http://www.sinfest.net/btphp/comics/%Y-%m-%d.gif",
   "output": "sinfest"
 },
 { /* SMBC */
