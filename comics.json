@@ -79,7 +79,7 @@
 },
 { /* Girls With Slingshots */
   "url": "http://www.girlswithslingshots.com",
-  "regexp": "comics/[0-9]+-[Gg][Ww][Ss][0-9]*\\.(jpg|jpeg)",
+  "regexp": "comics/[0-9]+-[Gg][Ww][Ss][a-z]*[0-9]*\\.(jpg|jpeg|png)",
   "output": "gws"
 },
 { /* GPF */
@@ -120,7 +120,8 @@
   "days": "XmtwtfX"
 },
 { /* Red Meat */
-  "url": "http://www.redmeat.com/redmeat/current/index-1.gif",
+  "url": "http://www.redmeat.com/max-cannon/FreshMeat",
+  "regexp": "http://www.redmeat.com/imager/[^\"]*",
   "output": "redmeat",
   "days": "XXXXXfX"
 },
