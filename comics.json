@@ -52,7 +52,8 @@
 { /* Diesel Sweeties */
   "url": "http://www.dieselsweeties.com/",
   "regexp": "/h?strips/[^.]+.(png|gif)",
-  "output": "diesel"
+  "output": "diesel",
+  "days": "XmtwtfX"
 },
 { /* Dilbert */
   "url": "http://dilbert.com/",
