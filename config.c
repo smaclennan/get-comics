@@ -1,5 +1,5 @@
 #include "get-comics.h"
-#include "JSON_parser.h"
+#include "my-parser.h"
 
 static struct tm *today;
 static unsigned wday;
@@ -292,7 +292,7 @@ int read_config(char *fname)
 	int count = 0, next_char;
 	FILE *input;
 	JSON_config config;
-	struct JSON_parser_struct *jc;
+	JSON_parser jc;
 	time_t now;
 
 	if (!fname)

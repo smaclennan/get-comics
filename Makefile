@@ -47,7 +47,7 @@ QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
 
 all:	get-comics link-check http-get $(EXTRA)
 
-get-comics: get-comics.o $(COMMON) config.o JSON_parser.o
+get-comics: get-comics.o $(COMMON) config.o my-parser.o
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $+ $(LIBS)
 	@if [ -x /usr/bin/etags ]; then /usr/bin/etags *.c *.h; fi
 
