@@ -59,7 +59,7 @@ JSON_parser new_JSON_parser(JSON_config const * config)
 
 static void new_state(JSON_parser jc, enum states new)
 {
-	if (verbose > 1)
+	if (verbose > 2)
 		printf("state %d -> %d\n", jc->state, new);
 	jc->state = new;
 }
@@ -114,10 +114,9 @@ int JSON_parser_char(JSON_parser jc, int next_char)
 			value.vu.str.value = jc->string;
 			jc->callback(NULL, jc->type, &value);
 			new_state(jc, jc->next_state);
-		} else if (next_char == '\\') {
-			*jc->str++ = next_char;
+		} else if (next_char == '\\')
 			new_state(jc, J_STRING_QUOTE);
-		} else
+		else
 			*jc->str++ = next_char;
 		break;
 
