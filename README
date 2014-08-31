@@ -43,7 +43,7 @@ JSON Parsers
 I was using JSON at work and much preferred it to XML. I decided to
 convert get-comics to use JSON.
 
-get-comics went through three JSON parsers. I started with JSON
+get-comics went through four JSON parsers. I started with JSON
 lib. But it was an extra library dependency which is a pain on distros
 like Ubuntu that do not provide include files by default.
 
@@ -55,6 +55,11 @@ is not portable to windows.
 So I finally decided on JSON_parser.c. It is portable. And it has the
 big plus that it tells you the exact character in the file the syntax
 error was on.
+
+Now I have written my own parser. This was an experiment to see how
+hard it would be to write a simple JSON parser for get-comics
+only. The parser is compatible with JSON_parser so it is easy to
+switch back.
 
 get-comics 4
 ------------
