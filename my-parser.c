@@ -21,21 +21,24 @@ enum states {
 	J_END,
 	J_DONE,
 	J_FAILED,
-	C1,
-	C2,
-	C3
+	J_C1,
+	J_C2,
+	J_C3
 };
 
 struct JSON_parser_struct {
 	JSON_parser_callback callback;
 	enum states state;
 
+	/* JSON_T_STRING only */
 	char string[256], *str;
+	int type;
+	int next_state;
+
+	/* JSON_T_INTEGER only */
 	int integer;
 
-	int type;	/* JSON_T_STRING only */
-	int next_state;	/* JSON_T_STRING only */
-
+	/* sanity checking */
 	int in_array;
 	int in_object;
 };
@@ -101,7 +104,7 @@ int JSON_parser_char(JSON_parser jc, int next_char)
 		if (next_char == '"')
 			STRING_OBJ(JSON_T_KEY, J_COLON);
 		else if (next_char == '/')
-			new_state(jc, C1);
+			new_state(jc, J_C1);
 		else if (next_char == '}') /* empty object allowed */
 			LEAVE_OBJECT(J_START);
 		else if (!isspace(next_char))
@@ -136,23 +139,23 @@ int JSON_parser_char(JSON_parser jc, int next_char)
 		}
 		break;
 
-	case C1:
+	case J_C1:
 		if (next_char == '*')
-			new_state(jc, C2);
+			new_state(jc, J_C2);
 		else
 			goto failed;
 		break;
 
-	case C2:
+	case J_C2:
 		if (next_char == '*')
-			new_state(jc, C3);
+			new_state(jc, J_C3);
 		break;
 
-	case C3:
+	case J_C3:
 		if (next_char == '/')
 			new_state(jc, J_KEY_START);
 		else
-			new_state(jc, C2);
+			new_state(jc, J_C2);
 		break;
 
 
@@ -221,8 +224,6 @@ int JSON_parser_done(JSON_parser jc)
 
 void delete_JSON_parser(JSON_parser jc)
 {
-    if (jc) {
-	free((void*)jc);
-	jc = NULL;
-     }
+    if (jc)
+	free(jc);
 }
