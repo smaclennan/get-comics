@@ -221,6 +221,7 @@ int JSON_parse_file(const char *fname, JSON_parser_callback callback)
 		++count;
 		if (!JSON_parser_char(&JC, next_char)) {
 			printf("JSON_parser: syntax error byte %d\n", count);
+			JC.state = 0; /* fail */
 			break;
 		}
 	}
