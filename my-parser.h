@@ -12,14 +12,6 @@ typedef struct JSON_value_struct {
 
 typedef int (*JSON_parser_callback)(void* ctx, int type, const struct JSON_value_struct* value);
 
-typedef struct {
-    JSON_parser_callback    callback;
-    int                     depth;
-    int                     allow_comments;
-} JSON_config;
-
-typedef struct JSON_parser_struct *JSON_parser;
-
 typedef enum
 {
     JSON_T_NONE = 0,
@@ -32,11 +24,7 @@ typedef enum
     JSON_T_KEY
 } JSON_type;
 
-void init_JSON_config(JSON_config * config);
-JSON_parser new_JSON_parser(JSON_config const* config);
-void delete_JSON_parser(JSON_parser jc);
-int JSON_parser_char(JSON_parser jc, int next_char);
-int JSON_parser_done(JSON_parser jc);
+/* get-comics extension */
+int JSON_parse_file(const char *fname, JSON_parser_callback callback);
 
 #endif
-

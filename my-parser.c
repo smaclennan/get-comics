@@ -26,7 +26,7 @@ enum states {
 	J_C3
 };
 
-struct JSON_parser_struct {
+typedef struct JSON_parser_struct {
 	JSON_parser_callback callback;
 	enum states state;
 
@@ -41,24 +41,9 @@ struct JSON_parser_struct {
 	/* sanity checking */
 	int in_array;
 	int in_object;
-};
+} *JSON_parser;
 
-void init_JSON_config(JSON_config* config)
-{
-    if (config)
-	memset(config, 0, sizeof(*config));
-}
-
-JSON_parser new_JSON_parser(JSON_config const * config)
-{
-	if (config->callback == NULL)
-		return NULL;
-
-	JSON_parser jc = (JSON_parser)calloc(1, sizeof(*jc));
-	if (jc)
-		jc->callback = config->callback;
-	return jc;
-}
+static struct JSON_parser_struct JC;
 
 static void new_state(JSON_parser jc, enum states new)
 {
@@ -81,7 +66,7 @@ static void new_state(JSON_parser jc, enum states new)
 		jc->next_state = next_statein;	\
 	} while (0)
 
-int JSON_parser_char(JSON_parser jc, int next_char)
+static int JSON_parser_char(JSON_parser jc, int next_char)
 {
 	JSON_value value;
 
@@ -217,13 +202,34 @@ failed:
 	return 0;
 }
 
-int JSON_parser_done(JSON_parser jc)
+int JSON_parse_file(const char *fname, JSON_parser_callback callback)
 {
-	return jc->state == J_DONE;
-}
+	if (!callback)
+		return 2;
 
-void delete_JSON_parser(JSON_parser jc)
-{
-    if (jc)
-	free(jc);
+	memset(&JC, 0, sizeof(JC));
+	JC.callback = callback;
+
+	FILE *fp = fopen(fname, "r");
+	if (!fp) {
+		my_perror((char *)fname);
+		return -1;
+	}
+
+	int count = 0, next_char;
+	while ((next_char = fgetc(fp)) > 0) {
+		++count;
+		if (!JSON_parser_char(&JC, next_char)) {
+			printf("JSON_parser: syntax error byte %d\n", count);
+			break;
+		}
+	}
+
+	fclose(fp);
+
+	int rc = JC.state == J_DONE ? 0 : 1;
+	if (rc)
+		printf("JSON_parser: parse failed\n");
+
+	return rc;
 }

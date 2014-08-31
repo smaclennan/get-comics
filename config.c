@@ -289,49 +289,13 @@ static int parse(void *ctx, int type, const JSON_value *value)
 
 int read_config(char *fname)
 {
-	int count = 0, next_char;
-	FILE *input;
-	JSON_config config;
-	JSON_parser jc;
-	time_t now;
-
-	if (!fname)
-		fname = JSON_FILE;
-
 	/* Get the time for the urls */
-	time(&now);
+	time_t now = time(NULL);
 	today = localtime(&now);
 	wday = 1 << today->tm_wday;
 
-	init_JSON_config(&config);
-
-	config.depth = 3;
-	config.callback = parse;
-	config.allow_comments = 1;
-
-	jc = new_JSON_parser(&config);
-
-	input = fopen(fname, "r");
-	if (!input) {
-		my_perror(fname);
+	if (JSON_parse_file(fname ? fname : JSON_FILE, parse))
 		exit(1);
-	}
 
-	while ((next_char = fgetc(input)) > 0) {
-		++count;
-		if (!JSON_parser_char(jc, next_char)) {
-			printf("JSON_parser: syntax error byte %d\n", count);
-			exit(1);
-		}
-	}
-
-	fclose(input);
-
-	if (!JSON_parser_done(jc)) {
-		printf("JSON_parser: unexpected EOF\n");
-		exit(1);
-	}
-
-	delete_JSON_parser(jc);
 	return 0;
 }

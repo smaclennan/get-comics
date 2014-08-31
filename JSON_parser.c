@@ -1161,3 +1161,46 @@ void init_JSON_config(JSON_config* config)
         config->free = free;
     }
 }
+
+/* get-comics addition */
+int JSON_parse_file(const char *fname, JSON_parser_callback callback)
+{
+	JSON_config config;
+
+	init_JSON_config(&config);
+
+	config.depth = 3;
+	config.callback = callback;
+	config.allow_comments = 1;
+
+	JSON_parser jc = new_JSON_parser(&config);
+	if (!jc) {
+		puts("Unable to create parser.");
+		return 1;
+	}
+
+	FILE *fp = fopen(fname, "r");
+	if (!fp) {
+		perror(fname);
+		delete_JSON_parser(jc);
+		return -1;
+	}
+
+	int count = 0, next_char;
+	while ((next_char = fgetc(fp)) > 0) {
+		++count;
+		if (!JSON_parser_char(jc, next_char)) {
+			printf("JSON_parser: syntax error byte %d\n", count);
+			break;
+		}
+	}
+
+	fclose(fp);
+
+	int rc = JSON_parser_done(jc) ? 0 : 1;
+	if (rc)
+		printf("JSON_parser: unexpected EOF\n");
+
+	delete_JSON_parser(jc);
+	return rc;
+}
