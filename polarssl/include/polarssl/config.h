@@ -1451,7 +1451,7 @@
  *
  * This module adds support for the PKCS#5 PBKDF2 key derivation function.
  */
-#define POLARSSL_PBKDF2_C
+// SAM #define POLARSSL_PBKDF2_C
 
 /**
  * \def POLARSSL_PEM_PARSE_C
@@ -1665,7 +1665,7 @@
  *
  * Requires: POLARSSL_SSL_CACHE_C
  */
-#define POLARSSL_SSL_CACHE_C
+// SAM #define POLARSSL_SSL_CACHE_C
 
 /**
  * \def POLARSSL_SSL_CLI_C
@@ -1742,7 +1742,7 @@
  *
  * This module is used by the HAVEGE random number generator.
  */
-#define POLARSSL_TIMING_C
+// SAM #define POLARSSL_TIMING_C
 
 /**
  * \def POLARSSL_VERSION_C

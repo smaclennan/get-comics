@@ -44,13 +44,12 @@ OBJS=	aes.o		aesni.o					\
 		error.o				\
 		md.o		md_wrap.o				\
 				md5.o				\
-		oid.o									\
-			pbkdf2.o	pem.o			\
+		oid.o		pem.o			\
 		pk.o		pk_wrap.o	pkparse.o		\
 		rsa.o		sha1.o		sha256.o		\
-		sha512.o	ssl_cache.o	ssl_cli.o		\
+		sha512.o	ssl_cli.o		\
 		   ssl_ciphersuites.o			\
-		ssl_tls.o	timing.o		\
+		ssl_tls.o			\
 		version.o								\
 		x509.o		x509_crt.o			\
 
