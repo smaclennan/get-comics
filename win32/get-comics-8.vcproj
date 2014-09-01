@@ -257,11 +257,11 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\JSON_parser.c"
+			RelativePath="..\my-parser.c"
 			>
 		</File>
 		<File
-			RelativePath="..\JSON_parser.h"
+			RelativePath="..\my-parser.h"
 			>
 		</File>
 		<File
