@@ -22,7 +22,8 @@ ifneq ($(GO),)
 EXTRA+=go-get-comics
 endif
 
-COMMON  := http.o log.o openssl.o socket.o
+CFILES  := http.c log.c openssl.c socket.c
+COMMON	:= $(CFILES:.c=.o)
 
 # Optionaly add openssl
 ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
@@ -64,6 +65,9 @@ go-get-comics: get-comics.go
 
 get-comics.html: get-comics.1
 	man2html get-comics.1 > get-comics.html
+
+check:
+	sparse get-comics.c $(CFILES) config.c my-parser.c
 
 install: all
 	install -D -s -m 755 get-comics $(DESTDIR)/usr/bin/get-comics
