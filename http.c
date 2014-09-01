@@ -11,6 +11,7 @@
 
 #ifdef _WIN32
 /* #define errno WSAGetLastError() */
+#undef EINPROGRESS /* we need the windows socket define */
 #define EINPROGRESS WSAEWOULDBLOCK
 /* Windows doesn't support this. */
 #define MSG_NOSIGNAL 0
@@ -306,7 +307,7 @@ int build_request(struct connection *conn)
 
 void write_request(struct connection *conn)
 {
-	ssize_t n; /* must be signed */
+	int n; /* must be signed. windows does not support ssize_t */
 
 #ifdef WANT_SSL
 	if (conn->ssl) {

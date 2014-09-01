@@ -135,8 +135,8 @@
     <ClCompile Include="..\config.c" />
     <ClCompile Include="..\get-comics.c" />
     <ClCompile Include="..\http.c" />
-    <ClCompile Include="..\JSON_parser.c" />
     <ClCompile Include="..\log.c" />
+    <ClCompile Include="..\my-parser.c" />
     <ClCompile Include="..\openssl.c" />
     <ClCompile Include="poll.c" />
     <ClCompile Include="regex.c" />
@@ -145,8 +145,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\get-comics.h" />
+    <ClInclude Include="..\my-parser.h" />
     <ClInclude Include="getopt.h" />
-    <ClInclude Include="..\JSON_parser.h" />
     <ClInclude Include="regex.h" />
     <ClInclude Include="win32.h" />
   </ItemGroup>

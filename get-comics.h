@@ -5,16 +5,19 @@
 #include <errno.h>
 #include <time.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #ifdef _WIN32
 #include "win32/win32.h"
+
+#define JSON_FILE		"comics.json"
 #else
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/poll.h>
 #include <sys/socket.h>
-#endif
-#include <sys/stat.h>
 
+#define JSON_FILE		"/usr/share/get-comics/comics.json"
+#endif
 
 #ifdef WANT_GZIP
 #include <zlib.h>
@@ -23,10 +26,7 @@
 static inline int inflateEnd(void *strm) { return -1; }
 #endif
 
-
 #define HTTP_PORT		80
-#define JSON_FILE		"/usr/share/get-comics/comics.json"
-
 
 /* Limit the number of concurrent sockets. */
 #define THREAD_LIMIT	6
