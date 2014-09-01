@@ -67,7 +67,7 @@ int openssl_connect(struct connection *conn)
 
 		entropy_init(&entropy);
 		if (ctr_drbg_init(&ctr_drbg, entropy_func, &entropy,
-				  (uint8_t *)"get-comics", 10)) {
+				  (unsigned char *)"get-comics", 10)) {
 			puts("ctr_drbg_init failed! We need more entropy.");
 			exit(1);
 		}
@@ -104,7 +104,7 @@ int openssl_connect(struct connection *conn)
 
 int openssl_read(struct connection *conn)
 {
-	int n = ssl_read(conn->ssl, (uint8_t *)conn->curp, conn->rlen);
+	int n = ssl_read(conn->ssl, (unsigned char *)conn->curp, conn->rlen);
 	if (n < 0)
 		switch (n) {
 		case POLARSSL_ERR_NET_WANT_READ:
@@ -120,7 +120,7 @@ int openssl_read(struct connection *conn)
 
 int openssl_write(struct connection *conn)
 {
-	int n = ssl_write(conn->ssl, (uint8_t *)conn->curp, conn->length);
+	int n = ssl_write(conn->ssl, (unsigned char *)conn->curp, conn->length);
 	if (n < 0)
 		switch (n) {
 		case POLARSSL_ERR_NET_WANT_READ:
