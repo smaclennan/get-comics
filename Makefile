@@ -11,7 +11,10 @@ CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
 #CFLAGS += -DLOGGING
 
 # Comment in to enable https via openssl
-CFLAGS += -DWANT_SSL
+#CFLAGS += -DWANT_OPENSSL
+
+# Comment in to enable https via polarssl
+CFLAGS += -DWANT_POLARSSL
 
 # Comment in to enable gzip encoding
 CFLAGS += -DWANT_GZIP
@@ -22,12 +25,20 @@ ifneq ($(GO),)
 EXTRA+=go-get-comics
 endif
 
-CFILES  := http.c log.c openssl.c socket.c
+CFILES  := http.c log.c openssl.c polarssl.c socket.c
 COMMON	:= $(CFILES:.c=.o)
 
-# Optionaly add openssl
-ifneq ($(findstring WANT_SSL,$(CFLAGS)),)
+# Optionally add polarssl
+ifneq ($(findstring WANT_POLARSSL,$(CFLAGS)),)
+PLIB=polarssl/library/libpolarssl.a
+CFLAGS += -DWANT_SSL -Ipolarssl/include
+LIBS += $(PLIB)
+else
+# Optionally add openssl
+ifneq ($(findstring WANT_OPENSSL,$(CFLAGS)),)
+CFLAGS += -DWANT_SSL
 LIBS += -lssl -lcrypto
+endif
 endif
 
 # Optionaly add gzip
@@ -46,7 +57,7 @@ QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
 
-all:	get-comics link-check http-get $(EXTRA)
+all:	$(PLIB) get-comics link-check http-get $(EXTRA)
 
 get-comics: get-comics.o $(COMMON) config.o my-parser.o
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $+ $(LIBS)
@@ -60,6 +71,9 @@ http-get: http-get.o $(COMMON)
 
 go-get-comics: get-comics.go
 	$(GO) -o $@ $+
+
+$(PLIB):
+	make -C polarssl -j4
 
 *.o: get-comics.h
 
@@ -78,5 +92,6 @@ install: all
 clean:
 	rm -f get-comics link-check http-get *.o .*.o.d get-comics.html TAGS
 	rm -f go-get-comics
+	@make -C polarssl clean
 
 include $(wildcard .*.o.d)

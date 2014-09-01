@@ -102,7 +102,10 @@ struct connection {
 
 	struct log *log;
 
-#ifdef WANT_SSL
+#ifdef WANT_OPENSSL
+	void *ssl;
+#endif
+#ifdef WANT_POLARSSL
 	void *ssl;
 #endif
 
@@ -208,3 +211,4 @@ int openssl_check_connect(struct connection *conn);
 int openssl_read(struct connection *conn);
 int openssl_write(struct connection *conn);
 void openssl_close(struct connection *conn);
+void openssl_list_ciphers(void);

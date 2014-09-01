@@ -1,6 +1,6 @@
 #include "get-comics.h"
 
-#ifdef WANT_SSL
+#ifdef WANT_OPENSSL
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
@@ -154,7 +154,5 @@ void openssl_close(struct connection *conn)
 		conn->ssl = NULL;
 	}
 }
-#else
-void openssl_close(struct connection *conn) {}
 #endif
 
