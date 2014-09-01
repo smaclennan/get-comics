@@ -148,11 +148,6 @@ static void add_redirect(struct connection **conn, int val)
 	(*conn)->redirect_ok = val;
 }
 
-static char s_key[80];
-static int s_iskey;
-
-static struct connection *new;
-static int in_comics;
 
 static void parse_top_str(char *key, char *val)
 {
@@ -187,75 +182,84 @@ static void parse_top_int(char *key, int val)
 		printf("Unexpected element '%s'\n", key);
 }
 
-static void parse_comic_str(char *key, char *val)
+static void parse_comic_str(struct connection **new, char *key, char *val)
 {
 	if (verbose > 1)
 		printf("  key '%s' val '%s'\n", key, val);
 
 	if (strcmp(key, "url") == 0)
-		add_url(&new, val);
+		add_url(new, val);
 	else if (strcmp(key, "days") == 0)
-		add_days(&new, val);
+		add_days(new, val);
 	else if (strcmp(key, "regexp") == 0)
-		add_regexp(&new, val);
+		add_regexp(new, val);
 	else if (strcmp(key, "output") == 0)
-		add_outname(&new, val);
+		add_outname(new, val);
 	else if (strcmp(key, "href") == 0)
-		add_base_href(&new, val);
+		add_base_href(new, val);
 	else if (strcmp(key, "referer") == 0)
-		add_referer(&new, val);
+		add_referer(new, val);
 	else if (strcmp(key, "gocomic") == 0)
-		add_gocomic(&new, val);
+		add_gocomic(new, val);
 	else
 		printf("Unexpected entry %s\n", key);
 }
 
-static void parse_comic_int(char *key, int val)
+static void parse_comic_int(struct connection **new, char *key, int val)
 {
 	if (verbose > 1)
 		printf("  key '%s' val %d\n", key, val);
 
 	if (strcmp(key, "regmatch") == 0)
-		add_regmatch(&new, val);
+		add_regmatch(new, val);
 	else if (strcmp(key, "redirect") == 0)
-		add_redirect(&new, val);
+		add_redirect(new, val);
 	else
 		printf("Unexpected entry %s\n", key);
 }
 
-static int parse(void *ctx, int type, const JSON_value *value)
+static struct parse_ctx {
+	char s_key[80];
+	int s_iskey;
+	int in_comics;
+	struct connection *new;
+} parse_ctx;
+
+static int parse(void *ctxin, int type, const JSON_value *value)
 {
+	struct parse_ctx *ctx = ctxin;
+
 	switch (type) {
 	case JSON_T_KEY:
-		s_iskey = 1;
-		snprintf(s_key, sizeof(s_key), "%s", value->vu.str.value);
+		ctx->s_iskey = 1;
+		snprintf(ctx->s_key, sizeof(ctx->s_key), "%s", value->vu.str.value);
 		return 1; /* do not break */
 
 	case JSON_T_STRING:
-		if (!s_iskey) {
+		if (!ctx->s_iskey) {
 			printf("Parse error: string with no key\n");
 			exit(1);
 		}
-		if (in_comics)
-			parse_comic_str(s_key, (char *)value->vu.str.value);
+		if (ctx->in_comics)
+			parse_comic_str(&ctx->new, ctx->s_key, (char *)value->vu.str.value);
 		else
-			parse_top_str(s_key, (char *)value->vu.str.value);
+			parse_top_str(ctx->s_key, (char *)value->vu.str.value);
 		break;
 
 	case JSON_T_INTEGER:
-		if (!s_iskey) {
+		if (!ctx->s_iskey) {
 			printf("Parse error: int with no key\n");
 			exit(1);
 		}
-		if (in_comics)
-			parse_comic_int(s_key, value->vu.integer_value);
+		if (ctx->in_comics)
+			parse_comic_int(&ctx->new, ctx->s_key, value->vu.integer_value);
 		else
-			parse_top_int(s_key, value->vu.integer_value);
+			parse_top_int(ctx->s_key, value->vu.integer_value);
 		break;
 
 	case JSON_T_ARRAY_BEGIN:
-		if (s_iskey && strcmp(s_key, "comics") == 0)
-			in_comics = 1;
+		if (ctx->s_iskey && strcmp(ctx->s_key, "comics") == 0)
+			ctx->in_comics = 1;
 		else {
 			printf("Invalid array\n");
 			exit(1);
@@ -263,27 +267,27 @@ static int parse(void *ctx, int type, const JSON_value *value)
 		break;
 
 	case JSON_T_ARRAY_END:
-		in_comics = 0;
+		ctx->in_comics = 0;
 		break;
 
 	case JSON_T_OBJECT_BEGIN:
-		if (in_comics) {
-			new = NULL;
+		if (ctx->in_comics) {
+			ctx->new = NULL;
 			if (verbose > 1)
 				printf("Comic:\n");
 		}
 		break;
 
 	case JSON_T_OBJECT_END:
-		if (in_comics)
-			sanity_check_comic(new);
+		if (ctx->in_comics)
+			sanity_check_comic(ctx->new);
 		break;
 
 	default:
 		printf("Unexpected JSON object %d\n", type);
 	}
 
-	s_iskey = 0;
+	ctx->s_iskey = 0;
 	return 1;
 }
 
@@ -294,7 +298,8 @@ int read_config(char *fname)
 	today = localtime(&now);
 	wday = 1 << today->tm_wday;
 
-	if (JSON_parse_file(fname ? fname : JSON_FILE, parse))
+	memset(&parse_ctx, 0, sizeof(parse_ctx)); /* reset context */
+	if (JSON_parse_file(fname ? fname : JSON_FILE, parse, &parse_ctx))
 		exit(1);
 
 	return 0;

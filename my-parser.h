@@ -25,6 +25,6 @@ typedef enum
 } JSON_type;
 
 /* get-comics extension */
-int JSON_parse_file(const char *fname, JSON_parser_callback callback);
+int JSON_parse_file(const char *fname, JSON_parser_callback callback, void *callback_ctx);
 
 #endif

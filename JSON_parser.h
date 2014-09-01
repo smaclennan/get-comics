@@ -218,7 +218,9 @@ JSON_PARSER_DLL_API int JSON_parser_get_last_error(JSON_parser jc);
 JSON_PARSER_DLL_API int JSON_parser_reset(JSON_parser jc);
 
 /* get-comics addition */
-JSON_PARSER_DLL_API int JSON_parse_file(const char *fname, JSON_parser_callback callback);
+JSON_PARSER_DLL_API int JSON_parse_file(const char *fname,
+					JSON_parser_callback callback,
+					void *callback_ctx);
 #ifdef __cplusplus
 }
 #endif

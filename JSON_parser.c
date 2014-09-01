@@ -1163,7 +1163,7 @@ void init_JSON_config(JSON_config* config)
 }
 
 /* get-comics addition */
-int JSON_parse_file(const char *fname, JSON_parser_callback callback)
+int JSON_parse_file(const char *fname, JSON_parser_callback callback void *ctx)
 {
 	JSON_config config;
 
@@ -1171,6 +1171,7 @@ int JSON_parse_file(const char *fname, JSON_parser_callback callback)
 
 	config.depth = 3;
 	config.callback = callback;
+	config.callback_ctx = ctx;
 	config.allow_comments = 1;
 
 	JSON_parser jc = new_JSON_parser(&config);
