@@ -81,6 +81,7 @@ static char *find_regexp(struct connection *conn)
 		if (regexec(&regex, buf, MATCH_DEPTH, match, 0) == 0) {
 			/* got a match */
 			fclose(fp);
+			regfree(&regex);
 			if (unlink_index)
 				unlink(conn->regfname);
 
@@ -102,6 +103,7 @@ static char *find_regexp(struct connection *conn)
 	fclose(fp);
 
 	printf("%s DID NOT MATCH REGEXP\n", conn->url);
+	regfree(&regex);
 
 	return NULL;
 }
