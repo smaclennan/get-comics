@@ -154,5 +154,30 @@ void openssl_close(struct connection *conn)
 		conn->ssl = NULL;
 	}
 }
+
+void openssl_list_ciphers(void)
+{
+	FILE *pfp = popen("openssl ciphers", "r");
+	if (!pfp) {
+		my_perror("openssl ciphers");
+		return;
+	}
+
+	int count = 0, ccount = 0, ch, i;
+	while ((ch = fgetc(pfp)) != EOF)
+		if (ch == ':') {
+			if (count == 0)
+				for (i = ccount; i < 42; ++i)
+					putchar(' ');
+			else putchar('\n');
+			count = !count;
+			ccount = 0;
+		} else {
+			putchar(ch);
+			++ccount;
+		}
+
+	pclose(pfp);
+}
 #endif
 

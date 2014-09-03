@@ -242,12 +242,13 @@ static void read_conn(struct connection *conn)
 
 static void usage(int rc)
 {
-	fputs("usage: get-comics [-krvV] [-d comics_dir]", stdout);
+	fputs("usage: get-comics [-krvCV] [-d comics_dir]", stdout);
 	puts(" [-l links_file] [-p proxy]");
 	puts("                  [-t threads] [config-file ...]");
 	puts("Where: -k  keep index files");
 	puts("       -r  randomize");
 	puts("       -v  verbose");
+	puts("       -C  list supported ciphers");
 	puts("       -V  verify config");
 	exit(rc);
 }
@@ -289,7 +290,7 @@ int main(int argc, char *argv[])
 			verbose++;
 			break;
 		case 'C':
-#ifdef WANT_POLARSSL
+#ifdef WANT_SSL
 			openssl_list_ciphers();
 #else
 			puts("-C not supported.");

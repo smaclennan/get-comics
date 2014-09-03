@@ -156,6 +156,4 @@ void openssl_list_ciphers(void)
 	    list++;
 	}
 }
-#else
-void openssl_close(struct connection *conn) {}
 #endif

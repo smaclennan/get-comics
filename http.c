@@ -47,7 +47,9 @@ int release_connection(struct connection *conn)
 	if (verbose > 2)
 		printf("Release %s\n", conn->url);
 
+#ifdef WANT_SSL
 	openssl_close(conn);
+#endif
 
 	if (conn->poll && conn->poll->fd != -1) {
 		closesocket(conn->poll->fd);
