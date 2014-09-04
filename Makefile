@@ -1,7 +1,10 @@
 CC = clang -fno-color-diagnostics
 
-# SAM CFLAGS += -O3 -Wall -g
-CFLAGS += -Wall -g
+
+# If you set D=1 on the command line then $(D:1=-g)
+# returns -g, else it returns the default (-O2).
+D = -O2
+CFLAGS += -Wall $(D:1=-g)
 
 # For dependencies
 CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
