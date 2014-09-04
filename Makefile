@@ -20,6 +20,8 @@ CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
 CFLAGS += -DWANT_POLARSSL
 
 # Comment in to enable gzip encoding
+CFLAGS += -DWANT_ZLIB
+ZDIR = zlib-1.2.8
 CFLAGS += -DWANT_GZIP
 
 # Currently I use gccgo
@@ -45,8 +47,13 @@ endif
 endif
 
 # Optionaly add gzip
+ifneq ($(findstring WANT_ZLIB,$(CFLAGS)),)
+ZLIB=$(ZDIR)/libz.a
+LIBS += $(ZLIB)
+else
 ifneq ($(findstring WANT_GZIP,$(CFLAGS)),)
 LIBS += -lz
+endif
 endif
 
 #
@@ -60,7 +67,7 @@ QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
 
-all:	$(PLIB) get-comics link-check http-get $(EXTRA)
+all:	$(PLIB) $(ZLIB) get-comics link-check http-get $(EXTRA)
 
 get-comics: get-comics.o $(COMMON) config.o my-parser.o
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $+ $(LIBS)
@@ -77,6 +84,9 @@ go-get-comics: get-comics.go
 
 $(PLIB):
 	make -C polarssl -j4
+
+$(ZLIB):
+	make -C $(ZDIR) -j4
 
 *.o: get-comics.h
 
@@ -96,5 +106,6 @@ clean:
 	rm -f get-comics link-check http-get *.o .*.o.d get-comics.html TAGS
 	rm -f go-get-comics
 	@make -C polarssl clean
+	@make -C $(ZDIR) clean
 
 include $(wildcard .*.o.d)
