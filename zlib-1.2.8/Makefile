@@ -55,7 +55,7 @@ man3dir = ${mandir}/man3
 pkgconfigdir = ${libdir}/pkgconfig
 
 OBJZ = adler32.o crc32.o infback.o inffast.o inflate.o inftrees.o zutil.o
-OBJG = gzclose.o gzlib.o gzread.o
+OBJG = gzlib.o gzread.o
 OBJC = $(OBJZ) $(OBJG)
 
 PIC_OBJZ = adler32.lo crc32.lo deflate.lo infback.lo inffast.lo inflate.lo inftrees.lo trees.lo zutil.lo
