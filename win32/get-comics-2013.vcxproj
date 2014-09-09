@@ -59,8 +59,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.;..;win32;C:\Program Files\Microsoft SDKs\Windows\v7.1\Include;%(AdditionalIncludeDirectories);../polarssl/include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions);WANT_SSL;WANT_POLARSSL</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.;..;win32;C:\Program Files\Microsoft SDKs\Windows\v7.1\Include;%(AdditionalIncludeDirectories);../polarssl/include;../zlib-1.2.8</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions);WANT_SSL;WANT_POLARSSL;WANT_ZLIB;WANT_GZIP</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -171,6 +171,13 @@
     <ClCompile Include="..\polarssl\library\version.c" />
     <ClCompile Include="..\polarssl\library\x509.c" />
     <ClCompile Include="..\polarssl\library\x509_crt.c" />
+    <ClCompile Include="..\zlib-1.2.8\adler32.c" />
+    <ClCompile Include="..\zlib-1.2.8\crc32.c" />
+    <ClCompile Include="..\zlib-1.2.8\infback.c" />
+    <ClCompile Include="..\zlib-1.2.8\inffast.c" />
+    <ClCompile Include="..\zlib-1.2.8\inflate.c" />
+    <ClCompile Include="..\zlib-1.2.8\inftrees.c" />
+    <ClCompile Include="..\zlib-1.2.8\zutil.c" />
     <ClCompile Include="poll.c" />
     <ClCompile Include="regex.c" />
     <ClCompile Include="..\socket.c" />
@@ -179,6 +186,14 @@
   <ItemGroup>
     <ClInclude Include="..\get-comics.h" />
     <ClInclude Include="..\my-parser.h" />
+    <ClInclude Include="..\zlib-1.2.8\crc32.h" />
+    <ClInclude Include="..\zlib-1.2.8\inffast.h" />
+    <ClInclude Include="..\zlib-1.2.8\inffixed.h" />
+    <ClInclude Include="..\zlib-1.2.8\inflate.h" />
+    <ClInclude Include="..\zlib-1.2.8\inftrees.h" />
+    <ClInclude Include="..\zlib-1.2.8\zconf.h" />
+    <ClInclude Include="..\zlib-1.2.8\zlib.h" />
+    <ClInclude Include="..\zlib-1.2.8\zutil.h" />
     <ClInclude Include="getopt.h" />
     <ClInclude Include="regex.h" />
     <ClInclude Include="win32.h" />
