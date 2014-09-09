@@ -55,11 +55,10 @@ man3dir = ${mandir}/man3
 pkgconfigdir = ${libdir}/pkgconfig
 
 OBJZ = adler32.o crc32.o infback.o inffast.o inflate.o inftrees.o zutil.o
-OBJC = $(OBJZ) $(OBJG)
+OBJC = $(OBJZ)
 
-PIC_OBJZ = adler32.lo crc32.lo deflate.lo infback.lo inffast.lo inflate.lo inftrees.lo trees.lo zutil.lo
-PIC_OBJG = compress.lo uncompr.lo gzclose.lo gzlib.lo gzread.lo gzwrite.lo
-PIC_OBJC = $(PIC_OBJZ) $(PIC_OBJG)
+PIC_OBJZ = adler32.lo crc32.lo infback.lo inffast.lo inflate.lo inftrees.lo trees.lo zutil.lo
+PIC_OBJC = $(PIC_OBJZ)
 
 # to use the asm code: make OBJA=match.o, PIC_OBJA=match.lo
 OBJA =
