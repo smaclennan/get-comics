@@ -28,7 +28,7 @@
 #if defined(POLARSSL_PEM_PARSE_C) || defined(POLARSSL_PEM_WRITE_C)
 #include "polarssl/pem.h"
 #include "polarssl/base64.h"
-#include "polarssl/des.h"
+// SAM #include "polarssl/des.h"
 #include "polarssl/aes.h"
 #include "polarssl/md5.h"
 #include "polarssl/cipher.h"
