@@ -663,7 +663,7 @@
  *
  * Enable the checkup functions (*_self_test).
  */
-#define POLARSSL_SELF_TEST
+// SAM #define POLARSSL_SELF_TEST
 
 /**
  * \def POLARSSL_SSL_ALL_ALERT_MESSAGES
