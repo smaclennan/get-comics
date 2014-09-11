@@ -7,7 +7,6 @@
 
 #ifndef ZCONF_H
 #define ZCONF_H
-#define Z_SOLO
 
 /*
  * If you *really* need a unique prefix for all types and library functions,
