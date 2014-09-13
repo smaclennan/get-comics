@@ -198,6 +198,7 @@ void out_results(struct connection *comics, int skipped);
 /* export from socket.c */
 int connect_socket(struct connection *conn, char *hostname, char *port);
 void check_connect(struct connection *conn);
+void free_cache(void);
 
 /* export from log.c */
 void log_add(struct connection *conn, char *fmt, ...);

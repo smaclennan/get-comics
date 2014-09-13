@@ -437,6 +437,7 @@ int main(int argc, char *argv[])
 	getchar();
 #endif
 
+	free_cache(); /* for valgrind */
 	return 0;
 }
 
