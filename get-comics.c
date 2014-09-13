@@ -345,7 +345,14 @@ int main(int argc, char *argv[])
 		thread_limit = n_comics;
 
 	if (!comics_dir) {
+#ifdef WIN32
+		char *homedrive = getenv("HOMEDRIVE");
+		char *homepath = getenv("HOMEPATH");
+		char home[64];
+		snprintf(home, sizeof(home), "%s%s", homedrive, homepath);
+#else
 		char *home = getenv("HOME");
+#endif
 
 		if (home) {
 			comics_dir = must_alloc(strlen(home) + 10);
@@ -425,6 +432,10 @@ int main(int argc, char *argv[])
 		fclose(links_only);
 
 	out_results(comics, skipped);
+#ifdef WIN32
+	printf("Hit return to exit");
+	getchar();
+#endif
 
 	return 0;
 }

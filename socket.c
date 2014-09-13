@@ -5,15 +5,14 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+
+#define USE_CACHE /* fails in windows */
 #endif
 
 
 /* Only define this if your OS does not support getaddrinfo.
 #define IPV4
 */
-
-#define USE_CACHE
-
 
 static int tcp_connected(struct connection *conn)
 {
