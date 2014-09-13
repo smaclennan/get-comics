@@ -36,25 +36,41 @@ int openssl_check_connect(struct connection *conn)
 static int netrecv(void *ctx, unsigned char *buf, size_t len)
 {
     int fd = *(int *)ctx;
-    int n = read(fd, buf, len);
+    int n = recv(fd, buf, len, 0);
     if (n < 0) {
-	    if (errno == EWOULDBLOCK || errno == EINTR)
+#ifdef WIN32
+	    if (WSAGetLastError() == WSAEWOULDBLOCK)
 		    return POLARSSL_ERR_NET_WANT_READ;
-	    else
-		    return POLARSSL_ERR_NET_RECV_FAILED;
+	    if (WSAGetLastError() == WSAECONNRESET)
+		    return POLARSSL_ERR_NET_CONN_RESET;
+#else
+	    if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
+		    return POLARSSL_ERR_NET_WANT_READ;
+	    if (errno == EPIPE || errno == ECONNRESET)
+		    return POLARSSL_ERR_NET_CONN_RESET;
+#endif
+	    return POLARSSL_ERR_NET_RECV_FAILED;
     }
     return n;
 }
 
 static int netsend(void *ctx, const unsigned char *buf, size_t len)
 {
-    int fd = *(int *) ctx;
-    int n = write(fd, buf, len);
+    int fd = *(int *)ctx;
+    int n = send(fd, buf, len, 0);
     if (n < 0) {
-	    if (errno == EWOULDBLOCK || errno == EINTR)
+#ifdef WIN32
+	    if (WSAGetLastError() == WSAEWOULDBLOCK)
 		    return POLARSSL_ERR_NET_WANT_WRITE;
-	    else
-		    return POLARSSL_ERR_NET_SEND_FAILED;
+	    if (WSAGetLastError() == WSAECONNRESET)
+		    return POLARSSL_ERR_NET_CONN_RESET;
+#else
+	    if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
+		    return POLARSSL_ERR_NET_WANT_WRITE;
+	    if (errno == EPIPE || errno == ECONNRESET)
+		    return POLARSSL_ERR_NET_CONN_RESET;
+#endif
+	    return POLARSSL_ERR_NET_SEND_FAILED;
     }
     return n;
 }
