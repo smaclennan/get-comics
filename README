@@ -5,7 +5,7 @@ I read about 30 to 40 comics daily from the net. That is along with
 the comics in the newspaper. I wrote an Emacs lisp program to download
 them all for convenient viewing.
 
-However, when I go away on vacation, I wanted something to download
+However, when I go away on vacation, I want something to download
 the comics daily and save them. I had problems getting Emacs to
 startup and run reliably, so I quickly wrote the first get-comics.
 
@@ -37,6 +37,13 @@ The third version of get-comics used libcurl. I found that libcurl
 hangs too often. Since the second version has been reliable for years,
 I basically dropped this version in favor of the second version.
 
+get-comics 4
+------------
+
+I rewrote get-comics in go just because I could ;) I used it
+exclusively for months. But it requires libgo, so I have reverted back
+to the C version.
+
 JSON Parsers
 ------------
 
@@ -52,7 +59,7 @@ not a full JSON library. I decided on js0n. I really like js0n. It is
 very small and fits nicely with the comics layout. Unfortunately, it
 is not portable to windows.
 
-So I finally decided on JSON_parser.c. It is portable. And it has the
+So I switched to JSON_parser.c. It is portable. And it has the
 big plus that it tells you the exact character in the file the syntax
 error was on.
 
@@ -60,13 +67,6 @@ Now I have written my own parser. This was an experiment to see how
 hard it would be to write a simple JSON parser for get-comics
 only. The parser is compatible with JSON_parser so it is easy to
 switch back.
-
-get-comics 4
-------------
-
-I rewrote get-comics in go just because I could ;) I used it
-exclusively for months. But it requires libgo, so I have reverted back
-to the C version.
 
 Documentation
 -------------
