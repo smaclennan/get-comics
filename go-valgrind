@@ -1,0 +1,10 @@
+#!/bin/sh
+
+OPTS="--leak-check=full"
+OPTS="$OPTS --show-reachable=yes"
+OPTS="$OPTS -v"
+#OPTS="$OPTS --suppressions=valgrind.supp"
+
+valgrind $OPTS ./get-comics $* 2>valgrind.out
+
+tail valgrind.out

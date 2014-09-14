@@ -7,12 +7,13 @@
 #include <netdb.h>
 #endif
 
-
 /* Only define this if your OS does not support getaddrinfo.
 #define IPV4
 */
 
+/* Non-IPV4 only. We currently get about 78% cache hits! */
 #define USE_CACHE
+
 
 
 static int tcp_connected(struct connection *conn)
@@ -53,7 +54,7 @@ static inline int inprogress(void)
 #ifdef _WIN32
 	return WSAGetLastError() == WSAEWOULDBLOCK;
 #else
-	return errno == EINPROGRESS;
+	return errno == EINPROGRESS || errno == EAGAIN;
 #endif
 }
 
@@ -108,9 +109,13 @@ failed:
 	closesocket(sock);
 	return -1;
 }
+
+void free_cache(void) {}
 #else
 
+#ifdef USE_CACHE
 static struct addrinfo *cache;
+#endif
 
 static struct addrinfo *get_cache(char *hostname)
 {
@@ -154,6 +159,19 @@ failed:
 	if (new->ai_addr)
 		free(new->ai_addr);
 	free(new);
+#endif
+}
+
+void free_cache(void)
+{
+#ifdef USE_CACHE
+	while (cache) {
+		struct addrinfo *next = cache->ai_next;
+		free(cache->ai_addr);
+		free(cache->ai_canonname);
+		free(cache);
+		cache = next;
+	}
 #endif
 }
 
@@ -210,14 +228,14 @@ int connect_socket(struct connection *conn, char *hostname, char *port)
 				break;
 		}
 
-		freeaddrinfo(result);
-
-		if (!r) {
+		if (r) {
+			add_cache(hostname, r);
+			freeaddrinfo(result);
+		} else {
+			freeaddrinfo(result);
 			printf("Unable to get socket for host %s\n", hostname);
 			return -1;
 		}
-
-		add_cache(hostname, r);
 	}
 
 	if (!set_conn_socket(conn, sock)) {
