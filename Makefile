@@ -36,7 +36,7 @@ COMMON	:= $(CFILES:.c=.o)
 ifneq ($(findstring WANT_POLARSSL,$(CFLAGS)),)
 PLIB=polarssl/library/libpolarssl.a
 CFLAGS += -DWANT_SSL -Ipolarssl/include
-LIBS += $(PLIB)
+LLIBS += $(PLIB)
 else
 # Optionally add openssl
 ifneq ($(findstring WANT_OPENSSL,$(CFLAGS)),)
@@ -48,12 +48,14 @@ endif
 # Optionaly add gzip
 ifneq ($(findstring WANT_ZLIB,$(CFLAGS)),)
 ZLIB=$(ZDIR)/libz.a
-LIBS += $(ZLIB)
+LLIBS += $(ZLIB)
 else
 ifneq ($(findstring WANT_GZIP,$(CFLAGS)),)
 LIBS += -lz
 endif
 endif
+
+LIBS += $(LLIBS)
 
 #
 # Pretty print - "borrowed" from sparse Makefile
@@ -66,16 +68,16 @@ QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
 
-all:	$(PLIB) $(ZLIB) get-comics link-check http-get $(EXTRA)
+all:	get-comics link-check http-get $(EXTRA)
 
-get-comics: get-comics.o $(COMMON) config.o my-parser.o
+get-comics: get-comics.o $(COMMON) config.o my-parser.o $(LLIBS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $+ $(LIBS)
 	@if [ -x /usr/bin/etags ]; then /usr/bin/etags *.c *.h; fi
 
-link-check: link-check.o $(COMMON)
+link-check: link-check.o $(COMMON) $(LLIBS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o link-check $+ $(LIBS)
 
-http-get: http-get.o $(COMMON)
+http-get: http-get.o $(COMMON) $(LLIBS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o http-get $+ $(LIBS)
 
 go-get-comics: get-comics.go
