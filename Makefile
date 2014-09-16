@@ -8,6 +8,8 @@ CFLAGS += -Wall $(D:1=-g)
 # For dependencies
 CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
 
+MAKEFLAGS += --no-print-directory
+
 # Comment in to enable the log_* functions
 # Currently unused. Mainly for debugging.
 #CFLAGS += -DLOGGING
@@ -84,10 +86,10 @@ go-get-comics: get-comics.go
 	$(GO) -o $@ $+
 
 $(PLIB):
-	make -C polarssl -j4
+	$(MAKE) -C polarssl/library
 
 $(ZLIB):
-	make -C $(ZDIR) -j4
+	$(MAKE) -C $(ZDIR)
 
 *.o: get-comics.h
 

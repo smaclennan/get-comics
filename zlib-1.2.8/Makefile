@@ -68,6 +68,17 @@ OBJS = $(OBJC) $(OBJA)
 
 PIC_OBJS = $(PIC_OBJC) $(PIC_OBJA)
 
+#
+# Pretty print - "borrowed" from sparse Makefile
+#
+V	      = @
+Q	      = $(V:1=)
+QUIET_CC      = $(Q:@=@echo    '     CC       '$@;)
+QUIET_AR      = $(Q:@=@echo    '     AR       '$@;)
+
+%.o: %.c
+	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
+
 all: $(STATICLIB)
 
 static: example$(EXE) minigzip$(EXE)
@@ -123,7 +134,7 @@ cover: infcover
 	gcov inf*.c
 
 libz.a: $(OBJS)
-	$(AR) $(ARFLAGS) $@ $(OBJS)
+	$(QUIET_AR)$(AR) $(ARFLAGS) $@ $(OBJS)
 	-@ ($(RANLIB) $@ || true) >/dev/null 2>&1
 
 match.o: match.S
