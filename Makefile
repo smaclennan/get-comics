@@ -66,6 +66,7 @@ V	      = @
 Q	      = $(V:1=)
 QUIET_CC      = $(Q:@=@echo    '     CC       '$@;)
 QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
+QUIET_GO      = $(Q:@=@echo    '     GO       '$@;)
 
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
@@ -83,13 +84,13 @@ http-get: http-get.o $(COMMON) $(LLIBS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o http-get $+ $(LIBS)
 
 go-get-comics: get-comics.go
-	$(GO) -o $@ $+
+	$(QUIET_GO)$(GO) -o $@ $+
 
 $(PLIB):
-	$(MAKE) -C polarssl/library
+	@$(MAKE) -C polarssl/library
 
 $(ZLIB):
-	$(MAKE) -C $(ZDIR)
+	@$(MAKE) -C $(ZDIR)
 
 *.o: get-comics.h
 

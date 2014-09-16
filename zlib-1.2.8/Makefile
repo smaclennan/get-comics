@@ -73,8 +73,8 @@ PIC_OBJS = $(PIC_OBJC) $(PIC_OBJA)
 #
 V	      = @
 Q	      = $(V:1=)
-QUIET_CC      = $(Q:@=@echo    '     CC       '$@;)
-QUIET_AR      = $(Q:@=@echo    '     AR       '$@;)
+QUIET_CC      = $(Q:@=@echo    '     CC       zlib/'$@;)
+QUIET_AR      = $(Q:@=@echo    '     AR       zlib/'$@;)
 
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<

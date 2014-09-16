@@ -19,12 +19,12 @@ OBJS=	aes.o aesni.o asn1parse.o base64.o bignum.o certs.o cipher.o \
 all: libpolarssl.a
 
 libpolarssl.a: $(OBJS)
-	echo "     AR       $@"
+	echo "     AR       polarssl/$@"
 	$(AR) cr $@ $(OBJS)
 	$(AR) s $@
 
 .c.o:
-	echo "     CC       $<"
+	echo "     CC       polarssl/$<"
 	$(CC) $(CFLAGS) $(OFLAGS) -c $<
 
 clean:
