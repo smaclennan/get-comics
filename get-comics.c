@@ -242,6 +242,13 @@ static void read_conn(struct connection *conn)
 		reset_connection(conn); /* Try again */
 }
 
+#ifndef WIN32
+/* Polarssl can send a sigpipe when a connection is reset by the
+ * peer. It is safe to just ignore it.
+ */
+static void sigpipe(int signum) {}
+#endif
+
 static void usage(int rc)
 {
 	fputs("usage: get-comics [-krvCV] [-d comics_dir]", stdout);
@@ -371,6 +378,7 @@ int main(int argc, char *argv[])
 #else
 	signal(SIGTERM, dump_outstanding);
 	signal(SIGHUP, dump_outstanding);
+	signal(SIGPIPE, sigpipe);
 #endif
 
 	npoll = thread_limit + 1; /* add one for stdin */

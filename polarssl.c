@@ -27,8 +27,11 @@ int openssl_check_connect(struct connection *conn)
 	case POLARSSL_ERR_NET_WANT_WRITE:
 		set_writable(conn);
 		return 0;
+	case POLARSSL_ERR_NET_CONN_RESET:
+		reset_connection(conn);
+		return 1;
 	default:
-		printf("Not read or write %d\n", rc);
+		printf("Not read or write 0x%x\n", rc);
 		return 1;
 	}
 }
