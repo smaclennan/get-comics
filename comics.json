@@ -3,8 +3,8 @@
 "comics": [
 
 { /* Aislin */
-  "url": "http://www.montrealgazette.com/opinion/editorial-cartoons/index.html",
-  "regexp": "cms/binary/[0-9]+\\.jpg",
+  "url": "http://montrealgazette.com/gallery/editorial-cartoons",
+  "regexp":"http://wpmedia.montrealgazette.com/%Y/[0-9]+/\(pascal|aislin\)[^.]+\\.jpg",
   "output": "aislin",
   "days": "Xmtwtfs"
 },
