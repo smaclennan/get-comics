@@ -37,10 +37,9 @@
   "output": "channelate"
 },
 { /* Cyanide & Happiness */
-  "url": "http://explosm.net/comics/",
-  "redirect": 1,
+  "url": "http://explosm.net/",
   "regexp":
-   "http://(www.)?explosm\\.net/db/files/Comics/(Matt|Kris|Dave|Rob)/[^/]+\\.(png|jpg|gif)",
+   "//files\\.explosm\\.net/comics/(Matt|Kris|Dave|Rob)/[^/]+\\.(png|jpg|gif)",
   "output": "cyanide"
 },
 { /* The Devil's Panties */

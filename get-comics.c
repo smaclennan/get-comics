@@ -147,7 +147,7 @@ static int start_next_comic(void)
 
 int process_html(struct connection *conn)
 {
-	char *p;
+	char imgurl[1024], *p;
 
 	if (conn->out >= 0) {
 		close(conn->out);
@@ -170,15 +170,17 @@ int process_html(struct connection *conn)
 	if (is_http(p))
 		/* fully rooted */
 		conn->url = strdup(p);
-	else {
-		char imgurl[1024];
-
+	else if (strncmp(p, "//", 2) == 0) {
+		/* partially rooted - let's assume http */
+		snprintf(imgurl, sizeof(imgurl), "http:%s", p);
+		conn->url = strdup(imgurl);
+	} else {
 		if (conn->base_href)
-			sprintf(imgurl, "%s%s", conn->base_href, p);
+			snprintf(imgurl, sizeof(imgurl), "%s%s", conn->base_href, p);
 		else if (*p == '/')
-			sprintf(imgurl, "%s%s", conn->host, p);
+			snprintf(imgurl, sizeof(imgurl), "%s%s", conn->host, p);
 		else
-			sprintf(imgurl, "%s/%s", conn->host, p);
+			snprintf(imgurl, sizeof(imgurl), "%s/%s", conn->host, p);
 		conn->url = strdup(imgurl);
 	}
 
