@@ -4,7 +4,7 @@
 
 { /* Aislin */
   "url": "http://montrealgazette.com/gallery/editorial-cartoons",
-  "regexp":"http://wpmedia.montrealgazette.com/%Y/[0-9]+/\(pascal|aislin\)[^.]+\\.jpg",
+  "regexp":"http://wpmedia.montrealgazette.com/%Y/[0-9]+/\(pascal|aislinweb\)[^.]+\\.jpg",
   "output": "aislin",
   "days": "Xmtwtfs"
 },
