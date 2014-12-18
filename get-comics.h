@@ -62,6 +62,7 @@ struct log {
 
 
 struct connection {
+	int id; /* for debugging */
 	char *url;
 	char *host; /* filled by read_config */
 	char *regexp;
@@ -120,6 +121,7 @@ extern int thread_limit;
 extern int threads_set;
 extern int read_timeout;
 extern int randomize;
+extern FILE *debug_fp;
 
 extern int outstanding;
 extern int gotit;

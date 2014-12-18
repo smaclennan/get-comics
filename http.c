@@ -25,6 +25,7 @@ static char *proxy_port = "3128";
 static char *http = "HTTP/1.1";
 
 int verbose;
+FILE *debug_fp;
 
 int outstanding;
 int gotit;
@@ -86,6 +87,9 @@ static int close_connection(struct connection *conn)
 		--outstanding;
 		if (verbose > 1)
 			printf("Closed %s (%d)\n", conn->url, outstanding);
+		if (debug_fp)
+			fprintf(debug_fp, "%ld:   Closed %3d (%d)\n",
+					time(NULL), conn->id, outstanding);
 	} else
 		printf("Multiple Closes: %s\n", conn->url);
 	log_clear(conn);

@@ -7,9 +7,12 @@ static char *gocomics_regexp;
 
 static void new_comic(struct connection **conn)
 {
+	static int id;
+
 	if (*conn == NULL) {
 		*conn = must_alloc(sizeof(struct connection));
 		(*conn)->out = -1;
+		(*conn)->id = ++id;
 	}
 }
 
@@ -162,6 +165,8 @@ static void parse_top_str(char *key, char *val)
 		set_proxy(val);
 	else if (strcmp(key, "gocomics-regexp") == 0)
 		gocomics_regexp = must_strdup(val);
+	else if (strcmp(key, "debug") == 0)
+		debug_fp = fopen(val, "w");
 	else
 		printf("Unexpected element '%s'\n", key);
 }

@@ -130,8 +130,11 @@ static int start_next_comic(void)
 		} else if (build_request(head) == 0) {
 			time(&head->access);
 			if (verbose)
-				printf("Started %s (%d)\n",
-				       head->url, outstanding);
+				printf("Started %s (%d)\n", head->url, outstanding);
+			if (debug_fp)
+				fprintf(debug_fp, "%ld: Started  %3d '%s' (%d)\n",
+						head->access, head->id,
+						head->outname ? head->outname : head->url, outstanding);
 			++outstanding;
 			head = head->next;
 			return 1;
@@ -448,6 +451,8 @@ int main(int argc, char *argv[])
 #endif
 
 	free_cache(); /* for valgrind */
+	if (debug_fp)
+		fclose(debug_fp);
 	return 0;
 }
 
