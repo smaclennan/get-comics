@@ -4,7 +4,7 @@
 
 { /* Aislin */
   "url": "http://montrealgazette.com/gallery/editorial-cartoons",
-  "regexp":"http://wpmedia.montrealgazette.com/%Y/[0-9]+/\(pascal|aislinweb\)[^.]+\\.jpg",
+  "regexp":"http://wpmedia.montrealgazette.com/2[0-9]+/[0-9]+/\(pascal|aislinweb\)[^.]+\\.jpg",
   "output": "aislin",
   "days": "Xmtwtfs"
 },
@@ -62,7 +62,7 @@
 },
 { /* Dilbert - Sunday */
   "url": "http://dilbert.com/",
-  "regexp": "http://dilbert.com/dyn/str_strip/[0-9/]*.strip.sunday.gif",
+  "regexp": "http://assets.amuniversal.com/[0-9a-f]+",
   "output": "dilbert",
   "days": "sXXXXXX"
 },
