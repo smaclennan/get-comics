@@ -56,7 +56,7 @@
 },
 { /* Dilbert */
   "url": "http://dilbert.com/",
-  "regexp": "http://dilbert.com/dyn/str_strip/[0-9/]*.strip.gif",
+  "regexp": "http://assets.amuniversal.com/[0-9a-f]+",
   "output": "dilbert",
   "days": "Xmtwtfs"
 },
