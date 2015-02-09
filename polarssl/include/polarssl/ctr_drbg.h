@@ -3,12 +3,9 @@
  *
  * \brief CTR_DRBG based on AES-256 (NIST SP 800-90)
  *
- *  Copyright (C) 2006-2013, Brainspark B.V.
+ *  Copyright (C) 2006-2014, ARM Limited, All Rights Reserved
  *
- *  This file is part of PolarSSL (http://www.polarssl.org)
- *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
- *
- *  All rights reserved.
+ *  This file is part of mbed TLS (https://polarssl.org)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,17 +39,39 @@
 #define CTR_DRBG_SEEDLEN            ( CTR_DRBG_KEYSIZE + CTR_DRBG_BLOCKSIZE )
                                             /**< The seed length (counter + AES key)            */
 
-#if !defined(POLARSSL_CONFIG_OPTIONS)
-#if defined(POLARSSL_SHA512_C)
+/**
+ * \name SECTION: Module settings
+ *
+ * The configuration options you can set for this module are in this section.
+ * Either change them in config.h or define them on the compiler command line.
+ * \{
+ */
+
+#if !defined(CTR_DRBG_ENTROPY_LEN)
+#if defined(POLARSSL_SHA512_C) && !defined(POLARSSL_ENTROPY_FORCE_SHA256)
 #define CTR_DRBG_ENTROPY_LEN        48      /**< Amount of entropy used per seed by default (48 with SHA-512, 32 with SHA-256) */
 #else
 #define CTR_DRBG_ENTROPY_LEN        32      /**< Amount of entropy used per seed by default (48 with SHA-512, 32 with SHA-256) */
 #endif
+#endif
+
+#if !defined(CTR_DRBG_RESEED_INTERVAL)
 #define CTR_DRBG_RESEED_INTERVAL    10000   /**< Interval before reseed is performed by default */
+#endif
+
+#if !defined(CTR_DRBG_MAX_INPUT)
 #define CTR_DRBG_MAX_INPUT          256     /**< Maximum number of additional input bytes */
+#endif
+
+#if !defined(CTR_DRBG_MAX_REQUEST)
 #define CTR_DRBG_MAX_REQUEST        1024    /**< Maximum number of requested bytes per call */
+#endif
+
+#if !defined(CTR_DRBG_MAX_SEED_INPUT)
 #define CTR_DRBG_MAX_SEED_INPUT     384     /**< Maximum size of (re)seed buffer */
-#endif /* !POLARSSL_CONFIG_OPTIONS */
+#endif
+
+/* \} name SECTION: Module settings */
 
 #define CTR_DRBG_PR_OFF             0       /**< No prediction resistance       */
 #define CTR_DRBG_PR_ON              1       /**< Prediction resistance enabled  */
@@ -69,8 +88,9 @@ typedef struct
     unsigned char counter[16];  /*!<  counter (V)       */
     int reseed_counter;         /*!<  reseed counter    */
     int prediction_resistance;  /*!<  enable prediction resistance (Automatic
-                                      reseed before every random generation)        */
-    size_t entropy_len;         /*!<  amount of entropy grabbed on each (re)seed    */
+                                      reseed before every random generation)  */
+    size_t entropy_len;         /*!<  amount of entropy grabbed on each
+                                      (re)seed          */
     int reseed_interval;        /*!<  reseed interval   */
 
     aes_context aes_ctx;        /*!<  AES context       */
@@ -86,7 +106,7 @@ ctr_drbg_context;
 
 /**
  * \brief               CTR_DRBG initialization
- * 
+ *
  * Note: Personalization data can be provided in addition to the more generic
  *       entropy source to make this instantiation as unique as possible.
  *
@@ -106,6 +126,13 @@ int ctr_drbg_init( ctr_drbg_context *ctx,
                    void *p_entropy,
                    const unsigned char *custom,
                    size_t len );
+
+/**
+ * \brief               Clear CTR_CRBG context data
+ *
+ * \param ctx           CTR_DRBG context to clear
+ */
+void ctr_drbg_free( ctr_drbg_context *ctx );
 
 /**
  * \brief               Enable / disable prediction resistance (Default: Off)
@@ -141,7 +168,7 @@ void ctr_drbg_set_reseed_interval( ctr_drbg_context *ctx,
 
 /**
  * \brief               CTR_DRBG reseeding (extracts data from entropy source)
- * 
+ *
  * \param ctx           CTR_DRBG context
  * \param additional    Additional data to add to state (Can be NULL)
  * \param len           Length of additional data
@@ -158,6 +185,10 @@ int ctr_drbg_reseed( ctr_drbg_context *ctx,
  * \param ctx           CTR_DRBG context
  * \param additional    Additional data to update state with
  * \param add_len       Length of additional data
+ *
+ * \note                If add_len is greater than CTR_DRBG_MAX_SEED_INPUT,
+ *                      only the first CTR_DRBG_MAX_SEED_INPUT bytes are used,
+ *                      the remaining ones are silently discarded.
  */
 void ctr_drbg_update( ctr_drbg_context *ctx,
                       const unsigned char *additional, size_t add_len );
@@ -204,7 +235,8 @@ int ctr_drbg_random( void *p_rng,
  * \param ctx           CTR_DRBG context
  * \param path          Name of the file
  *
- * \return              0 if successful, 1 on file error, or
+ * \return              0 if successful,
+ *                      POLARSSL_ERR_CTR_DRBG_FILE_IO_ERROR on file error, or
  *                      POLARSSL_ERR_CTR_DRBG_ENTROPY_SOURCE_FAILED
  */
 int ctr_drbg_write_seed_file( ctr_drbg_context *ctx, const char *path );
@@ -216,12 +248,13 @@ int ctr_drbg_write_seed_file( ctr_drbg_context *ctx, const char *path );
  * \param ctx           CTR_DRBG context
  * \param path          Name of the file
  *
- * \return              0 if successful, 1 on file error,
+ * \return              0 if successful,
+ *                      POLARSSL_ERR_CTR_DRBG_FILE_IO_ERROR on file error,
  *                      POLARSSL_ERR_CTR_DRBG_ENTROPY_SOURCE_FAILED or
  *                      POLARSSL_ERR_CTR_DRBG_INPUT_TOO_BIG
  */
 int ctr_drbg_update_seed_file( ctr_drbg_context *ctx, const char *path );
-#endif
+#endif /* POLARSSL_FS_IO */
 
 /**
  * \brief               Checkup routine
@@ -231,7 +264,9 @@ int ctr_drbg_update_seed_file( ctr_drbg_context *ctx, const char *path );
 int ctr_drbg_self_test( int verbose );
 
 /* Internal functions (do not call directly) */
-int ctr_drbg_init_entropy_len( ctr_drbg_context *, int (*)(void *, unsigned char *, size_t), void *, const unsigned char *, size_t, size_t );
+int ctr_drbg_init_entropy_len( ctr_drbg_context *,
+                               int (*)(void *, unsigned char *, size_t), void *,
+                               const unsigned char *, size_t, size_t );
 
 #ifdef __cplusplus
 }

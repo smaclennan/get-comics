@@ -3,12 +3,9 @@
  *
  * \brief Configuration options (set of defines)
  *
- *  Copyright (C) 2006-2013, Brainspark B.V.
+ *  Copyright (C) 2006-2014, ARM Limited, All Rights Reserved
  *
- *  This file is part of PolarSSL (http://www.polarssl.org)
- *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
- *
- *  All rights reserved.
+ *  This file is part of mbed TLS (https://polarssl.org)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -113,10 +110,64 @@
  * Comment if your system does not support the IPv6 socket interface
  */
 #define POLARSSL_HAVE_IPV6
+
+/**
+ * \def POLARSSL_PLATFORM_MEMORY
+ *
+ * Enable the memory allocation layer.
+ *
+ * By default mbed TLS uses the system-provided malloc() and free().
+ * This allows different allocators (self-implemented or provided) to be
+ * provided to the platform abstraction layer.
+ *
+ * Enabling POLARSSL_PLATFORM_MEMORY will provide "platform_set_malloc_free()"
+ * to allow you to set an alternative malloc() and free() function pointer.
+ *
+ * Requires: POLARSSL_PLATFORM_C
+ *
+ * Enable this layer to allow use of alternative memory allocators.
+ */
+//#define POLARSSL_PLATFORM_MEMORY
+
+/**
+ * \def POLARSSL_PLATFORM_NO_STD_FUNCTIONS
+ *
+ * Do not assign standard functions in the platform layer (e.g. malloc() to
+ * POLARSSL_PLATFORM_STD_MALLOC and printf() to POLARSSL_PLATFORM_STD_PRINTF)
+ *
+ * This makes sure there are no linking errors on platforms that do not support
+ * these functions. You will HAVE to provide alternatives, either at runtime
+ * via the platform_set_xxx() functions or at compile time by setting
+ * the POLARSSL_PLATFORM_STD_XXX defines.
+ *
+ * Requires: POLARSSL_PLATFORM_C
+ *
+ * Uncomment to prevent default assignment of standard functions in the
+ * platform layer.
+ */
+//#define POLARSSL_PLATFORM_NO_STD_FUNCTIONS
+
+/**
+ * \def POLARSSL_PLATFORM_XXX_ALT
+ *
+ * Uncomment a macro to let mbed TLS support the function in the platform
+ * abstraction layer.
+ *
+ * Example: In case you uncomment POLARSSL_PLATFORM_PRINTF_ALT, mbed TLS will
+ * provide a function "platform_set_printf()" that allows you to set an
+ * alternative printf function pointer.
+ *
+ * All these define require POLARSSL_PLATFORM_C to be defined!
+ *
+ * Uncomment a macro to enable alternate implementation of specific base
+ * platform function
+ */
+//#define POLARSSL_PLATFORM_PRINTF_ALT
+//#define POLARSSL_PLATFORM_FPRINTF_ALT
 /* \} name SECTION: System support */
 
 /**
- * \name SECTION: PolarSSL feature support
+ * \name SECTION: mbed TLS feature support
  *
  * This section sets support for features that are or are not needed
  * within the modules that are enabled.
@@ -124,14 +175,27 @@
  */
 
 /**
+ * \def POLARSSL_TIMING_ALT
+ *
+ * Uncomment to provide your own alternate implementation for hardclock(),
+ * get_timer(), set_alarm() and m_sleep().
+ *
+ * Only works if you have POLARSSL_TIMING_C enabled.
+ *
+ * You will need to provide a header "timing_alt.h" and an implementation at
+ * compile time.
+ */
+//#define POLARSSL_TIMING_ALT
+
+/**
  * \def POLARSSL_XXX_ALT
  *
- * Uncomment a macro to let PolarSSL use your alternate core implementation of
+ * Uncomment a macro to let mbed TLS use your alternate core implementation of
  * a symmetric or hash algorithm (e.g. platform specific assembly optimized
  * implementations). Keep in mind that the function prototypes should remain
  * the same.
  *
- * Example: In case you uncomment POLARSSL_AES_ALT, PolarSSL will no longer
+ * Example: In case you uncomment POLARSSL_AES_ALT, mbed TLS will no longer
  * provide the "struct aes_context" definition and omit the base function
  * declarations and implementations. "aes_alt.h" will be included from
  * "aes.h" to include the new function definitions.
@@ -214,8 +278,8 @@
  *      TLS_PSK_WITH_NULL_SHA
  *
  * Uncomment this macro to enable the NULL cipher and ciphersuites
-#define POLARSSL_CIPHER_NULL_CIPHER
  */
+//#define POLARSSL_CIPHER_NULL_CIPHER
 
 /**
  * \def POLARSSL_CIPHER_PADDING_XXX
@@ -244,8 +308,21 @@
  *      TLS_DHE_RSA_WITH_DES_CBC_SHA
  *
  * Uncomment this macro to enable weak ciphersuites
-#define POLARSSL_ENABLE_WEAK_CIPHERSUITES
  */
+//#define POLARSSL_ENABLE_WEAK_CIPHERSUITES
+
+/**
+ * \def POLARSSL_REMOVE_ARC4_CIPHERSUITES
+ *
+ * Remove RC4 ciphersuites by default in SSL / TLS.
+ * This flag removes the ciphersuites based on RC4 from the default list as
+ * returned by ssl_list_ciphersuites(). However, it is still possible to
+ * enable (some of) them with ssl_set_ciphersuites() by including them
+ * explicitly.
+ *
+ * Uncomment this macro to remove RC4 ciphersuites by default.
+ */
+//#define POLARSSL_REMOVE_ARC4_CIPHERSUITES
 
 /**
  * \def POLARSSL_ECP_XXXX_ENABLED

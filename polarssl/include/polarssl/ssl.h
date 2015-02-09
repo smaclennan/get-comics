@@ -3,12 +3,9 @@
  *
  * \brief SSL/TLS functions.
  *
- *  Copyright (C) 2006-2013, Brainspark B.V.
+ *  Copyright (C) 2006-2014, ARM Limited, All Rights Reserved
  *
- *  This file is part of PolarSSL (http://www.polarssl.org)
- *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
- *
- *  All rights reserved.
+ *  This file is part of mbed TLS (https://polarssl.org)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,9 +24,23 @@
 #ifndef POLARSSL_SSL_H
 #define POLARSSL_SSL_H
 
+#if !defined(POLARSSL_CONFIG_FILE)
 #include "config.h"
+#else
+#include POLARSSL_CONFIG_FILE
+#endif
+
+/* Temporary compatibility trick for the current stable branch */
+#if !defined(POLARSSL_SSL_DISABLE_RENEGOTIATION)
+#define POLARSSL_SSL_RENEGOTIATION
+#endif
+
 #include "net.h"
 #include "bignum.h"
+
+#if defined(POLARSSL_ECP_C) // SAM
+#include "ecp.h"
+#endif
 
 #include "ssl_ciphersuites.h"
 
@@ -83,6 +94,12 @@
 #define POLARSSL_KEY_EXCHANGE__SOME__PSK_ENABLED
 #endif
 
+#if defined(POLARSSL_KEY_EXCHANGE_ECDHE_RSA_ENABLED) ||                     \
+    defined(POLARSSL_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED) ||                   \
+    defined(POLARSSL_KEY_EXCHANGE_ECDHE_PSK_ENABLED)
+#define POLARSSL_KEY_EXCHANGE__SOME__ECDHE_ENABLED
+#endif
+
 #if defined(_MSC_VER) && !defined(inline)
 #define inline _inline
 #else
@@ -103,7 +120,7 @@
 #define POLARSSL_ERR_SSL_NO_CIPHER_CHOSEN                  -0x7380  /**< The server has no ciphersuites in common with the client. */
 #define POLARSSL_ERR_SSL_NO_RNG                            -0x7400  /**< No RNG was provided to the SSL module. */
 #define POLARSSL_ERR_SSL_NO_CLIENT_CERTIFICATE             -0x7480  /**< No client certification received from the client, but required by the authentication mode. */
-#define POLARSSL_ERR_SSL_CERTIFICATE_TOO_LARGE             -0x7500  /**< Our own certificate(s) is/are too large to send in an SSL message.*/
+#define POLARSSL_ERR_SSL_CERTIFICATE_TOO_LARGE             -0x7500  /**< Our own certificate(s) is/are too large to send in an SSL message. */
 #define POLARSSL_ERR_SSL_CERTIFICATE_REQUIRED              -0x7580  /**< The own certificate is not set, but needed by the server. */
 #define POLARSSL_ERR_SSL_PRIVATE_KEY_REQUIRED              -0x7600  /**< The own private key or pre-shared key is not set, but needed. */
 #define POLARSSL_ERR_SSL_CA_CHAIN_REQUIRED                 -0x7680  /**< No CA Chain is set, but required to operate. */
@@ -131,8 +148,11 @@
 #define POLARSSL_ERR_SSL_BAD_HS_NEW_SESSION_TICKET         -0x6E00  /**< Processing of the NewSessionTicket handshake message failed. */
 #define POLARSSL_ERR_SSL_SESSION_TICKET_EXPIRED            -0x6D80  /**< Session ticket has expired. */
 #define POLARSSL_ERR_SSL_PK_TYPE_MISMATCH                  -0x6D00  /**< Public key type mismatch (eg, asked for RSA key exchange and presented EC key) */
-#define POLARSSL_ERR_SSL_UNKNOWN_IDENTITY                  -0x6C80  /**< Unkown identity received (eg, PSK identity) */
+#define POLARSSL_ERR_SSL_UNKNOWN_IDENTITY                  -0x6C80  /**< Unknown identity received (eg, PSK identity) */
 #define POLARSSL_ERR_SSL_INTERNAL_ERROR                    -0x6C00  /**< Internal error (eg, unexpected failure in lower-level module) */
+#define POLARSSL_ERR_SSL_COUNTER_WRAPPING                  -0x6B80  /**< A counter would wrap (eg, too many messages exchanged). */
+#define POLARSSL_ERR_SSL_WAITING_SERVER_HELLO_RENEGO       -0x6B00  /**< Unexpected message at ServerHello in renegotiation. */
+#define POLARSSL_ERR_SSL_NO_USABLE_CIPHERSUITE             -0x6A80  /**< None of the common ciphersuites is usable (eg, no suitable certificate, see debug messages). */
 
 /*
  * Various constants
@@ -157,10 +177,10 @@
 #else
 #if defined(POLARSSL_SSL_PROTO_TLS1_2)
 #define SSL_MIN_MINOR_VERSION           SSL_MINOR_VERSION_3
-#endif
-#endif
-#endif
-#endif
+#endif /* POLARSSL_SSL_PROTO_TLS1_2 */
+#endif /* POLARSSL_SSL_PROTO_TLS1_1 */
+#endif /* POLARSSL_SSL_PROTO_TLS1   */
+#endif /* POLARSSL_SSL_PROTO_SSL3   */
 
 /* Determine maximum supported version */
 #define SSL_MAX_MAJOR_VERSION           SSL_MAJOR_VERSION_3
@@ -176,10 +196,10 @@
 #else
 #if defined(POLARSSL_SSL_PROTO_SSL3)
 #define SSL_MAX_MINOR_VERSION           SSL_MINOR_VERSION_0
-#endif
-#endif
-#endif
-#endif
+#endif /* POLARSSL_SSL_PROTO_SSL3   */
+#endif /* POLARSSL_SSL_PROTO_TLS1   */
+#endif /* POLARSSL_SSL_PROTO_TLS1_1 */
+#endif /* POLARSSL_SSL_PROTO_TLS1_2 */
 
 /* RFC 6066 section 4, see also mfl_code_to_length in ssl_tls.c
  * NONE must be zero so that memset()ing structure to zero works */
@@ -192,6 +212,16 @@
 
 #define SSL_IS_CLIENT                   0
 #define SSL_IS_SERVER                   1
+
+#define SSL_IS_NOT_FALLBACK             0
+#define SSL_IS_FALLBACK                 1
+
+#define SSL_EXTENDED_MS_DISABLED        0
+#define SSL_EXTENDED_MS_ENABLED         1
+
+#define SSL_ETM_DISABLED                0
+#define SSL_ETM_ENABLED                 1
+
 #define SSL_COMPRESS_NULL               0
 #define SSL_COMPRESS_DEFLATE            1
 
@@ -210,6 +240,9 @@
 #define SSL_RENEGOTIATION_DISABLED      0
 #define SSL_RENEGOTIATION_ENABLED       1
 
+#define SSL_RENEGOTIATION_NOT_ENFORCED  -1
+#define SSL_RENEGO_MAX_RECORDS_DEFAULT  16
+
 #define SSL_LEGACY_NO_RENEGOTIATION     0
 #define SSL_LEGACY_ALLOW_RENEGOTIATION  1
 #define SSL_LEGACY_BREAK_HANDSHAKE      2
@@ -221,24 +254,42 @@
 #define SSL_SESSION_TICKETS_DISABLED     0
 #define SSL_SESSION_TICKETS_ENABLED      1
 
-#if !defined(POLARSSL_CONFIG_OPTIONS)
+#define SSL_CBC_RECORD_SPLITTING_DISABLED   -1
+#define SSL_CBC_RECORD_SPLITTING_ENABLED     0
+
+#define SSL_ARC4_ENABLED                0
+#define SSL_ARC4_DISABLED               1
+
+/**
+ * \name SECTION: Module settings
+ *
+ * The configuration options you can set for this module are in this section.
+ * Either change them in config.h or define them on the compiler command line.
+ * \{
+ */
+
+#if !defined(SSL_DEFAULT_TICKET_LIFETIME)
 #define SSL_DEFAULT_TICKET_LIFETIME     86400 /**< Lifetime of session tickets (if enabled) */
-#endif /* !POLARSSL_CONFIG_OPTIONS */
+#endif
 
 /*
  * Size of the input / output buffer.
  * Note: the RFC defines the default size of SSL / TLS messages. If you
  * change the value here, other clients / servers may not be able to
  * communicate with you anymore. Only change this value if you control
- * both sides of the connection and have it reduced at both sides!
+ * both sides of the connection and have it reduced at both sides, or
+ * if you're using the Max Fragment Length extension and you know all your
+ * peers are using it too!
  */
-#if !defined(POLARSSL_CONFIG_OPTIONS)
+#if !defined(SSL_MAX_CONTENT_LEN)
 #define SSL_MAX_CONTENT_LEN         16384   /**< Size of the input / output buffer */
-#endif /* !POLARSSL_CONFIG_OPTIONS */
+#endif
+
+/* \} name SECTION: Module settings */
 
 /*
- * Allow an extra 301 bytes for the record header
- * and encryption overhead: counter (8) + header (5) + MAC (32) + padding (256)
+ * Allow extra bytes for record, authentication and encryption overhead:
+ * counter (8) + header (5) + IV(16) + MAC (16-48) + padding (0-256)
  * and allow for a maximum of 1024 of compression expansion if
  * enabled.
  */
@@ -248,9 +299,47 @@
 #define SSL_COMPRESSION_ADD             0
 #endif
 
-#define SSL_BUFFER_LEN (SSL_MAX_CONTENT_LEN + SSL_COMPRESSION_ADD + 301)
+#if defined(POLARSSL_RC4_C) || defined(POLARSSL_CIPHER_MODE_CBC)
+/* Ciphersuites using HMAC */
+#if defined(POLARSSL_SHA512_C)
+#define SSL_MAC_ADD                 48  /* SHA-384 used for HMAC */
+#elif defined(POLARSSL_SHA256_C)
+#define SSL_MAC_ADD                 32  /* SHA-256 used for HMAC */
+#else
+#define SSL_MAC_ADD                 20  /* SHA-1   used for HMAC */
+#endif
+#else
+/* AEAD ciphersuites: GCM and CCM use a 128 bits tag */
+#define SSL_MAC_ADD                 16
+#endif
 
+#if defined(POLARSSL_CIPHER_MODE_CBC)
+#define SSL_PADDING_ADD            256
+#else
+#define SSL_PADDING_ADD              0
+#endif
+
+#define SSL_BUFFER_LEN  ( SSL_MAX_CONTENT_LEN               \
+                        + SSL_COMPRESSION_ADD               \
+                        + 29 /* counter + header + IV */    \
+                        + SSL_MAC_ADD                       \
+                        + SSL_PADDING_ADD                   \
+                        )
+
+/*
+ * Length of the verify data for secure renegotiation
+ */
+#if defined(POLARSSL_SSL_PROTO_SSL3)
+#define SSL_VERIFY_DATA_MAX_LEN 36
+#else
+#define SSL_VERIFY_DATA_MAX_LEN 12
+#endif
+
+/*
+ * Signaling ciphersuite values (SCSV)
+ */
 #define SSL_EMPTY_RENEGOTIATION_INFO    0xFF   /**< renegotiation info ext */
+#define SSL_FALLBACK_SCSV               0x5600 /**< draft-ietf-tls-downgrade-scsv-00 */
 
 /*
  * Supported Signature and Hash algorithms (For TLS 1.2)
@@ -308,11 +397,13 @@
 #define SSL_ALERT_MSG_PROTOCOL_VERSION      70  /* 0x46 */
 #define SSL_ALERT_MSG_INSUFFICIENT_SECURITY 71  /* 0x47 */
 #define SSL_ALERT_MSG_INTERNAL_ERROR        80  /* 0x50 */
+#define SSL_ALERT_MSG_INAPROPRIATE_FALLBACK 86  /* 0x56 */
 #define SSL_ALERT_MSG_USER_CANCELED         90  /* 0x5A */
 #define SSL_ALERT_MSG_NO_RENEGOTIATION     100  /* 0x64 */
 #define SSL_ALERT_MSG_UNSUPPORTED_EXT      110  /* 0x6E */
 #define SSL_ALERT_MSG_UNRECOGNIZED_NAME    112  /* 0x70 */
 #define SSL_ALERT_MSG_UNKNOWN_PSK_IDENTITY 115  /* 0x73 */
+#define SSL_ALERT_MSG_NO_APPLICATION_PROTOCOL 120 /* 0x78 */
 
 #define SSL_HS_HELLO_REQUEST            0
 #define SSL_HS_CLIENT_HELLO             1
@@ -341,6 +432,11 @@
 
 #define TLS_EXT_SIG_ALG                     13
 
+#define TLS_EXT_ALPN                        16
+
+#define TLS_EXT_ENCRYPT_THEN_MAC            22 /* 0x16 */
+#define TLS_EXT_EXTENDED_MASTER_SECRET  0x0017 /* 23 */
+
 #define TLS_EXT_SESSION_TICKET              35
 
 #define TLS_EXT_RENEGOTIATION_INFO      0xFF01
@@ -355,11 +451,42 @@
 /*
  * Size defines
  */
-#if !defined(POLARSSL_MPI_MAX_SIZE)
-#define POLARSSL_PREMASTER_SIZE             512
-#else
-#define POLARSSL_PREMASTER_SIZE             POLARSSL_MPI_MAX_SIZE
+#if !defined(POLARSSL_PSK_MAX_LEN)
+#define POLARSSL_PSK_MAX_LEN            32 /* 256 bits */
 #endif
+
+/* Dummy type used only for its size */
+union _ssl_premaster_secret
+{
+#if defined(POLARSSL_KEY_EXCHANGE_RSA_ENABLED)
+    unsigned char _pms_rsa[48];                         /* RFC 5246 8.1.1 */
+#endif
+#if defined(POLARSSL_KEY_EXCHANGE_DHE_RSA_ENABLED)
+    unsigned char _pms_dhm[POLARSSL_MPI_MAX_SIZE];      /* RFC 5246 8.1.2 */
+#endif
+#if defined(POLARSSL_KEY_EXCHANGE_ECDHE_RSA_ENABLED)    || \
+    defined(POLARSSL_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED)  || \
+    defined(POLARSSL_KEY_EXCHANGE_ECDH_RSA_ENABLED)     || \
+    defined(POLARSSL_KEY_EXCHANGE_ECDH_ECDSA_ENABLED)
+    unsigned char _pms_ecdh[POLARSSL_ECP_MAX_BYTES];    /* RFC 4492 5.10 */
+#endif
+#if defined(POLARSSL_KEY_EXCHANGE_PSK_ENABLED)
+    unsigned char _pms_psk[4 + 2 * POLARSSL_PSK_MAX_LEN];       /* RFC 4279 2 */
+#endif
+#if defined(POLARSSL_KEY_EXCHANGE_DHE_PSK_ENABLED)
+    unsigned char _pms_dhe_psk[4 + POLARSSL_MPI_MAX_SIZE
+                                 + POLARSSL_PSK_MAX_LEN];       /* RFC 4279 3 */
+#endif
+#if defined(POLARSSL_KEY_EXCHANGE_RSA_PSK_ENABLED)
+    unsigned char _pms_rsa_psk[52 + POLARSSL_PSK_MAX_LEN];      /* RFC 4279 4 */
+#endif
+#if defined(POLARSSL_KEY_EXCHANGE_ECDHE_PSK_ENABLED)
+    unsigned char _pms_ecdhe_psk[4 + POLARSSL_ECP_MAX_BYTES
+                                   + POLARSSL_PSK_MAX_LEN];     /* RFC 5489 2 */
+#endif
+};
+
+#define POLARSSL_PREMASTER_SIZE     sizeof( union _ssl_premaster_secret )
 
 #ifdef __cplusplus
 extern "C" {
@@ -371,7 +498,7 @@ extern "C" {
  */
 typedef int (*rsa_decrypt_func)( void *ctx, int mode, size_t *olen,
                         const unsigned char *input, unsigned char *output,
-                        size_t output_max_len ); 
+                        size_t output_max_len );
 typedef int (*rsa_sign_func)( void *ctx,
                      int (*f_rng)(void *, unsigned char *, size_t), void *p_rng,
                      int mode, md_type_t md_alg, unsigned int hashlen,
@@ -447,6 +574,10 @@ struct _ssl_session
 #if defined(POLARSSL_SSL_TRUNCATED_HMAC)
     int trunc_hmac;             /*!< flag for truncated hmac activation   */
 #endif /* POLARSSL_SSL_TRUNCATED_HMAC */
+
+#if defined(POLARSSL_SSL_ENCRYPT_THEN_MAC)
+    int encrypt_then_mac;       /*!< flag for EtM activation                */
+#endif
 };
 
 /*
@@ -471,8 +602,8 @@ struct _ssl_transform
 
 #if defined(POLARSSL_SSL_PROTO_SSL3)
     /* Needed only for SSL v3.0 secret */
-    unsigned char mac_enc[48];          /*!<  SSL v3.0 secret (enc)   */
-    unsigned char mac_dec[48];          /*!<  SSL v3.0 secret (dec)   */
+    unsigned char mac_enc[20];          /*!<  SSL v3.0 secret (enc)   */
+    unsigned char mac_dec[20];          /*!<  SSL v3.0 secret (dec)   */
 #endif /* POLARSSL_SSL_PROTO_SSL3 */
 
     md_context_t md_ctx_enc;            /*!<  MAC (encryption)        */
@@ -498,8 +629,8 @@ struct _ssl_handshake_params
     /*
      * Handshake specific crypto variables
      */
-    int sig_alg;                        /*!<  Signature algorithm     */
-    int cert_type;                      /*!<  Requested cert type     */
+    int sig_alg;                        /*!<  Hash algorithm for signature   */
+    int cert_type;                      /*!<  Requested cert type            */
     int verify_sig_alg;                 /*!<  Signature algorithm for verify */
 #if defined(POLARSSL_DHM_C)
     dhm_context dhm_ctx;                /*!<  DHM key exchange        */
@@ -521,7 +652,7 @@ struct _ssl_handshake_params
 #if defined(POLARSSL_SSL_SERVER_NAME_INDICATION)
     ssl_key_cert *sni_key_cert;         /*!<  key/cert list from SNI  */
 #endif
-#endif
+#endif /* POLARSSL_X509_CRT_PARSE_C */
 
     /*
      * Checksum contexts
@@ -561,6 +692,9 @@ struct _ssl_handshake_params
 #if defined(POLARSSL_SSL_SESSION_TICKETS)
     int new_session_ticket;             /*!< use NewSessionTicket?    */
 #endif /* POLARSSL_SSL_SESSION_TICKETS */
+#if defined(POLARSSL_SSL_EXTENDED_MASTER_SECRET)
+    int extended_ms;                    /*!< use Extended Master Secret? */
+#endif
 };
 
 #if defined(POLARSSL_SSL_SESSION_TICKETS)
@@ -596,6 +730,9 @@ struct _ssl_context
      */
     int state;                  /*!< SSL handshake: current state     */
     int renegotiation;          /*!< Initial or renegotiation         */
+#if defined(POLARSSL_SSL_RENEGOTIATION)
+    int renego_records_seen;    /*!< Records since renego request     */
+#endif
 
     int major_ver;              /*!< equal to  SSL_MAJOR_VERSION_3    */
     int minor_ver;              /*!< either 0 (SSL3) or 1 (TLS1.0)    */
@@ -604,6 +741,17 @@ struct _ssl_context
     int max_minor_ver;          /*!< max. minor version used          */
     int min_major_ver;          /*!< min. major version used          */
     int min_minor_ver;          /*!< min. minor version used          */
+
+#if defined(POLARSSL_SSL_FALLBACK_SCSV) && defined(POLARSSL_SSL_CLI_C)
+    char fallback;              /*!< flag for fallback connections    */
+#endif
+#if defined(POLARSSL_SSL_ENCRYPT_THEN_MAC)
+    char encrypt_then_mac;      /*!< flag for encrypt-then-mac        */
+#endif
+#if defined(POLARSSL_SSL_EXTENDED_MASTER_SECRET)
+    char extended_ms;           /*!< flag for extended master secret  */
+#endif
+    char arc4_disabled;         /*!< flag for disabling RC4           */
 
     /*
      * Callbacks (RNG, debug, I/O, verification)
@@ -692,6 +840,10 @@ struct _ssl_context
 #if defined(POLARSSL_SSL_MAX_FRAGMENT_LENGTH)
     unsigned char mfl_code;     /*!< MaxFragmentLength chosen by us   */
 #endif /* POLARSSL_SSL_MAX_FRAGMENT_LENGTH */
+#if defined(POLARSSL_SSL_CBC_RECORD_SPLITTING)
+    signed char split_done;     /*!< flag for record splitting:
+                                     -1 disabled, 0 todo, 1 done      */
+#endif
 
     /*
      * PKI layer
@@ -718,9 +870,17 @@ struct _ssl_context
     int authmode;                       /*!<  verification mode       */
     int client_auth;                    /*!<  flag for client auth.   */
     int verify_result;                  /*!<  verification result     */
+#if defined(POLARSSL_SSL_RENEGOTIATION)
     int disable_renegotiation;          /*!<  enable/disable renegotiation   */
+    int renego_max_records;             /*!<  grace period for renegotiation */
+    unsigned char renego_period[8];     /*!<  value of the record counters
+                                              that triggers renegotiation    */
+#endif
     int allow_legacy_renegotiation;     /*!<  allow legacy renegotiation     */
     const int *ciphersuite_list[4];     /*!<  allowed ciphersuites / version */
+#if defined(POLARSSL_SSL_SET_CURVES)
+    const ecp_group_id *curve_list;     /*!<  allowed curves                 */
+#endif
 #if defined(POLARSSL_SSL_TRUNCATED_HMAC)
     int trunc_hmac;                     /*!<  negotiate truncated hmac?      */
 #endif
@@ -752,14 +912,24 @@ struct _ssl_context
     size_t         hostname_len;
 #endif
 
+#if defined(POLARSSL_SSL_ALPN)
+    /*
+     * ALPN extension
+     */
+    const char **alpn_list;     /*!<  ordered list of supported protocols   */
+    const char *alpn_chosen;    /*!<  negotiated protocol                   */
+#endif
+
     /*
      * Secure renegotiation
      */
     int secure_renegotiation;           /*!<  does peer support legacy or
                                               secure renegotiation           */
+#if defined(POLARSSL_SSL_RENEGOTIATION)
     size_t verify_data_len;             /*!<  length of verify data stored   */
-    char own_verify_data[36];           /*!<  previous handshake verify data */
-    char peer_verify_data[36];          /*!<  previous handshake verify data */
+    char own_verify_data[SSL_VERIFY_DATA_MAX_LEN]; /*!<  previous handshake verify data */
+    char peer_verify_data[SSL_VERIFY_DATA_MAX_LEN]; /*!<  previous handshake verify data */
+#endif
 };
 
 #if defined(POLARSSL_SSL_HW_RECORD_ACCEL)
@@ -779,7 +949,7 @@ extern int (*ssl_hw_record_reset)(ssl_context *ssl);
 extern int (*ssl_hw_record_write)(ssl_context *ssl);
 extern int (*ssl_hw_record_read)(ssl_context *ssl);
 extern int (*ssl_hw_record_finish)(ssl_context *ssl);
-#endif
+#endif /* POLARSSL_SSL_HW_RECORD_ACCEL */
 
 /**
  * \brief Returns the list of ciphersuites supported by the SSL/TLS module.
@@ -790,8 +960,8 @@ extern int (*ssl_hw_record_finish)(ssl_context *ssl);
 const int *ssl_list_ciphersuites( void );
 
 /**
- * \brief               Return the name of the ciphersuite associated with the given
- *                      ID
+ * \brief               Return the name of the ciphersuite associated with the
+ *                      given ID
  *
  * \param ciphersuite_id SSL ciphersuite ID
  *
@@ -800,8 +970,8 @@ const int *ssl_list_ciphersuites( void );
 const char *ssl_get_ciphersuite_name( const int ciphersuite_id );
 
 /**
- * \brief               Return the ID of the ciphersuite associated with the given
- *                      name
+ * \brief               Return the ID of the ciphersuite associated with the
+ *                      given name
  *
  * \param ciphersuite_name SSL ciphersuite name
  *
@@ -859,6 +1029,12 @@ void ssl_set_endpoint( ssl_context *ssl, int endpoint );
  *
  *  SSL_VERIFY_REQUIRED:  peer *must* present a valid certificate,
  *                        handshake is aborted if verification failed.
+ *
+ * \note On client, SSL_VERIFY_REQUIRED is the recommended mode.
+ * With SSL_VERIFY_OPTIONAL, the user needs to call ssl_get_verify_result() at
+ * the right time(s), which may not be obvious, while REQUIRED always perform
+ * the verification as soon as possible. For example, REQUIRED was protecting
+ * against the "triple handshake" attack even before it was found.
  */
 void ssl_set_authmode( ssl_context *ssl, int authmode );
 
@@ -914,9 +1090,11 @@ void ssl_set_bio( ssl_context *ssl,
         int (*f_recv)(void *, unsigned char *, size_t), void *p_recv,
         int (*f_send)(void *, const unsigned char *, size_t), void *p_send );
 
+#if defined(POLARSSL_SSL_SRV_C)
 /**
  * \brief          Set the session cache callbacks (server-side only)
- *                 If not set, no session resuming is done.
+ *                 If not set, no session resuming is done (except if session
+ *                 tickets are enabled too).
  *
  *                 The session cache has the responsibility to check for stale
  *                 entries based on timeout. See RFC 5246 for recommendations.
@@ -954,7 +1132,9 @@ void ssl_set_bio( ssl_context *ssl,
 void ssl_set_session_cache( ssl_context *ssl,
         int (*f_get_cache)(void *, ssl_session *), void *p_get_cache,
         int (*f_set_cache)(void *, const ssl_session *), void *p_set_cache );
+#endif /* POLARSSL_SSL_SRV_C */
 
+#if defined(POLARSSL_SSL_CLI_C)
 /**
  * \brief          Request resumption of session (client-side only)
  *                 Session data is copied from presented session structure.
@@ -970,14 +1150,15 @@ void ssl_set_session_cache( ssl_context *ssl,
  * \sa             ssl_get_session()
  */
 int ssl_set_session( ssl_context *ssl, const ssl_session *session );
+#endif /* POLARSSL_SSL_CLI_C */
 
 /**
  * \brief               Set the list of allowed ciphersuites and the preference
  *                      order. First in the list has the highest preference.
  *                      (Overrides all version specific lists)
  *
- *                      Note: The PolarSSL SSL server uses its own preferences
- *                      over the preference of the connection SSL client unless
+ *                      Note: The server uses its own preferences
+ *                      over the preference of the client unless
  *                      POLARSSL_SSL_SRV_RESPECT_CLIENT_PREFERENCE is defined!
  *
  * \param ssl           SSL context
@@ -1043,6 +1224,9 @@ int ssl_set_own_cert( ssl_context *ssl, x509_crt *own_cert,
  *                 up your certificate chain. The top certificate (self-signed)
  *                 can be omitted.
  *
+ * \warning        This backwards-compatibility function is deprecated!
+ *                 Please use \c ssl_set_own_cert() instead.
+ *
  * \param ssl      SSL context
  * \param own_cert own public certificate chain
  * \param rsa_key  own private RSA key
@@ -1054,7 +1238,7 @@ int ssl_set_own_cert_rsa( ssl_context *ssl, x509_crt *own_cert,
 #endif /* POLARSSL_RSA_C */
 
 /**
- * \brief          Set own certificate and alternate non-PolarSSL RSA private
+ * \brief          Set own certificate and external RSA private
  *                 key and handling callbacks, such as the PKCS#11 wrappers
  *                 or any other external private key handler.
  *                 (see the respective RSA functions in rsa.h for documentation
@@ -1064,6 +1248,10 @@ int ssl_set_own_cert_rsa( ssl_context *ssl, x509_crt *own_cert,
  *                 Note: own_cert should contain IN order from the bottom
  *                 up your certificate chain. The top certificate (self-signed)
  *                 can be omitted.
+ *
+ * \warning        This backwards-compatibility function is deprecated!
+ *                 Please use \c pk_init_ctx_rsa_alt()
+ *                 and \c ssl_set_own_cert() instead.
  *
  * \param ssl      SSL context
  * \param own_cert own public certificate chain
@@ -1102,7 +1290,7 @@ int ssl_set_psk( ssl_context *ssl, const unsigned char *psk, size_t psk_len,
  *
  *                 If set, the PSK callback is called for each
  *                 handshake where a PSK ciphersuite was negotiated.
- *                 The callback provides the identity received and wants to
+ *                 The caller provides the identity received and wants to
  *                 receive the actual PSK data and length.
  *
  *                 The callback has the following parameters: (void *parameter,
@@ -1147,7 +1335,29 @@ int ssl_set_dh_param( ssl_context *ssl, const char *dhm_P, const char *dhm_G );
  * \return         0 if successful
  */
 int ssl_set_dh_param_ctx( ssl_context *ssl, dhm_context *dhm_ctx );
-#endif
+#endif /* POLARSSL_DHM_C */
+
+#if defined(POLARSSL_SSL_SET_CURVES)
+/**
+ * \brief          Set the allowed curves in order of preference.
+ *                 (Default: all defined curves.)
+ *
+ *                 On server: this only affects selection of the ECDHE curve;
+ *                 the curves used for ECDH and ECDSA are determined by the
+ *                 list of available certificates instead.
+ *
+ *                 On client: this affects the list of curves offered for any
+ *                 use. The server can override our preference order.
+ *
+ *                 Both sides: limits the set of curves used by peer to the
+ *                 listed curves for any use (ECDH(E), certificates).
+ *
+ * \param ssl      SSL context
+ * \param curves   Ordered list of allowed curves,
+ *                 terminated by POLARSSL_ECP_DP_NONE.
+ */
+void ssl_set_curves( ssl_context *ssl, const ecp_group_id *curves );
+#endif /* POLARSSL_SSL_SET_CURVES */
 
 #if defined(POLARSSL_SSL_SERVER_NAME_INDICATION)
 /**
@@ -1187,6 +1397,30 @@ void ssl_set_sni( ssl_context *ssl,
                   void *p_sni );
 #endif /* POLARSSL_SSL_SERVER_NAME_INDICATION */
 
+#if defined(POLARSSL_SSL_ALPN)
+/**
+ * \brief          Set the supported Application Layer Protocols.
+ *
+ * \param ssl      SSL context
+ * \param protos   NULL-terminated list of supported protocols,
+ *                 in decreasing preference order.
+ *
+ * \return         0 on success, or POLARSSL_ERR_SSL_BAD_INPUT_DATA.
+ */
+int ssl_set_alpn_protocols( ssl_context *ssl, const char **protos );
+
+/**
+ * \brief          Get the name of the negotiated Application Layer Protocol.
+ *                 This function should be called after the handshake is
+ *                 completed.
+ *
+ * \param ssl      SSL context
+ *
+ * \return         Protcol name, or NULL if no protocol was negotiated.
+ */
+const char *ssl_get_alpn_protocol( const ssl_context *ssl );
+#endif /* POLARSSL_SSL_ALPN */
+
 /**
  * \brief          Set the maximum supported version sent from the client side
  *                 and/or accepted at the server side
@@ -1204,13 +1438,14 @@ void ssl_set_sni( ssl_context *ssl,
  */
 void ssl_set_max_version( ssl_context *ssl, int major, int minor );
 
-
 /**
  * \brief          Set the minimum accepted SSL/TLS protocol version
  *                 (Default: SSL_MIN_MAJOR_VERSION, SSL_MIN_MINOR_VERSION)
  *
- *                 Note: Input outside of the SSL_MAX_XXXXX_VERSION and
- *                       SSL_MIN_XXXXX_VERSION range is ignored.
+ * \note           Input outside of the SSL_MAX_XXXXX_VERSION and
+ *                 SSL_MIN_XXXXX_VERSION range is ignored.
+ *
+ * \note           SSL_MINOR_VERSION_0 (SSL v3) should be avoided.
  *
  * \param ssl      SSL context
  * \param major    Major version number (only SSL_MAJOR_VERSION_3 supported)
@@ -1219,6 +1454,74 @@ void ssl_set_max_version( ssl_context *ssl, int major, int minor );
  *                 SSL_MINOR_VERSION_3 supported)
  */
 void ssl_set_min_version( ssl_context *ssl, int major, int minor );
+
+#if defined(POLARSSL_SSL_FALLBACK_SCSV) && defined(POLARSSL_SSL_CLI_C)
+/**
+ * \brief          Set the fallback flag (client-side only).
+ *                 (Default: SSL_IS_NOT_FALLBACK).
+ *
+ * \note           Set to SSL_IS_FALLBACK when preparing a fallback
+ *                 connection, that is a connection with max_version set to a
+ *                 lower value than the value you're willing to use. Such
+ *                 fallback connections are not recommended but are sometimes
+ *                 necessary to interoperate with buggy (version-intolerant)
+ *                 servers.
+ *
+ * \warning        You should NOT set this to SSL_IS_FALLBACK for
+ *                 non-fallback connections! This would appear to work for a
+ *                 while, then cause failures when the server is upgraded to
+ *                 support a newer TLS version.
+ *
+ * \param ssl      SSL context
+ * \param fallback SSL_IS_NOT_FALLBACK or SSL_IS_FALLBACK
+ */
+void ssl_set_fallback( ssl_context *ssl, char fallback );
+#endif /* POLARSSL_SSL_FALLBACK_SCSV && POLARSSL_SSL_CLI_C */
+
+#if defined(POLARSSL_SSL_ENCRYPT_THEN_MAC)
+/**
+ * \brief           Enable or disable Encrypt-then-MAC
+ *                  (Default: SSL_ETM_ENABLED)
+ *
+ * \note            This should always be enabled, it is a security
+ *                  improvement, and should not cause any interoperability
+ *                  issue (used only if the peer supports it too).
+ *
+ * \param ssl       SSL context
+ * \param etm       SSL_ETM_ENABLED or SSL_ETM_DISABLED
+ */
+void ssl_set_encrypt_then_mac( ssl_context *ssl, char etm );
+#endif /* POLARSSL_SSL_ENCRYPT_THEN_MAC */
+
+#if defined(POLARSSL_SSL_EXTENDED_MASTER_SECRET)
+/**
+ * \brief           Enable or disable Extended Master Secret negotiation.
+ *                  (Default: SSL_EXTENDED_MS_ENABLED)
+ *
+ * \note            This should always be enabled, it is a security fix to the
+ *                  protocol, and should not cause any interoperability issue
+ *                  (used only if the peer supports it too).
+ *
+ * \param ssl       SSL context
+ * \param ems       SSL_EXTENDED_MS_ENABLED or SSL_EXTENDED_MS_DISABLED
+ */
+void ssl_set_extended_master_secret( ssl_context *ssl, char ems );
+#endif /* POLARSSL_SSL_EXTENDED_MASTER_SECRET */
+
+/**
+ * \brief          Disable or enable support for RC4
+ *                 (Default: SSL_ARC4_ENABLED)
+ *
+ * \note           Though the default is RC4 for compatibility reasons in the
+ *                 1.3 branch, the recommended value is SSL_ARC4_DISABLED.
+ *
+ * \note           This function will likely be removed in future versions as
+ *                 RC4 will then be disabled by default at compile time.
+ *
+ * \param ssl      SSL context
+ * \param arc4     SSL_ARC4_ENABLED or SSL_ARC4_DISABLED
+ */
+void ssl_set_arc4_support( ssl_context *ssl, char arc4 );
 
 #if defined(POLARSSL_SSL_MAX_FRAGMENT_LENGTH)
 /**
@@ -1241,18 +1544,33 @@ int ssl_set_max_frag_len( ssl_context *ssl, unsigned char mfl_code );
 
 #if defined(POLARSSL_SSL_TRUNCATED_HMAC)
 /**
- * \brief          Activate negotiation of truncated HMAC (Client only)
- *                 (Default: SSL_TRUNC_HMAC_ENABLED)
+ * \brief          Activate negotiation of truncated HMAC
+ *                 (Default: SSL_TRUNC_HMAC_DISABLED on client,
+ *                           SSL_TRUNC_HMAC_ENABLED on server.)
  *
  * \param ssl      SSL context
  * \param truncate Enable or disable (SSL_TRUNC_HMAC_ENABLED or
  *                                    SSL_TRUNC_HMAC_DISABLED)
  *
- * \return         O if successful,
- *                 POLARSSL_ERR_SSL_BAD_INPUT_DATA if used server-side
+ * \return         Always 0.
  */
 int ssl_set_truncated_hmac( ssl_context *ssl, int truncate );
 #endif /* POLARSSL_SSL_TRUNCATED_HMAC */
+
+#if defined(POLARSSL_SSL_CBC_RECORD_SPLITTING)
+/**
+ * \brief          Enable / Disable 1/n-1 record splitting
+ *                 (Default: SSL_CBC_RECORD_SPLITTING_ENABLED)
+ *
+ * \note           Only affects SSLv3 and TLS 1.0, not higher versions.
+ *                 Does not affect non-CBC ciphersuites in any version.
+ *
+ * \param ssl      SSL context
+ * \param split    SSL_CBC_RECORD_SPLITTING_ENABLED or
+ *                 SSL_CBC_RECORD_SPLITTING_DISABLED
+ */
+void ssl_set_cbc_record_splitting( ssl_context *ssl, char split );
+#endif /* POLARSSL_SSL_CBC_RECORD_SPLITTING */
 
 #if defined(POLARSSL_SSL_SESSION_TICKETS)
 /**
@@ -1283,6 +1601,7 @@ int ssl_set_session_tickets( ssl_context *ssl, int use_tickets );
 void ssl_set_session_ticket_lifetime( ssl_context *ssl, int lifetime );
 #endif /* POLARSSL_SSL_SESSION_TICKETS */
 
+#if defined(POLARSSL_SSL_RENEGOTIATION)
 /**
  * \brief          Enable / Disable renegotiation support for connection when
  *                 initiated by peer
@@ -1297,11 +1616,12 @@ void ssl_set_session_ticket_lifetime( ssl_context *ssl, int lifetime );
  *                                             SSL_RENEGOTIATION_DISABLED)
  */
 void ssl_set_renegotiation( ssl_context *ssl, int renegotiation );
+#endif /* POLARSSL_SSL_RENEGOTIATION */
 
 /**
  * \brief          Prevent or allow legacy renegotiation.
  *                 (Default: SSL_LEGACY_NO_RENEGOTIATION)
- *                 
+ *
  *                 SSL_LEGACY_NO_RENEGOTIATION allows connections to
  *                 be established even if the peer does not support
  *                 secure renegotiation, but does not allow renegotiation
@@ -1327,6 +1647,58 @@ void ssl_set_renegotiation( ssl_context *ssl, int renegotiation );
  */
 void ssl_legacy_renegotiation( ssl_context *ssl, int allow_legacy );
 
+#if defined(POLARSSL_SSL_RENEGOTIATION)
+/**
+ * \brief          Enforce requested renegotiation.
+ *                 (Default: enforced, max_records = 16)
+ *
+ *                 When we request a renegotiation, the peer can comply or
+ *                 ignore the request. This function allows us to decide
+ *                 whether to enforce our renegotiation requests by closing
+ *                 the connection if the peer doesn't comply.
+ *
+ *                 However, records could already be in transit from the peer
+ *                 when the request is emitted. In order to increase
+ *                 reliability, we can accept a number of records before the
+ *                 expected handshake records.
+ *
+ *                 The optimal value is highly dependent on the specific usage
+ *                 scenario.
+ *
+ * \warning        On client, the grace period can only happen during
+ *                 ssl_read(), as opposed to ssl_write() and ssl_renegotiate()
+ *                 which always behave as if max_record was 0. The reason is,
+ *                 if we receive application data from the server, we need a
+ *                 place to write it, which only happens during ssl_read().
+ *
+ * \param ssl      SSL context
+ * \param max_records Use SSL_RENEGOTIATION_NOT_ENFORCED if you don't want to
+ *                 enforce renegotiation, or a non-negative value to enforce
+ *                 it but allow for a grace period of max_records records.
+ */
+void ssl_set_renegotiation_enforced( ssl_context *ssl, int max_records );
+
+/**
+ * \brief          Set record counter threshold for periodic renegotiation.
+ *                 (Default: 2^64 - 256.)
+ *
+ *                 Renegotiation is automatically triggered when a record
+ *                 counter (outgoing or ingoing) crosses the defined
+ *                 threshold. The default value is meant to prevent the
+ *                 connection from being closed when the counter is about to
+ *                 reached its maximal value (it is not allowed to wrap).
+ *
+ *                 Lower values can be used to enforce policies such as "keys
+ *                 must be refreshed every N packets with cipher X".
+ *
+ * \param ssl      SSL context
+ * \param period   The threshold value: a big-endian 64-bit number.
+ *                 Set to 2^64 - 1 to disable periodic renegotiation
+ */
+void ssl_set_renegotiation_period( ssl_context *ssl,
+                                   const unsigned char period[8] );
+#endif /* POLARSSL_SSL_RENEGOTIATION */
+
 /**
  * \brief          Return the number of data bytes available to read
  *
@@ -1341,11 +1713,11 @@ size_t ssl_get_bytes_avail( const ssl_context *ssl );
  *
  * \param ssl      SSL context
  *
- * \return         0 if successful, or a combination of:
- *                      BADCERT_EXPIRED
- *                      BADCERT_REVOKED
- *                      BADCERT_CN_MISMATCH
- *                      BADCERT_NOT_TRUSTED
+ * \return         0 if successful,
+ *                 -1 if result is not available (eg because the handshake was
+ *                 aborted too early), or
+ *                 a combination of BADCERT_xxx and BADCRL_xxx flags, see
+ *                 x509.h
  */
 int ssl_get_verify_result( const ssl_context *ssl );
 
@@ -1385,6 +1757,7 @@ const char *ssl_get_version( const ssl_context *ssl );
 const x509_crt *ssl_get_peer_cert( const ssl_context *ssl );
 #endif /* POLARSSL_X509_CRT_PARSE_C */
 
+#if defined(POLARSSL_SSL_CLI_C)
 /**
  * \brief          Save session in order to resume it later (client-side only)
  *                 Session data is copied to presented session structure.
@@ -1402,6 +1775,7 @@ const x509_crt *ssl_get_peer_cert( const ssl_context *ssl );
  * \sa             ssl_set_session()
  */
 int ssl_get_session( const ssl_context *ssl, ssl_session *session );
+#endif /* POLARSSL_SSL_CLI_C */
 
 /**
  * \brief          Perform the SSL handshake
@@ -1427,6 +1801,7 @@ int ssl_handshake( ssl_context *ssl );
  */
 int ssl_handshake_step( ssl_context *ssl );
 
+#if defined(POLARSSL_SSL_RENEGOTIATION)
 /**
  * \brief          Initiate an SSL renegotiation on the running connection.
  *                 Client: perform the renegotiation right now.
@@ -1438,13 +1813,14 @@ int ssl_handshake_step( ssl_context *ssl );
  * \return         0 if successful, or any ssl_handshake() return value.
  */
 int ssl_renegotiate( ssl_context *ssl );
+#endif /* POLARSSL_SSL_RENEGOTIATION */
 
 /**
  * \brief          Read at most 'len' application data bytes
  *
  * \param ssl      SSL context
  * \param buf      buffer that will hold the data
- * \param len      how many bytes must be read
+ * \param len      maximum number of bytes to read
  *
  * \return         This function returns the number of bytes read, 0 for EOF,
  *                 or a negative error code.
@@ -1464,6 +1840,10 @@ int ssl_read( ssl_context *ssl, unsigned char *buf, size_t len );
  * \note           When this function returns POLARSSL_ERR_NET_WANT_WRITE,
  *                 it must be called later with the *same* arguments,
  *                 until it returns a positive value.
+ *
+ * \note           This function may write less than the number of bytes
+ *                 requested if len is greater than the maximum record length.
+ *                 For arbitrary-sized messages, it should be called in a loop.
  */
 int ssl_write( ssl_context *ssl, const unsigned char *buf, size_t len );
 
@@ -1493,6 +1873,13 @@ int ssl_close_notify( ssl_context *ssl );
  * \param ssl      SSL context
  */
 void ssl_free( ssl_context *ssl );
+
+/**
+ * \brief          Initialize SSL session structure
+ *
+ * \param session  SSL session
+ */
+void ssl_session_init( ssl_session *session );
 
 /**
  * \brief          Free referenced items in an SSL session including the
@@ -1548,7 +1935,8 @@ int ssl_write_change_cipher_spec( ssl_context *ssl );
 int ssl_parse_finished( ssl_context *ssl );
 int ssl_write_finished( ssl_context *ssl );
 
-void ssl_optimize_checksum( ssl_context *ssl, const ssl_ciphersuite_t *ciphersuite_info );
+void ssl_optimize_checksum( ssl_context *ssl,
+                            const ssl_ciphersuite_t *ciphersuite_info );
 
 #if defined(POLARSSL_KEY_EXCHANGE__SOME__PSK_ENABLED)
 int ssl_psk_derive_premaster( ssl_context *ssl, key_exchange_type_t key_ex );
@@ -1560,6 +1948,10 @@ pk_type_t ssl_pk_alg_from_sig( unsigned char sig );
 #endif
 
 md_type_t ssl_md_alg_from_hash( unsigned char hash );
+
+#if defined(POLARSSL_SSL_SET_CURVES)
+int ssl_curve_is_acceptable( const ssl_context *ssl, ecp_group_id grp_id );
+#endif
 
 #if defined(POLARSSL_X509_CRT_PARSE_C)
 static inline pk_context *ssl_own_key( ssl_context *ssl )
@@ -1573,6 +1965,19 @@ static inline x509_crt *ssl_own_cert( ssl_context *ssl )
     return( ssl->handshake->key_cert == NULL ? NULL
             : ssl->handshake->key_cert->cert );
 }
+
+/*
+ * Check usage of a certificate wrt extensions:
+ * keyUsage, extendedKeyUsage (later), and nSCertType (later).
+ *
+ * Warning: cert_endpoint is the endpoint of the cert (ie, of our peer when we
+ * check a cert we received from them)!
+ *
+ * Return 0 if everything is OK, -1 if not.
+ */
+int ssl_check_cert_usage( const x509_crt *cert,
+                          const ssl_ciphersuite_t *ciphersuite,
+                          int cert_endpoint );
 #endif /* POLARSSL_X509_CRT_PARSE_C */
 
 /* constant-time buffer comparison */

@@ -1,12 +1,9 @@
 /*
  *  FIPS-180-1 compliant SHA-1 implementation
  *
- *  Copyright (C) 2006-2013, Brainspark B.V.
+ *  Copyright (C) 2006-2014, ARM Limited, All Rights Reserved
  *
- *  This file is part of PolarSSL (http://www.polarssl.org)
- *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
- *
- *  All rights reserved.
+ *  This file is part of mbed TLS (https://polarssl.org)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +25,11 @@
  *  http://www.itl.nist.gov/fipspubs/fip180-1.htm
  */
 
+#if !defined(POLARSSL_CONFIG_FILE)
 #include "polarssl/config.h"
+#else
+#include POLARSSL_CONFIG_FILE
+#endif
 
 #if defined(POLARSSL_SHA1_C)
 
@@ -37,6 +38,17 @@
 #if defined(POLARSSL_FS_IO) || defined(POLARSSL_SELF_TEST)
 #include <stdio.h>
 #endif
+
+#if defined(POLARSSL_PLATFORM_C)
+#include "polarssl/platform.h"
+#else
+#define polarssl_printf printf
+#endif
+
+/* Implementation that should never be optimized out by the compiler */
+static void polarssl_zeroize( void *v, size_t n ) {
+    volatile unsigned char *p = v; while( n-- ) *p++ = 0;
+}
 
 #if !defined(POLARSSL_SHA1_ALT)
 
@@ -62,6 +74,19 @@
     (b)[(i) + 3] = (unsigned char) ( (n)       );       \
 }
 #endif
+
+void sha1_init( sha1_context *ctx )
+{
+    memset( ctx, 0, sizeof( sha1_context ) );
+}
+
+void sha1_free( sha1_context *ctx )
+{
+    if( ctx == NULL )
+        return;
+
+    polarssl_zeroize( ctx, sizeof( sha1_context ) );
+}
 
 /*
  * SHA-1 context setup
@@ -103,8 +128,8 @@ void sha1_process( sha1_context *ctx, const unsigned char data[64] )
 
 #define R(t)                                            \
 (                                                       \
-    temp = W[(t -  3) & 0x0F] ^ W[(t - 8) & 0x0F] ^     \
-           W[(t - 14) & 0x0F] ^ W[ t      & 0x0F],      \
+    temp = W[( t -  3 ) & 0x0F] ^ W[( t - 8 ) & 0x0F] ^ \
+           W[( t - 14 ) & 0x0F] ^ W[  t       & 0x0F],  \
     ( W[t & 0x0F] = S(temp,1) )                         \
 )
 
@@ -242,7 +267,7 @@ void sha1_update( sha1_context *ctx, const unsigned char *input, size_t ilen )
     size_t fill;
     uint32_t left;
 
-    if( ilen <= 0 )
+    if( ilen == 0 )
         return;
 
     left = ctx->total[0] & 0x3F;
@@ -320,11 +345,11 @@ void sha1( const unsigned char *input, size_t ilen, unsigned char output[20] )
 {
     sha1_context ctx;
 
+    sha1_init( &ctx );
     sha1_starts( &ctx );
     sha1_update( &ctx, input, ilen );
     sha1_finish( &ctx, output );
-
-    memset( &ctx, 0, sizeof( sha1_context ) );
+    sha1_free( &ctx );
 }
 
 #if defined(POLARSSL_FS_IO)
@@ -341,14 +366,14 @@ int sha1_file( const char *path, unsigned char output[20] )
     if( ( f = fopen( path, "rb" ) ) == NULL )
         return( POLARSSL_ERR_SHA1_FILE_IO_ERROR );
 
+    sha1_init( &ctx );
     sha1_starts( &ctx );
 
     while( ( n = fread( buf, 1, sizeof( buf ), f ) ) > 0 )
         sha1_update( &ctx, buf, n );
 
     sha1_finish( &ctx, output );
-
-    memset( &ctx, 0, sizeof( sha1_context ) );
+    sha1_free( &ctx );
 
     if( ferror( f ) != 0 )
     {
@@ -364,7 +389,8 @@ int sha1_file( const char *path, unsigned char output[20] )
 /*
  * SHA-1 HMAC context setup
  */
-void sha1_hmac_starts( sha1_context *ctx, const unsigned char *key, size_t keylen )
+void sha1_hmac_starts( sha1_context *ctx, const unsigned char *key,
+                       size_t keylen )
 {
     size_t i;
     unsigned char sum[20];
@@ -388,13 +414,14 @@ void sha1_hmac_starts( sha1_context *ctx, const unsigned char *key, size_t keyle
     sha1_starts( ctx );
     sha1_update( ctx, ctx->ipad, 64 );
 
-    memset( sum, 0, sizeof( sum ) );
+    polarssl_zeroize( sum, sizeof( sum ) );
 }
 
 /*
  * SHA-1 HMAC process buffer
  */
-void sha1_hmac_update( sha1_context *ctx, const unsigned char *input, size_t ilen )
+void sha1_hmac_update( sha1_context *ctx, const unsigned char *input,
+                       size_t ilen )
 {
     sha1_update( ctx, input, ilen );
 }
@@ -412,7 +439,7 @@ void sha1_hmac_finish( sha1_context *ctx, unsigned char output[20] )
     sha1_update( ctx, tmpbuf, 20 );
     sha1_finish( ctx, output );
 
-    memset( tmpbuf, 0, sizeof( tmpbuf ) );
+    polarssl_zeroize( tmpbuf, sizeof( tmpbuf ) );
 }
 
 /*
@@ -433,18 +460,18 @@ void sha1_hmac( const unsigned char *key, size_t keylen,
 {
     sha1_context ctx;
 
+    sha1_init( &ctx );
     sha1_hmac_starts( &ctx, key, keylen );
     sha1_hmac_update( &ctx, input, ilen );
     sha1_hmac_finish( &ctx, output );
-
-    memset( &ctx, 0, sizeof( sha1_context ) );
+    sha1_free( &ctx );
 }
 
 #if defined(POLARSSL_SELF_TEST)
 /*
  * FIPS-180-1 test vectors
  */
-static unsigned char sha1_test_buf[3][57] = 
+static unsigned char sha1_test_buf[3][57] =
 {
     { "abc" },
     { "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq" },
@@ -537,10 +564,12 @@ static const unsigned char sha1_hmac_test_sum[7][20] =
  */
 int sha1_self_test( int verbose )
 {
-    int i, j, buflen;
+    int i, j, buflen, ret = 0;
     unsigned char buf[1024];
     unsigned char sha1sum[20];
     sha1_context ctx;
+
+    sha1_init( &ctx );
 
     /*
      * SHA-1
@@ -548,7 +577,7 @@ int sha1_self_test( int verbose )
     for( i = 0; i < 3; i++ )
     {
         if( verbose != 0 )
-            printf( "  SHA-1 test #%d: ", i + 1 );
+            polarssl_printf( "  SHA-1 test #%d: ", i + 1 );
 
         sha1_starts( &ctx );
 
@@ -568,22 +597,23 @@ int sha1_self_test( int verbose )
         if( memcmp( sha1sum, sha1_test_sum[i], 20 ) != 0 )
         {
             if( verbose != 0 )
-                printf( "failed\n" );
+                polarssl_printf( "failed\n" );
 
-            return( 1 );
+            ret = 1;
+            goto exit;
         }
 
         if( verbose != 0 )
-            printf( "passed\n" );
+            polarssl_printf( "passed\n" );
     }
 
     if( verbose != 0 )
-        printf( "\n" );
+        polarssl_printf( "\n" );
 
     for( i = 0; i < 7; i++ )
     {
         if( verbose != 0 )
-            printf( "  HMAC-SHA-1 test #%d: ", i + 1 );
+            polarssl_printf( "  HMAC-SHA-1 test #%d: ", i + 1 );
 
         if( i == 5 || i == 6 )
         {
@@ -604,21 +634,25 @@ int sha1_self_test( int verbose )
         if( memcmp( sha1sum, sha1_hmac_test_sum[i], buflen ) != 0 )
         {
             if( verbose != 0 )
-                printf( "failed\n" );
+                polarssl_printf( "failed\n" );
 
-            return( 1 );
+            ret = 1;
+            goto exit;
         }
 
         if( verbose != 0 )
-            printf( "passed\n" );
+            polarssl_printf( "passed\n" );
     }
 
     if( verbose != 0 )
-        printf( "\n" );
+        polarssl_printf( "\n" );
 
-    return( 0 );
+exit:
+    sha1_free( &ctx );
+
+    return( ret );
 }
 
-#endif
+#endif /* POLARSSL_SELF_TEST */
 
-#endif
+#endif /* POLARSSL_SHA1_C */

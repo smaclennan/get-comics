@@ -3,12 +3,9 @@
  *
  * \brief X.509 certificate revocation list parsing
  *
- *  Copyright (C) 2006-2013, Brainspark B.V.
+ *  Copyright (C) 2006-2013, ARM Limited, All Rights Reserved
  *
- *  This file is part of PolarSSL (http://www.polarssl.org)
- *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
- *
- *  All rights reserved.
+ *  This file is part of mbed TLS (https://polarssl.org)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +24,11 @@
 #ifndef POLARSSL_X509_CRL_H
 #define POLARSSL_X509_CRL_H
 
+#if !defined(POLARSSL_CONFIG_FILE)
 #include "config.h"
+#else
+#include POLARSSL_CONFIG_FILE
+#endif
 
 #include "x509.h"
 
@@ -71,7 +72,7 @@ typedef struct _x509_crl
     x509_buf raw;           /**< The raw certificate data (DER). */
     x509_buf tbs;           /**< The raw certificate body (DER). The part that is To Be Signed. */
 
-    int version;
+    int version;            /**< CRL version (1=v1, 2=v2) */
     x509_buf sig_oid1;
 
     x509_buf issuer_raw;    /**< The raw issuer data (DER). */
@@ -88,18 +89,31 @@ typedef struct _x509_crl
     x509_buf sig_oid2;
     x509_buf sig;
     md_type_t sig_md;           /**< Internal representation of the MD algorithm of the signature algorithm, e.g. POLARSSL_MD_SHA256 */
-    pk_type_t sig_pk            /**< Internal representation of the Public Key algorithm of the signature algorithm, e.g. POLARSSL_PK_RSA */;
+    pk_type_t sig_pk;           /**< Internal representation of the Public Key algorithm of the signature algorithm, e.g. POLARSSL_PK_RSA */
+    void *sig_opts;             /**< Signature options to be passed to pk_verify_ext(), e.g. for RSASSA-PSS */
 
     struct _x509_crl *next;
 }
 x509_crl;
 
 /**
- * \brief          Parse one or more CRLs and add them
- *                 to the chained list
+ * \brief          Parse a DER-encoded CRL and append it to the chained list
  *
  * \param chain    points to the start of the chain
- * \param buf      buffer holding the CRL data
+ * \param buf      buffer holding the CRL data in DER format
+ * \param buflen   size of the buffer
+ *
+ * \return         0 if successful, or a specific X509 or PEM error code
+ */
+int x509_crl_parse_der( x509_crl *chain,
+                        const unsigned char *buf, size_t buflen );
+/**
+ * \brief          Parse one or more CRLs and append them to the chained list
+ *
+ * \note           Mutliple CRLs are accepted only if using PEM format
+ *
+ * \param chain    points to the start of the chain
+ * \param buf      buffer holding the CRL data in PEM or DER format
  * \param buflen   size of the buffer
  *
  * \return         0 if successful, or a specific X509 or PEM error code
@@ -108,11 +122,12 @@ int x509_crl_parse( x509_crl *chain, const unsigned char *buf, size_t buflen );
 
 #if defined(POLARSSL_FS_IO)
 /**
- * \brief          Load one or more CRLs and add them
- *                 to the chained list
+ * \brief          Load one or more CRLs and append them to the chained list
+ *
+ * \note           Mutliple CRLs are accepted only if using PEM format
  *
  * \param chain    points to the start of the chain
- * \param path     filename to read the CRLs from
+ * \param path     filename to read the CRLs from (in PEM or DER encoding)
  *
  * \return         0 if successful, or a specific X509 or PEM error code
  */

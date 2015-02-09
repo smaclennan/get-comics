@@ -3,12 +3,9 @@
  *
  * \brief MD5 message digest algorithm (hash function)
  *
- *  Copyright (C) 2006-2013, Brainspark B.V.
+ *  Copyright (C) 2006-2013, ARM Limited, All Rights Reserved
  *
- *  This file is part of PolarSSL (http://www.polarssl.org)
- *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
- *
- *  All rights reserved.
+ *  This file is part of mbed TLS (https://polarssl.org)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +24,11 @@
 #ifndef POLARSSL_MD5_H
 #define POLARSSL_MD5_H
 
+#if !defined(POLARSSL_CONFIG_FILE)
 #include "config.h"
+#else
+#include POLARSSL_CONFIG_FILE
+#endif
 
 #include <string.h>
 
@@ -61,6 +62,20 @@ typedef struct
     unsigned char opad[64];     /*!< HMAC: outer padding        */
 }
 md5_context;
+
+/**
+ * \brief          Initialize MD5 context
+ *
+ * \param ctx      MD5 context to be initialized
+ */
+void md5_init( md5_context *ctx );
+
+/**
+ * \brief          Clear MD5 context
+ *
+ * \param ctx      MD5 context to be cleared
+ */
+void md5_free( md5_context *ctx );
 
 /**
  * \brief          MD5 context setup

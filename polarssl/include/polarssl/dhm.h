@@ -3,12 +3,9 @@
  *
  * \brief Diffie-Hellman-Merkle key exchange
  *
- *  Copyright (C) 2006-2013, Brainspark B.V.
+ *  Copyright (C) 2006-2013, ARM Limited, All Rights Reserved
  *
- *  This file is part of PolarSSL (http://www.polarssl.org)
- *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
- *
- *  All rights reserved.
+ *  This file is part of mbed TLS (https://polarssl.org)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,6 +40,8 @@
 #define POLARSSL_ERR_DHM_FILE_IO_ERROR                     -0x3480  /**< Read/write of file failed. */
 
 /**
+ * RFC 2409 defines a number of standardized Diffie-Hellman groups
+ * that can be used.
  * RFC 3526 defines a number of standardized Diffie-Hellman groups
  * for IKE.
  * RFC 5114 defines a number of standardized Diffie-Hellman groups
@@ -51,11 +50,22 @@
  * Some are included here for convenience.
  *
  * Included are:
+ *  RFC 2409 6.2.  1024-bit MODP Group (Second Oakley Group)
  *  RFC 3526 3.    2048-bit MODP Group
  *  RFC 3526 4.    3072-bit MODP Group
  *  RFC 5114 2.1.  1024-bit MODP Group with 160-bit Prime Order Subgroup
  *  RFC 5114 2.2.  2048-bit MODP Group with 224-bit Prime Order Subgroup
  */
+#define POLARSSL_DHM_RFC2409_MODP_1024_P               \
+    "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1" \
+    "29024E088A67CC74020BBEA63B139B22514A08798E3404DD" \
+    "EF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245" \
+    "E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7ED" \
+    "EE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381" \
+    "FFFFFFFFFFFFFFFF"
+
+#define POLARSSL_DHM_RFC2409_MODP_1024_G          "02"
+
 #define POLARSSL_DHM_RFC3526_MODP_2048_P               \
     "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1" \
     "29024E088A67CC74020BBEA63B139B22514A08798E3404DD" \
@@ -157,6 +167,13 @@ typedef struct
 dhm_context;
 
 /**
+ * \brief          Initialize DHM context
+ *
+ * \param ctx      DHM context to be initialized
+ */
+void dhm_init( dhm_context *ctx );
+
+/**
  * \brief          Parse the ServerKeyExchange parameters
  *
  * \param ctx      DHM context
@@ -224,7 +241,8 @@ int dhm_make_public( dhm_context *ctx, int x_size,
  *
  * \param ctx      DHM context
  * \param output   destination buffer
- * \param olen     number of chars written
+ * \param olen     on entry, must hold the size of the destination buffer
+ *                 on exit, holds the actual number of bytes written
  * \param f_rng    RNG function, for blinding purposes
  * \param p_rng    RNG parameter
  *
@@ -242,7 +260,9 @@ int dhm_calc_secret( dhm_context *ctx,
                      void *p_rng );
 
 /**
- * \brief          Free the components of a DHM key
+ * \brief          Free and clear the components of a DHM key
+ *
+ * \param ctx      DHM context to free and clear
  */
 void dhm_free( dhm_context *ctx );
 
@@ -285,4 +305,4 @@ int dhm_self_test( int verbose );
 }
 #endif
 
-#endif
+#endif /* dhm.h */

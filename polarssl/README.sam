@@ -1,0 +1,5 @@
+Very stripped down version of polarssl... but no code actually changed
+except the Makefiles.
+
+Spoke too soon. In 1.3.10 had to patch ssl.h and pem.c
+

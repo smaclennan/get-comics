@@ -3,12 +3,9 @@
  *
  * \brief AES block cipher
  *
- *  Copyright (C) 2006-2013, Brainspark B.V.
+ *  Copyright (C) 2006-2014, ARM Limited, All Rights Reserved
  *
- *  This file is part of PolarSSL (http://www.polarssl.org)
- *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
- *
- *  All rights reserved.
+ *  This file is part of mbed TLS (https://polarssl.org)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +24,11 @@
 #ifndef POLARSSL_AES_H
 #define POLARSSL_AES_H
 
+#if !defined(POLARSSL_CONFIG_FILE)
 #include "config.h"
+#else
+#include POLARSSL_CONFIG_FILE
+#endif
 
 #include <string.h>
 
@@ -70,6 +71,20 @@ typedef struct
 aes_context;
 
 /**
+ * \brief          Initialize AES context
+ *
+ * \param ctx      AES context to be initialized
+ */
+void aes_init( aes_context *ctx );
+
+/**
+ * \brief          Clear AES context
+ *
+ * \param ctx      AES context to be cleared
+ */
+void aes_free( aes_context *ctx );
+
+/**
  * \brief          AES key schedule (encryption)
  *
  * \param ctx      AES context to be initialized
@@ -78,7 +93,8 @@ aes_context;
  *
  * \return         0 if successful, or POLARSSL_ERR_AES_INVALID_KEY_LENGTH
  */
-int aes_setkey_enc( aes_context *ctx, const unsigned char *key, unsigned int keysize );
+int aes_setkey_enc( aes_context *ctx, const unsigned char *key,
+                    unsigned int keysize );
 
 /**
  * \brief          AES key schedule (decryption)
@@ -89,7 +105,8 @@ int aes_setkey_enc( aes_context *ctx, const unsigned char *key, unsigned int key
  *
  * \return         0 if successful, or POLARSSL_ERR_AES_INVALID_KEY_LENGTH
  */
-int aes_setkey_dec( aes_context *ctx, const unsigned char *key, unsigned int keysize );
+int aes_setkey_dec( aes_context *ctx, const unsigned char *key,
+                    unsigned int keysize );
 
 /**
  * \brief          AES-ECB block encryption/decryption
@@ -112,6 +129,14 @@ int aes_crypt_ecb( aes_context *ctx,
  *                 Length should be a multiple of the block
  *                 size (16 bytes)
  *
+ * \note           Upon exit, the content of the IV is updated so that you can
+ *                 call the function same function again on the following
+ *                 block(s) of data and get the same result as if it was
+ *                 encrypted in one call. This allows a "streaming" usage.
+ *                 If on the other hand you need to retain the contents of the
+ *                 IV, you should either save it manually or use the cipher
+ *                 module instead.
+ *
  * \param ctx      AES context
  * \param mode     AES_ENCRYPT or AES_DECRYPT
  * \param length   length of the input data
@@ -129,12 +154,21 @@ int aes_crypt_cbc( aes_context *ctx,
                     unsigned char *output );
 #endif /* POLARSSL_CIPHER_MODE_CBC */
 
+#if defined(POLARSSL_CIPHER_MODE_CFB)
 /**
  * \brief          AES-CFB128 buffer encryption/decryption.
  *
  * Note: Due to the nature of CFB you should use the same key schedule for
  * both encryption and decryption. So a context initialized with
  * aes_setkey_enc() for both AES_ENCRYPT and AES_DECRYPT.
+ *
+ * \note           Upon exit, the content of the IV is updated so that you can
+ *                 call the function same function again on the following
+ *                 block(s) of data and get the same result as if it was
+ *                 encrypted in one call. This allows a "streaming" usage.
+ *                 If on the other hand you need to retain the contents of the
+ *                 IV, you should either save it manually or use the cipher
+ *                 module instead.
  *
  * \param ctx      AES context
  * \param mode     AES_ENCRYPT or AES_DECRYPT
@@ -161,6 +195,14 @@ int aes_crypt_cfb128( aes_context *ctx,
  * both encryption and decryption. So a context initialized with
  * aes_setkey_enc() for both AES_ENCRYPT and AES_DECRYPT.
  *
+ * \note           Upon exit, the content of the IV is updated so that you can
+ *                 call the function same function again on the following
+ *                 block(s) of data and get the same result as if it was
+ *                 encrypted in one call. This allows a "streaming" usage.
+ *                 If on the other hand you need to retain the contents of the
+ *                 IV, you should either save it manually or use the cipher
+ *                 module instead.
+ *
  * \param ctx      AES context
  * \param mode     AES_ENCRYPT or AES_DECRYPT
  * \param length   length of the input data
@@ -176,7 +218,9 @@ int aes_crypt_cfb8( aes_context *ctx,
                     unsigned char iv[16],
                     const unsigned char *input,
                     unsigned char *output );
+#endif /*POLARSSL_CIPHER_MODE_CFB */
 
+#if defined(POLARSSL_CIPHER_MODE_CTR)
 /**
  * \brief               AES-CTR buffer encryption/decryption
  *
@@ -206,6 +250,7 @@ int aes_crypt_ctr( aes_context *ctx,
                        unsigned char stream_block[16],
                        const unsigned char *input,
                        unsigned char *output );
+#endif /* POLARSSL_CIPHER_MODE_CTR */
 
 #ifdef __cplusplus
 }

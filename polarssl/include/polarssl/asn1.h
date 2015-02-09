@@ -3,12 +3,9 @@
  *
  * \brief Generic ASN.1 parsing
  *
- *  Copyright (C) 2006-2013, Brainspark B.V.
+ *  Copyright (C) 2006-2013, ARM Limited, All Rights Reserved
  *
- *  This file is part of PolarSSL (http://www.polarssl.org)
- *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
- *
- *  All rights reserved.
+ *  This file is part of mbed TLS (https://polarssl.org)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +24,11 @@
 #ifndef POLARSSL_ASN1_H
 #define POLARSSL_ASN1_H
 
+#if !defined(POLARSSL_CONFIG_FILE)
 #include "config.h"
+#else
+#include POLARSSL_CONFIG_FILE
+#endif
 
 #if defined(POLARSSL_BIGNUM_C)
 #include "bignum.h"
@@ -35,15 +36,15 @@
 
 #include <string.h>
 
-/** 
+/**
  * \addtogroup asn1_module
- * \{ 
+ * \{
  */
- 
+
 /**
  * \name ASN1 Error codes
  * These error codes are OR'ed to X509 error codes for
- * higher error granularity. 
+ * higher error granularity.
  * ASN1 is a standard to specify data structures.
  * \{
  */
@@ -93,9 +94,13 @@
 /** Returns the size of the binary string, without the trailing \\0 */
 #define OID_SIZE(x) (sizeof(x) - 1)
 
-/** Compares two asn1_buf structures for the same OID. Only works for
- *  'defined' oid_str values (OID_HMAC_SHA1), you cannot use a 'unsigned
- *  char *oid' here!
+/**
+ * Compares an asn1_buf structure to a reference OID.
+ *
+ * Only works for 'defined' oid_str values (OID_HMAC_SHA1), you cannot use a
+ * 'unsigned char *oid' here!
+ *
+ * Warning: returns true when the OIDs are equal (unlike memcmp)!
  */
 #define OID_CMP(oid_str, oid_buf)                                   \
         ( ( OID_SIZE(oid_str) == (oid_buf)->len ) &&                \
@@ -150,6 +155,7 @@ typedef struct _asn1_named_data
     asn1_buf oid;                   /**< The object identifier. */
     asn1_buf val;                   /**< The named value. */
     struct _asn1_named_data *next;  /**< The next entry in the sequence. */
+    unsigned char next_merged;      /**< Merge next item into the current one? */
 }
 asn1_named_data;
 
@@ -270,7 +276,7 @@ int asn1_get_sequence_of( unsigned char **p,
 int asn1_get_mpi( unsigned char **p,
                   const unsigned char *end,
                   mpi *X );
-#endif
+#endif /* POLARSSL_BIGNUM_C */
 
 /**
  * \brief       Retrieve an AlgorithmIdentifier ASN.1 sequence.

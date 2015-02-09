@@ -1,1 +1,5 @@
-libpolarssl.a
+*.o
+libpolarssl.*
+libmbedtls.*
+*.sln
+*.vcxproj
