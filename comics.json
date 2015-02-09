@@ -82,11 +82,6 @@
   "regexp": "comics/[0-9]+.*\\.(jpg|jpeg|png)",
   "output": "gws"
 },
-{ /* GPF */
-  "url": "http://www.gpf-comics.com/",
-  "regexp": "/comics/gpf[^.]+\\.(gif|jpg|png)",
-  "days": "XmXwXwX"
-},
 { /*invisible bread */
   "url": "http://invisiblebread.com/",
   "regexp": "comics/[0-9a-zA-Z-]+.png",
