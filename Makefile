@@ -15,14 +15,14 @@ MAKEFLAGS += --no-print-directory
 #CFLAGS += -DLOGGING
 
 # Comment in to enable https via openssl
-#CFLAGS += -DWANT_OPENSSL
+CFLAGS += -DWANT_OPENSSL
 
 # Comment in to enable https via polarssl
-CFLAGS += -DWANT_POLARSSL
+#CFLAGS += -DWANT_POLARSSL
 
 # Comment in to enable gzip encoding
-CFLAGS += -DWANT_ZLIB
-ZDIR = zlib-1.2.8
+#CFLAGS += -DWANT_ZLIB
+#ZDIR = zlib-1.2.8
 CFLAGS += -DWANT_GZIP
 
 # Currently I use gccgo
@@ -31,19 +31,20 @@ ifneq ($(GO),)
 EXTRA+=go-get-comics
 endif
 
-CFILES  := http.c log.c openssl.c polarssl.c socket.c
-COMMON	:= $(CFILES:.c=.o)
+CFILES  := http.c log.c socket.c
 
 # Optionally add polarssl
 ifneq ($(findstring WANT_POLARSSL,$(CFLAGS)),)
 PLIB=polarssl/library/libpolarssl.a
 CFLAGS += -DWANT_SSL -Ipolarssl/include
 LLIBS += $(PLIB)
+CFILES += polarssl.c
 else
 # Optionally add openssl
 ifneq ($(findstring WANT_OPENSSL,$(CFLAGS)),)
 CFLAGS += -DWANT_SSL
 LIBS += -lssl -lcrypto
+CFILES += openssl.c
 endif
 endif
 
@@ -58,6 +59,8 @@ endif
 endif
 
 LIBS += $(LLIBS)
+
+COMMON	:= $(CFILES:.c=.o)
 
 #
 # Pretty print - "borrowed" from sparse Makefile
@@ -110,6 +113,8 @@ clean:
 	rm -f get-comics link-check http-get *.o .*.o.d get-comics.html TAGS
 	rm -f go-get-comics
 	@make -C polarssl clean
+ifneq ($(ZDIR),)
 	@make -C $(ZDIR) clean
+endif
 
 include $(wildcard .*.o.d)
