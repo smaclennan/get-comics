@@ -2,18 +2,6 @@
 "gocomics-regexp": "http://assets.amuniversal.com/[0-9a-f]{32}",
 "comics": [
 
-{ /* Aislin */
-  "url": "http://montrealgazette.com/gallery/editorial-cartoons",
-  "regexp":"http://wpmedia.montrealgazette.com/2[0-9]+/[0-9]+/\(pascal|aislinweb\)[^.]+\\.jpg",
-  "output": "aislin",
-  "days": "Xmtwtfs"
-},
-{ /* Biff */
-  "url": "http://thebookofbiff.com",
-  "regexp": "http://thebookofbiff.com/comics/.*\\.(png|gif)",
-  "output": "biff",
-  "days": "XmtwtfX"
-},
 { /* Bizarro via ArcaMax */
   "url": "http://www.arcamax.com/thefunnies/bizarro/",
   "regexp": "/newspics/[a-z0-9]+/[0-9/]+\\.(jpg|gif)",
