@@ -42,17 +42,10 @@
   "output": "diesel",
   "days": "XmtwtfX"
 },
-{ /* Dilbert */
-  "url": "http://dilbert.com/",
-  "regexp": "http://assets.amuniversal.com/[0-9a-f]+",
-  "output": "dilbert",
-  "days": "Xmtwtfs"
-},
-{ /* Dilbert - Sunday */
-  "url": "http://dilbert.com/",
-  "regexp": "http://assets.amuniversal.com/[0-9a-f]+",
-  "output": "dilbert",
-  "days": "sXXXXXX"
+{ /* Dilbert via ArcaMax */
+  "url": "http://www.arcamax.com/thefunnies/dilbert/",
+  "regexp": "/newspics/[a-z0-9]+/[0-9/]+\\.(jpg|gif)",
+  "output": "dilbert"
 },
 { /* Freefall */
   "url": "http://freefall.purrsia.com/",
