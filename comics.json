@@ -107,7 +107,7 @@
 },
 { /* SMBC */
   "url": "http://www.smbc-comics.com/",
-  "regexp": "comics/[0-9]+.png",
+  "regexp": "comics/[0-9-]+.png",
   "output": "smbc"
 },
 { /* Something Positive */
