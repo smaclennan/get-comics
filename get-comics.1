@@ -3,11 +3,13 @@
 get-comics \- download comics from the net
 .SH SYNOPSIS
 .B get-comics
-[\fI-kv\fR] 
-[\fI-d directory\fR] 
-[\fI-p proxy\fR] 
+[\fI-hkrvCV\fR]
+[\fI-d directory\fR]
+[\fI-l links_file\fR]
+[\fI-p proxy\fR]
 [\fI-t threads\fR]
-[\fIjson_file\fR]
+[\fI-T timeout\fR]
+[\fIjson_file...\fR]
 .br
 .B get-today
 .SH DESCRIPTION
@@ -27,21 +29,40 @@ comics. It is here as a sample only.
 where to download the comics to. Overrides the json file. Defaults to
 $HOME/comics.
 .TP
+\fB\-h\fR
+usage help message.
+.TP
 \fB\-k\fR
 keep the downloaded index files. Usually these are deleted. Useful
-for debugging.
+for debugging. Note: failed comics are always kept.
+.TP
+\fB\-l links file\fR
+produce a file with links to all the comics. Does not download the
+comics.
 .TP
 \fB\-p proxy[:port]\fR
 proxy and optional port (defaults to 3128). Overrides the json file.
 .TP
+\fB\-r\fR
+randomize the order of the comics.
+.TP
 \fB\-t threads\fR
-number of download threads
+number of simultaneous download threads
 .TP
 \fB\-v\fR
 increase verbosity
 .TP
-\fBjson_file\fR
-alternate json file to use. Defaults to /usr/share/get-comics/comics.json
+\fB\-C\fR
+list ciphers if SSL enabled.
+.TP
+\fB\-T timeout\fR
+read timeout in seconds. (default 5 minutes)
+.TP
+\fB\-V\fR
+verify the json file.
+.TP
+\fBjson_file(s)\fR
+alternate json file, or files, to use. Defaults to /usr/share/get-comics/comics.json
 .SH "HOW IT WORKS"
 .PP
 get-comics reads the json file and downloads the comics. It can
@@ -111,7 +132,7 @@ comics on Monday, Wednesday, and Friday only:
 sometimes the file name of the comic will clash with other comics. For
 example, two comics may use the date as the file name. To keep the
 comics from overwriting each other, a unique output file name can be
-specified with this tag.
+specified with this tag. It is highly recommended that you always set this.
 .TP
 .B href
 sometimes the URL from the regular expression is not good enough to
@@ -148,7 +169,7 @@ Written by Sean MacLennan
 .SH "REPORTING BUGS"
 Report bugs to <comics@seanm.ca>.
 .SH COPYRIGHT
-Copyright \(co 2002-2011 Sean MacLennan
+Copyright \(co 2002-2015 Sean MacLennan
 .br
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

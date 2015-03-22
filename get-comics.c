@@ -256,14 +256,15 @@ static void sigpipe(int signum) {}
 
 static void usage(int rc)
 {
-	fputs("usage: get-comics [-krvCV] [-d comics_dir]", stdout);
+	fputs("usage:  get-comics [-hkrvCV] [-d comics_dir]", stdout);
 	puts(" [-l links_file] [-p proxy]");
-	puts("                  [-t threads] [config-file ...]");
-	puts("Where: -k  keep index files");
-	puts("       -r  randomize");
-	puts("       -v  verbose");
-	puts("       -C  list supported ciphers");
-	puts("       -V  verify config");
+	puts("                   [-t threads] [-T timeout] [config-file ...]");
+	puts("Where:  -h  this help");
+	puts("\t-k  keep index files");
+	puts("\t-r  randomize");
+	puts("\t-v  verbose");
+	puts("\t-C  list supported ciphers");
+	puts("\t-V  verify config");
 	exit(rc);
 }
 
@@ -273,7 +274,7 @@ int main(int argc, char *argv[])
 	int i, n, timeout = 250, verify = 0;
 	struct connection *conn;
 
-	while ((i = getopt(argc, argv, "d:kl:p:rt:vCT:V")) != -1)
+	while ((i = getopt(argc, argv, "d:hkl:p:rt:vCT:V")) != -1)
 		switch ((char)i) {
 		case 'd':
 			comics_dir = optarg;
@@ -338,6 +339,7 @@ int main(int argc, char *argv[])
 		randomize_comics();
 
 	if (verify) {
+		printf("Comics: %u Skipped today: %u\n", n_comics + skipped, skipped);
 		if (verbose)
 			dump_outstanding(0);
 		return 0;
