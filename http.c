@@ -682,6 +682,9 @@ static int read_file_chunked(struct connection *conn)
 		INC_CURP(conn);
 	}
 
+	if (conn->curp == conn->endp)
+		return 0; /* Need to read next chunk */
+
 	if (conn->cstate == CS_DIGITS) {
 		while (isxdigit(*conn->curp)) {
 			if (isdigit(*conn->curp))
