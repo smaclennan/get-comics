@@ -65,7 +65,7 @@
 },
 { /*invisible bread */
   "url": "http://invisiblebread.com/",
-  "regexp": "comics/[0-9a-zA-Z-]+.png",
+  "regexp": "comics/[0-9a-zA-Z-]+.(png|gif)",
   "output": "invisiblebread"
 },
 { /* Kevin and Kell */
