@@ -58,11 +58,6 @@
   "output": "frumps",
   "days": "XmXwXfX"
 },
-{ /* Girls With Slingshots */
-  "url": "http://www.girlswithslingshots.com",
-  "regexp": "comics/[0-9]+.*\\.(jpg|jpeg|png)",
-  "output": "gws"
-},
 { /*invisible bread */
   "url": "http://invisiblebread.com/",
   "regexp": "comics/[0-9a-zA-Z-]+.(png|gif)",
