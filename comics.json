@@ -72,11 +72,6 @@
   "output": "maxim",
   "days": "XmtwtfX"
 },
-{ /* Out There */
-  "url": "http://outthere.keenspot.com/comics/%Y%m%d.jpg",
-  "output": "out-there",
-  "days": "XXXwXXX"
-},
 { /* PVP */
   "url": "http://www.pvponline.com/comic/",
   "regexp": "http://[^/]+/pvponlinenew/img/comic/%Y/[0-9]+/pvp[0-9]+[a-z]*\\.(jpg|gif|png)",
