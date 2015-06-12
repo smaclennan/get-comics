@@ -87,7 +87,7 @@
 },
 { /* Red Meat */
   "url": "http://www.redmeat.com/max-cannon/FreshMeat",
-  "regexp": "http://www.redmeat.com/imager/[^\"]*",
+  "regexp": "http://[^/]+/redmeat/imager/u/redmeat/[^\"]*",
   "output": "redmeat",
   "days": "XXXXXfX"
 },
