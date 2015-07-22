@@ -116,7 +116,7 @@
   "days": "XmXwXfX"
 },
 { /* Ubersoft Help Desk */
-  "url": "https://www.eviscerati.org/comics/",
+  "url": "https://www.eviscerati.org/comics",
   "regexp": "/files/comics/hd/hd[0-9_]+\\.(png|jpg)",
   "output": "ubersoft",
   "days": "XmtwtfX"
@@ -134,7 +134,7 @@
 { "gocomic": "drabble" },
 { "gocomic": "duplex" },
 { "gocomic": "fminus" },
-{ "gocomic": "frankandernest" },
+{ "gocomic": "frank-and-ernest" },
 { "gocomic": "freerange" },
 { "gocomic": "herman" },
 { "gocomic": "lio" },
