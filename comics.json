@@ -16,7 +16,7 @@
 },
 { /* chainsawsuit */
   "url": "http://chainsawsuit.com/",
-  "regexp": "wp-content/uploads/%Y/%m/[0-9a-zA-Z-]+.png",
+  "regexp": "wp-content/uploads/%Y/%m/[0-9a-zA-Z_-]+.png",
   "output": "chainsawsuit"
 },
 { /* Channelate */
