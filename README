@@ -5,13 +5,13 @@ I read about 30 to 40 comics daily from the net. That is along with
 the comics in the newspaper. I wrote an Emacs lisp program to download
 them all for convenient viewing.
 
-However, when I go away on vacation, I want something to download
+However, when I went away on vacation, I wanted something to download
 the comics daily and save them. I had problems getting Emacs to
 startup and run reliably, so I quickly wrote the first get-comics.
 
 
-First get-comics
-----------------
+get-comics 1
+------------
 
 The first get-comics was a multi-threaded app that was driven by an
 xml file to download comics. I wrote it multi-threaded because I
