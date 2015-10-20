@@ -72,6 +72,12 @@
   "output": "maxim",
   "days": "XmtwtfX"
 },
+{ /* Poorly Drawn Lines */
+  "url": "http://poorlydrawnlines.com/",
+  "regexp": "wp-content/uploads/%Y/%m/[0-9a-zA-Z_-]+.png",
+  "output": "pdl",
+  "days": "XXtXtXs"
+},
 { /* PVP */
   "url": "http://www.pvponline.com/comic/",
   "regexp": "http://[^/]+/pvponlinenew/img/comic/%Y/[0-9]+/pvp[0-9]+[a-z]*\\.(jpg|gif|png)",
