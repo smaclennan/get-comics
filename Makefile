@@ -15,10 +15,10 @@ MAKEFLAGS += --no-print-directory
 #CFLAGS += -DLOGGING
 
 # Comment in to enable https via openssl
-CFLAGS += -DWANT_OPENSSL
+#CFLAGS += -DWANT_OPENSSL
 
 # Comment in to enable https via polarssl
-#CFLAGS += -DWANT_POLARSSL
+CFLAGS += -DWANT_POLARSSL
 
 # Comment in to enable gzip encoding
 #CFLAGS += -DWANT_ZLIB
