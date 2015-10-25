@@ -112,7 +112,6 @@ install: all
 clean:
 	rm -f get-comics link-check http-get *.o .*.o.d get-comics.html TAGS
 	rm -f go-get-comics
-	@make -C polarssl clean
 ifneq ($(ZDIR),)
 	@make -C $(ZDIR) clean
 endif
