@@ -121,12 +121,6 @@
   "output": "twolumps",
   "days": "XmXwXfX"
 },
-{ /* Ubersoft Help Desk */
-  "url": "https://www.eviscerati.org/comics",
-  "regexp": "/files/comics/hd/hd[0-9_]+\\.(png|jpg)",
-  "output": "ubersoft",
-  "days": "XmtwtfX"
-},
 { /* xkcd */
   "url": "http://xkcd.com/",
   "regexp": "http://imgs.xkcd.com/comics/[^.]*\\.(jpg|png|gif)",
