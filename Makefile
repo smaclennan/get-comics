@@ -1,3 +1,5 @@
+VERSION=0.5
+
 CC = clang -fno-color-diagnostics
 
 # If you set D=1 on the command line then $(D:1=-g)
@@ -26,10 +28,10 @@ CFLAGS += -DWANT_OPENSSL
 CFLAGS += -DWANT_GZIP
 
 # Currently I use gccgo
-GO=$(shell which gccgo 2>/dev/null)
-ifneq ($(GO),)
-EXTRA+=go-get-comics
-endif
+#GO=$(shell which gccgo 2>/dev/null)
+#ifneq ($(GO),)
+#EXTRA+=go-get-comics
+#endif
 
 CFILES  := http.c log.c socket.c
 
@@ -102,6 +104,12 @@ get-comics.html: get-comics.1
 
 check:
 	sparse get-comics.c $(CFILES) config.c my-parser.c
+
+tarball: COPYING Makefile README* *.[ch] get-today get-comics.1 comics.json
+	mkdir get-comics-$(VERSION)
+	cp $+ get-comics-$(VERSION)
+	tar zcf slackware/get-comics-$(VERSION).tar.gz get-comics-$(VERSION)
+	rm -rf get-comics-$(VERSION)
 
 install: all
 	install -D -s -m 755 get-comics $(DESTDIR)/usr/bin/get-comics
