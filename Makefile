@@ -16,6 +16,11 @@ MAKEFLAGS += --no-print-directory
 # Currently unused. Mainly for debugging.
 #CFLAGS += -DLOGGING
 
+# Comment in to enable libcurl
+#CFLAGS += -DWANT_CURL
+
+# For curl we do not need ssl/gzip
+ifeq ($(findstring WANT_CURL,$(CFLAGS)),)
 # Comment in to enable https via openssl
 CFLAGS += -DWANT_OPENSSL
 
@@ -26,6 +31,7 @@ CFLAGS += -DWANT_OPENSSL
 #CFLAGS += -DWANT_ZLIB
 #ZDIR = zlib-1.2.8
 CFLAGS += -DWANT_GZIP
+endif
 
 # Currently I use gccgo
 #GO=$(shell which gccgo 2>/dev/null)
@@ -33,7 +39,7 @@ CFLAGS += -DWANT_GZIP
 #EXTRA+=go-get-comics
 #endif
 
-CFILES  := http.c log.c socket.c
+CFILES  := log.c common.c
 
 # Optionally add polarssl
 ifneq ($(findstring WANT_POLARSSL,$(CFLAGS)),)
@@ -58,6 +64,14 @@ else
 ifneq ($(findstring WANT_GZIP,$(CFLAGS)),)
 LIBS += -lz
 endif
+endif
+
+# Optionally add libcurl
+ifneq ($(findstring WANT_CURL,$(CFLAGS)),)
+LIBS += -lcurl
+CFILES += curl.c
+else
+CFILES += http.c socket.c
 endif
 
 LIBS += $(LLIBS)

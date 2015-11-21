@@ -25,8 +25,6 @@
 #include <signal.h>
 
 
-int read_timeout = SOCKET_TIMEOUT;
-
 char *comics_dir;
 int skipped;
 

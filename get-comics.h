@@ -26,6 +26,10 @@
 static inline int inflateEnd(void *strm) { return -1; }
 #endif
 
+#ifdef WANT_CURL
+#include <curl/curl.h>
+#endif
+
 #define HTTP_PORT		80
 
 /* Limit the number of concurrent sockets. */
@@ -82,6 +86,10 @@ struct connection {
 	int out;
 	time_t access;
 
+#ifdef WANT_CURL
+	CURL *curl;
+#endif
+
 	char buf[BUFSIZE + 1];
 	int  bufn;
 	int  rlen;
@@ -125,6 +133,7 @@ extern FILE *debug_fp;
 
 extern int outstanding;
 extern int gotit;
+extern int resets;
 
 extern const char *method;
 
@@ -191,7 +200,6 @@ static inline void write_comic(struct connection *conn) {}
 
 /* export from http.c */
 void set_proxy(char *proxystr);
-char *get_proxy(void);
 void write_request(struct connection *conn);
 int read_reply(struct connection *conn);
 int build_request(struct connection *conn);

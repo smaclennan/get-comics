@@ -25,8 +25,6 @@
 #include <signal.h>
 
 
-int read_timeout = SOCKET_TIMEOUT;
-
 static struct connection *comics;
 
 static struct connection *head;
