@@ -116,11 +116,6 @@
   "regexp": "newspics/(cache/[a-z0-9]+/)?[0-9]+/[0-9]+/[0-9]+.(gif|jpg)",
   "output": "tinkersons"
 },
-{ /* Two Lumps */
-  "url": "http://www.twolumps.net/comics/%Y%m%d.jpg",
-  "output": "twolumps",
-  "days": "XmXwXfX"
-},
 { /* xkcd */
   "url": "http://xkcd.com/",
   "regexp": "http://imgs.xkcd.com/comics/[^.]*\\.(jpg|png|gif)",
