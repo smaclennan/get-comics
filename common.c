@@ -9,8 +9,13 @@ int resets;
 int n_comics;
 int read_timeout = SOCKET_TIMEOUT;
 const char *method = "GET";
+int thread_limit = THREAD_LIMIT;
+
+struct connection *comics;
+struct connection *head;
 
 FILE *debug_fp;
+FILE *links_only;
 
 char *proxy;
 char *proxy_port = "3128";
@@ -132,6 +137,44 @@ int reset_connection(struct connection *conn)
 }
 #endif
 
+static void add_link(struct connection *conn)
+{
+	if (verbose)
+		printf("Add link %s\n", conn->url);
+
+	fprintf(links_only, "%s\n", conn->url);
+
+	conn->gotit = 1;
+	++gotit;
+}
+
+int start_next_comic(void)
+{
+	while (head && outstanding < thread_limit) {
+		if (links_only && !head->regexp) {
+			add_link(head);
+			head = head->next;
+			continue;
+		} else if (build_request(head) == 0) {
+			time(&head->access);
+			if (verbose)
+				printf("Started %s (%d)\n", head->url, outstanding);
+			if (debug_fp)
+				fprintf(debug_fp, "%ld: Started  %3d '%s' (%d)\n",
+						head->access, head->id,
+						head->outname ? head->outname : head->url, outstanding);
+			++outstanding;
+			head = head->next;
+			return 1;
+		}
+
+		printf("build_request %s failed\n", head->url);
+		head = head->next;
+	}
+
+	return head != NULL;
+}
+
 void set_proxy(char *proxystr)
 {
 	char *p;
@@ -153,5 +196,33 @@ void set_proxy(char *proxystr)
 
 	if (verbose)
 		printf("Proxy %s:%s\n", proxy, proxy_port);
+}
+
+void dump_outstanding(int sig)
+{
+	struct connection *conn;
+	struct tm *atime;
+	time_t now = time(NULL);
+
+	atime = localtime(&now);
+	printf("\nTotal %d Outstanding: %d @ %2d:%02d:%02d\n",
+		   n_comics, outstanding,
+		   atime->tm_hour, atime->tm_min, atime->tm_sec);
+	for (conn = comics; conn; conn = conn->next) {
+		if (!CONN_OPEN)
+			continue;
+		printf("> %s = %s\n", conn->url,
+			   conn->connected ? "connected" : "not connected");
+		if (conn->regexp)
+			printf("  %s %s\n",
+				   conn->matched ? "matched" : "regexp",
+				   conn->regexp);
+		atime = localtime(&conn->access);
+		printf("  %2d:%02d:%02d\n",
+			   atime->tm_hour, atime->tm_min, atime->tm_sec);
+	}
+	for (conn = head; conn; conn = conn->next)
+		printf("Q %s\n", conn->url);
+	fflush(stdout);
 }
 

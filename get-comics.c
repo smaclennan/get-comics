@@ -28,24 +28,14 @@
 char *comics_dir;
 int skipped;
 
-static struct connection *comics;
-
-static struct connection *head;
-
 static int unlink_index = 1;
-int thread_limit = THREAD_LIMIT;
 int randomize;
-static FILE *links_only;
 
 /* If the user specified this on the command line we do not want the
  * config file to override */
 int threads_set;
 
 
-#ifndef WANT_CURL
-static void user_command(void);
-#endif
-static void dump_outstanding(int sig);
 static void randomize_comics(void);
 
 
@@ -105,7 +95,6 @@ static char *find_regexp(struct connection *conn, char *reg, int regsize)
 	return NULL;
 }
 
-
 static void add_link(struct connection *conn)
 {
 	if (verbose)
@@ -116,34 +105,6 @@ static void add_link(struct connection *conn)
 	conn->gotit = 1;
 	++gotit;
 }
-
-int start_next_comic(void)
-{
-	while (head && outstanding < thread_limit) {
-		if (links_only && !head->regexp) {
-			add_link(head);
-			head = head->next;
-			continue;
-		} else if (build_request(head) == 0) {
-			time(&head->access);
-			if (verbose)
-				printf("Started %s (%d)\n", head->url, outstanding);
-			if (debug_fp)
-				fprintf(debug_fp, "%ld: Started  %3d '%s' (%d)\n",
-						head->access, head->id,
-						head->outname ? head->outname : head->url, outstanding);
-			++outstanding;
-			head = head->next;
-			return 1;
-		}
-
-		printf("build_request %s failed\n", head->url);
-		head = head->next;
-	}
-
-	return head != NULL;
-}
-
 
 int process_html(struct connection *conn)
 {
@@ -210,129 +171,6 @@ int process_html(struct connection *conn)
 static void sigpipe(int signum) {}
 #endif
 
-#ifndef WANT_CURL
-static struct pollfd *ufds;
-static int npoll;
-
-int set_conn_socket(struct connection *conn, int sock)
-{
-	int i;
-
-	for (i = 1; i < npoll; ++i)
-		if (ufds[i].fd == -1) {
-			conn->poll = &ufds[i];
-			conn->poll->fd = sock;
-			/* All sockets start out writable */
-			conn->poll->events = POLLOUT;
-			return 1;
-		}
-
-	return 0;
-}
-
-static int timeout_connections(void)
-{
-	struct connection *comic;
-	time_t timeout = time(NULL) - read_timeout;
-
-	for (comic = comics; comic; comic = comic->next)
-		if (comic->poll && comic->access < timeout) {
-			printf("TIMEOUT %s\n", comic->url);
-			fail_connection(comic);
-		}
-
-	return 0;
-}
-
-static void read_conn(struct connection *conn)
-{
-	int n;
-
-	time(&conn->access);
-#ifdef WANT_SSL
-	if (conn->ssl) {
-		n = openssl_read(conn);
-		/* openssl_read can return -EAGAIN if the SSL
-		 * connection needs a read or write. */
-		if (n == -EAGAIN)
-			return;
-	} else
-#endif
-		n = recv(conn->poll->fd, conn->curp, conn->rlen, 0);
-	if (n >= 0) {
-		if (verbose > 1)
-			printf("+ Read %d\n", n);
-		conn->endp = conn->curp + n;
-		conn->rlen -= n;
-		*conn->endp = '\0';
-
-		if (conn->func && conn->func(conn))
-			fail_connection(conn);
-	} else if (n < 0)
-		reset_connection(conn); /* Try again */
-}
-
-void main_loop(void)
-{
-	int i, n, timeout = 250;
-	struct connection *conn;
-
-	npoll = thread_limit + 1; /* add one for stdin */
-	ufds = must_calloc(npoll, sizeof(struct pollfd));
-	for (i = 0; i < npoll; ++i)
-		ufds[i].fd = -1;
-
-#ifndef _WIN32
-	/* Add stdin - windows can poll only on sockets */
-	if (isatty(0)) {
-		ufds[0].fd = 0;
-		ufds[0].events = POLLIN;
-	}
-#endif
-
-	while (head || outstanding) {
-		start_next_comic();
-
-		n = poll(ufds, npoll, timeout);
-		if (n < 0) {
-			my_perror("poll");
-			continue;
-		}
-
-		if (n == 0) {
-			timeout_connections();
-			if (!start_next_comic())
-				/* Once we have all the comics
-				 * started, increase the timeout
-				 * period. */
-				timeout = 1000;
-			continue;
-		}
-
-		if (ufds[0].revents)
-			user_command();
-
-		for (conn = comics; conn; conn = conn->next)
-			if (!conn->poll)
-				continue;
-			else if (conn->poll->revents & POLLOUT) {
-				if (!conn->connected)
-					check_connect(conn);
-				else {
-					time(&conn->access);
-					write_request(conn);
-				}
-			} else if (conn->poll->revents & POLLIN) {
-				/* This check is needed for openssl */
-				if (!conn->connected)
-					check_connect(conn);
-				else
-					read_conn(conn);
-			}
-	}
-}
-#endif
-
 static void usage(int rc)
 {
 	fputs("usage:  get-comics [-hkrvCV] [-d comics_dir]", stdout);
@@ -370,9 +208,6 @@ static void free_comics(void)
 	}
 
 	safe_free(comics_dir);
-#ifndef WANT_CURL
-	safe_free(ufds);
-#endif
 }
 
 int main(int argc, char *argv[])
@@ -511,61 +346,6 @@ int main(int argc, char *argv[])
 		fclose(debug_fp);
 	return 0;
 }
-
-static void dump_outstanding(int sig)
-{
-	struct connection *conn;
-	struct tm *atime;
-	time_t now = time(NULL);
-
-	atime = localtime(&now);
-	printf("\nTotal %d Outstanding: %d @ %2d:%02d:%02d\n",
-	       n_comics, outstanding,
-	       atime->tm_hour, atime->tm_min, atime->tm_sec);
-	for (conn = comics; conn; conn = conn->next) {
-		if (!CONN_OPEN)
-			continue;
-		printf("> %s = %s\n", conn->url,
-		       conn->connected ? "connected" : "not connected");
-		if (conn->regexp)
-			printf("  %s %s\n",
-			       conn->matched ? "matched" : "regexp",
-			       conn->regexp);
-		atime = localtime(&conn->access);
-		printf("  %2d:%02d:%02d\n",
-		       atime->tm_hour, atime->tm_min, atime->tm_sec);
-	}
-	for (conn = head; conn; conn = conn->next)
-		printf("Q %s\n", conn->url);
-	fflush(stdout);
-}
-
-#ifndef WANT_CURL
-static void user_command(void)
-{
-	char buf[80], *p;
-	struct connection *conn;
-
-	if (!fgets(buf, sizeof(buf), stdin)) {
-		printf("Hmmmmm no user input\n");
-		return;
-	}
-
-	for (p = buf; isspace(*p); ++p)
-		;
-
-	if (*p == 'd')
-		dump_outstanding(0);
-	else if (*p == 'b') {
-		int queued = 0;
-		for (conn = head; conn; conn = conn->next)
-			++queued;
-		printf("Total %d Got %d Outstanding %d Queued %d\n",
-		       n_comics, gotit, outstanding, queued);
-	} else if (*p)
-		printf("Unexpected command %s", buf);
-}
-#endif
 
 void add_comic(struct connection *new)
 {

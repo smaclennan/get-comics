@@ -25,15 +25,6 @@
 #include <signal.h>
 
 
-static struct connection *comics;
-
-static struct connection *head;
-
-int thread_limit = THREAD_LIMIT;
-
-static struct pollfd *ufds;
-static int npoll;
-
 static void add_url(char *url)
 {
 	static struct connection *tail;
@@ -91,26 +82,6 @@ static int read_link_file(char *fname)
 	return 0;
 }
 
-int start_next_comic(void)
-{
-	while (head && outstanding < thread_limit)
-		if (build_request(head) == 0) {
-			time(&head->access);
-			if (verbose)
-				printf("Started %s (%d)\n",
-				       head->url, outstanding);
-			++outstanding;
-			head = head->next;
-			return 1;
-		} else {
-			printf("build_request %s failed\n", head->url);
-			head = head->next;
-		}
-
-	return head != NULL;
-}
-
-
 int process_html(struct connection *conn)
 {	/* Should never be called with HEAD method */
 	printf("Internal Error: %s called\n", __func__);
@@ -118,48 +89,6 @@ int process_html(struct connection *conn)
 	return 1;
 }
 
-
-static int timeout_connections(void)
-{
-	struct connection *comic;
-	time_t timeout = time(NULL) - read_timeout;
-
-	for (comic = comics; comic; comic = comic->next)
-		if (comic->poll && comic->access < timeout) {
-			printf("TIMEOUT %s\n", comic->url);
-			fail_connection(comic);
-		}
-
-	return 0;
-}
-
-static void read_conn(struct connection *conn)
-{
-	int n;
-
-	time(&conn->access);
-#ifdef WANT_SSL
-	if (conn->ssl) {
-		n = openssl_read(conn);
-		/* openssl_read can return -EAGAIN if the SSL
-		 * connection needs a read or write. */
-		if (n == -EAGAIN)
-			return;
-	} else
-#endif
-		n = recv(conn->poll->fd, conn->curp, conn->rlen, 0);
-	if (n >= 0) {
-		if (verbose > 1)
-			printf("+ Read %d\n", n);
-		conn->endp = conn->curp + n;
-		conn->rlen -= n;
-		*conn->endp = '\0';
-
-		if (conn->func && conn->func(conn))
-			fail_connection(conn);
-	} else if (n < 0)
-		reset_connection(conn); /* Try again */
-}
 
 static void usage(int rc)
 {
@@ -173,8 +102,7 @@ static void usage(int rc)
 int main(int argc, char *argv[])
 {
 	char *env;
-	int i, n, timeout = 250;
-	struct connection *conn;
+	int i;
 
 	while ((i = getopt(argc, argv, "hp:t:vT:")) != -1)
 		switch ((char)i) {
@@ -219,67 +147,10 @@ int main(int argc, char *argv[])
 	win32_init();
 #endif
 
-	npoll = thread_limit + 1; /* add one for stdin */
-	ufds = must_calloc(npoll, sizeof(struct pollfd));
-	for (i = 0; i < npoll; ++i)
-		ufds[i].fd = -1;
-
-	while (head || outstanding) {
-
-		start_next_comic();
-
-		n = poll(ufds, npoll, timeout);
-		if (n < 0) {
-			my_perror("poll");
-			continue;
-		}
-
-		if (n == 0) {
-			timeout_connections();
-			if (!start_next_comic())
-				/* Once we have all the comics
-				 * started, increase the timeout
-				 * period. */
-				timeout = 1000;
-			continue;
-		}
-
-		for (conn = comics; conn; conn = conn->next)
-			if (!conn->poll)
-				continue;
-			else if (conn->poll->revents & POLLOUT) {
-				if (!conn->connected)
-					check_connect(conn);
-				else {
-					time(&conn->access);
-					write_request(conn);
-				}
-			} else if (conn->poll->revents & POLLIN) {
-				/* This check is needed for openssl */
-				if (!conn->connected)
-					check_connect(conn);
-				else
-					read_conn(conn);
-			}
-	}
+	main_loop();
 
 	out_results(comics, 0);
 
 	return n_comics != gotit;
 }
 
-int set_conn_socket(struct connection *conn, int sock)
-{
-	int i;
-
-	for (i = 1; i < npoll; ++i)
-		if (ufds[i].fd == -1) {
-			conn->poll = &ufds[i];
-			conn->poll->fd = sock;
-			/* All sockets start out writable */
-			conn->poll->events = POLLOUT;
-			return 1;
-		}
-
-	return 0;
-}

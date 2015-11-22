@@ -125,6 +125,9 @@ struct connection {
 #define CONN_OPEN (conn->poll)
 #endif
 
+extern struct connection *comics;
+extern struct connection *head;
+
 extern char *comics_dir;
 extern int n_comics;
 extern int skipped;
@@ -134,6 +137,7 @@ extern int threads_set;
 extern int read_timeout;
 extern int randomize;
 extern FILE *debug_fp;
+extern FILE *links_only;
 
 extern char *proxy;
 extern char *proxy_port;
@@ -207,6 +211,7 @@ char *must_strdup(char *str);
 void *must_calloc(int nmemb, int size);
 static inline void *must_alloc(int size) { return must_calloc(1, size); }
 char *lazy_imgtype(char *buf);
+void dump_outstanding(int sig);
 
 /* export from config.c */
 int read_config(char *fname);
