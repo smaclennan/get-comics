@@ -205,7 +205,6 @@ static inline void set_writable(struct connection *conn)
 int set_conn_socket(struct connection *conn, int sock);
 #endif
 
-void add_comic(struct connection *comic);
 char *must_strdup(char *str);
 void *must_calloc(int nmemb, int size);
 static inline void *must_alloc(int size) { return must_calloc(1, size); }

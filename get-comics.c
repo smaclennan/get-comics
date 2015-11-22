@@ -335,15 +335,3 @@ int main(int argc, char *argv[])
 		fclose(debug_fp);
 	return 0;
 }
-
-void add_comic(struct connection *new)
-{
-	static struct connection *tail;
-
-	if (comics)
-		tail->next = new;
-	else
-		comics = head = new;
-	tail = new;
-	++n_comics;
-}

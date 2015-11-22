@@ -5,6 +5,19 @@ static struct tm *today;
 static unsigned wday;
 static char *gocomics_regexp;
 
+
+static void add_comic(struct connection *new)
+{
+	static struct connection *tail;
+
+	if (comics)
+		tail->next = new;
+	else
+		comics = head = new;
+	tail = new;
+	++n_comics;
+}
+
 static void new_comic(struct connection **conn)
 {
 	static int id;
