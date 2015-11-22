@@ -82,14 +82,15 @@ static int fail_redirect(struct connection *conn)
 
 static void add_full_header(struct connection *conn)
 {
-#define FULL_HEADER
-#ifdef FULL_HEADER
-	/* Header strings taken from Firefox. ~300 bytes. */
 	int n = strlen(conn->buf);
 
-	n += snprintf(conn->buf + n, BUFSIZE - n,
-		      "User-Agent: Mozilla/5.0 (X11; Linux i686; rv:6.0.2) "
-		      "Gecko/20100101 Firefox/6.0.2\r\n");
+	/* Header strings taken from Firefox. ~300 bytes.
+	 * Some comics (e.g. sinfest) require the user agent.
+	 */
+	n += snprintf(conn->buf + n, BUFSIZE - n, "User-Agent: %s\r\n", user_agent);
+
+//#define FULL_HEADER
+#ifdef FULL_HEADER
 	n += snprintf(conn->buf + n, BUFSIZE - n,
 		      "Accept: text/html,application/xhtml+xml,application/"
 		      "xml;q=0.9,*/*;q=0.8\r\n");

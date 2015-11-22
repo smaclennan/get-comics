@@ -141,6 +141,8 @@ extern FILE *links_only;
 extern char *proxy;
 extern char *proxy_port;
 
+extern const char *user_agent;
+
 extern int outstanding;
 extern int gotit;
 extern int resets;
