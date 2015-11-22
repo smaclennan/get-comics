@@ -79,12 +79,6 @@ char *lazy_imgtype(char *buf)
 	return ".xxx";
 }
 
-#ifdef WANT_CURL
-#define CONN_OPEN (conn->curl)
-#else
-#define CONN_OPEN (conn->poll)
-#endif
-
 /* Normal way to close connection */
 int close_connection(struct connection *conn)
 {

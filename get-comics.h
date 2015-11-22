@@ -81,14 +81,14 @@ struct connection {
 	int reset;
 	int redirect_ok;
 
-	struct pollfd *poll;
 	int connected;
 	int out;
 	time_t access;
 
 #ifdef WANT_CURL
 	CURL *curl;
-#endif
+#else
+	struct pollfd *poll;
 
 	char buf[BUFSIZE + 1];
 	int  bufn;
@@ -109,17 +109,24 @@ struct connection {
 	int (*func)(struct connection *conn);
 #define NEXT_STATE(c, f)  ((c)->func = (f))
 
-	struct log *log;
-
 #ifdef WANT_OPENSSL
 	void *ssl;
 #endif
 #ifdef WANT_POLARSSL
 	void *ssl;
 #endif
+#endif /* WANT_CURL */
+
+	struct log *log;
 
 	struct connection *next;
 };
+
+#ifdef WANT_CURL
+#define CONN_OPEN (conn->curl)
+#else
+#define CONN_OPEN (conn->poll)
+#endif
 
 extern char *comics_dir;
 extern int n_comics;
@@ -179,19 +186,22 @@ int release_connection(struct connection *conn);
 int close_connection(struct connection *conn);
 int process_html(struct connection *conn);
 
+#ifdef WANT_CURL
+static inline void set_writable(struct connection *conn) {}
+#else
 static inline void set_readable(struct connection *conn)
 {
-	if (conn->poll)
-		conn->poll->events = POLLIN;
+	conn->poll->events = POLLIN;
 }
 
 static inline void set_writable(struct connection *conn)
 {
-	if (conn->poll)
-		conn->poll->events = POLLOUT;
+	conn->poll->events = POLLOUT;
 }
 
 int set_conn_socket(struct connection *conn, int sock);
+#endif
+
 void add_comic(struct connection *comic);
 char *must_strdup(char *str);
 void *must_calloc(int nmemb, int size);

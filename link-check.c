@@ -91,7 +91,7 @@ static int read_link_file(char *fname)
 	return 0;
 }
 
-static int start_next_comic(void)
+int start_next_comic(void)
 {
 	while (head && outstanding < thread_limit)
 		if (build_request(head) == 0) {

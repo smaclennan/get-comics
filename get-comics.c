@@ -42,9 +42,6 @@ static FILE *links_only;
 int threads_set;
 
 
-static struct pollfd *ufds;
-static int npoll;
-
 #ifndef WANT_CURL
 static void user_command(void);
 #endif
@@ -52,7 +49,7 @@ static void dump_outstanding(int sig);
 static void randomize_comics(void);
 
 
-static char *find_regexp(struct connection *conn)
+static char *find_regexp(struct connection *conn, char *reg, int regsize)
 {
 	FILE *fp;
 	regex_t regex;
@@ -92,8 +89,8 @@ static char *find_regexp(struct connection *conn)
 			}
 
 			*(buf + match[mn].rm_eo) = '\0';
-			strcpy(conn->buf, buf + match[mn].rm_so);
-			return conn->buf;
+			snprintf(reg, regsize, "%s", buf + match[mn].rm_so);
+			return reg;
 		}
 	}
 
@@ -150,14 +147,14 @@ int start_next_comic(void)
 
 int process_html(struct connection *conn)
 {
-	char imgurl[1024], *p;
+	char imgurl[1024], regmatch[1024], *p;
 
 	if (conn->out >= 0) {
 		close(conn->out);
 		conn->out = -1;
 	}
 
-	p = find_regexp(conn);
+	p = find_regexp(conn, regmatch, sizeof(regmatch));
 	if (p == NULL)
 		return 1;
 
@@ -205,7 +202,33 @@ int process_html(struct connection *conn)
 }
 
 
+#ifndef WIN32
+/* Polarssl can send a sigpipe when a connection is reset by the
+ * peer. It is safe to just ignore it.
+ */
+static void sigpipe(int signum) {}
+#endif
+
 #ifndef WANT_CURL
+static struct pollfd *ufds;
+static int npoll;
+
+int set_conn_socket(struct connection *conn, int sock)
+{
+	int i;
+
+	for (i = 1; i < npoll; ++i)
+		if (ufds[i].fd == -1) {
+			conn->poll = &ufds[i];
+			conn->poll->fd = sock;
+			/* All sockets start out writable */
+			conn->poll->events = POLLOUT;
+			return 1;
+		}
+
+	return 0;
+}
+
 static int timeout_connections(void)
 {
 	struct connection *comic;
@@ -247,16 +270,7 @@ static void read_conn(struct connection *conn)
 	} else if (n < 0)
 		reset_connection(conn); /* Try again */
 }
-#endif
 
-#ifndef WIN32
-/* Polarssl can send a sigpipe when a connection is reset by the
- * peer. It is safe to just ignore it.
- */
-static void sigpipe(int signum) {}
-#endif
-
-#ifndef WANT_CURL
 void main_loop(void)
 {
 	int i, n, timeout = 250;
@@ -479,7 +493,7 @@ static void dump_outstanding(int sig)
 	       n_comics, outstanding,
 	       atime->tm_hour, atime->tm_min, atime->tm_sec);
 	for (conn = comics; conn; conn = conn->next) {
-		if (!conn->poll)
+		if (!CONN_OPEN)
 			continue;
 		printf("> %s = %s\n", conn->url,
 		       conn->connected ? "connected" : "not connected");
@@ -522,22 +536,6 @@ static void user_command(void)
 		printf("Unexpected command %s", buf);
 }
 #endif
-
-int set_conn_socket(struct connection *conn, int sock)
-{
-	int i;
-
-	for (i = 1; i < npoll; ++i)
-		if (ufds[i].fd == -1) {
-			conn->poll = &ufds[i];
-			conn->poll->fd = sock;
-			/* All sockets start out writable */
-			conn->poll->events = POLLOUT;
-			return 1;
-		}
-
-	return 0;
-}
 
 void add_comic(struct connection *new)
 {

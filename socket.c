@@ -15,7 +15,6 @@
 #define USE_CACHE
 
 
-
 static int tcp_connected(struct connection *conn)
 {
 #ifdef WANT_SSL
