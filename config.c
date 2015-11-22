@@ -32,13 +32,29 @@ static void sanity_check_comic(struct connection *new)
 			printf("Skipping: %s\n", new->url);
 		++skipped;
 		free(new);
+		return;
 	} else if (!is_http(new->url)) {
 		if (verbose)
 			printf("Skipping not http: %s\n", new->url);
 		++skipped;
 		free(new);
-	} else
-		add_comic(new);
+		return;
+	} else if (!new->outname) {
+		/* User did not supply a filename. Get it from the URL. */
+		char *fname;
+		char *p = strrchr(new->url, '/');
+		if (p) {
+			++p;
+			if (*p)
+				fname = p;
+			else
+				fname = "index.html";
+		} else
+			fname = new->url;
+		new->outname = must_strdup(fname);
+	}
+
+	add_comic(new);
 }
 
 static void add_url(struct connection **conn, char *url)

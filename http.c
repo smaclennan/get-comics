@@ -31,7 +31,6 @@ static int gzip_init(struct connection *conn);
 static int read_file_gzip(struct connection *conn);
 static int write_output_gzipped(struct connection *conn, size_t bytes);
 
-
 /* This is only for 2 stage comics and redirects */
 int release_connection(struct connection *conn)
 {
@@ -468,18 +467,7 @@ int read_reply(struct connection *conn)
 
 	if (conn->regexp && !conn->matched)
 		fname = conn->regfname;
-	else if (conn->outname == NULL) {
-		/* User did not supply a filename. Get it from the URL. */
-		p = strrchr(conn->url, '/');
-		if (p) {
-			++p;
-			if (*p)
-				fname = p;
-			else
-				fname = "index.html";
-		} else
-			fname = conn->url;
-	} else
+	else
 		needopen = 0; /* defer open */
 
 	if (needopen) {

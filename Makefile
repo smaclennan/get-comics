@@ -68,7 +68,7 @@ endif
 
 # Optionally add libcurl
 ifneq ($(findstring WANT_CURL,$(CFLAGS)),)
-LIBS += -lcurl
+LIBS += -lcurl -levent
 CFILES += curl.c
 else
 CFILES += http.c socket.c
@@ -90,7 +90,7 @@ QUIET_GO      = $(Q:@=@echo    '     GO       '$@;)
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
 
-all:	get-comics link-check http-get $(EXTRA)
+all:	get-comics # link-check http-get $(EXTRA)
 
 get-comics: get-comics.o $(COMMON) config.o my-parser.o $(LLIBS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $+ $(LIBS)

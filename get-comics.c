@@ -45,7 +45,9 @@ int threads_set;
 static struct pollfd *ufds;
 static int npoll;
 
+#ifndef WANT_CURL
 static void user_command(void);
+#endif
 static void dump_outstanding(int sig);
 static void randomize_comics(void);
 
@@ -118,7 +120,7 @@ static void add_link(struct connection *conn)
 	++gotit;
 }
 
-static int start_next_comic(void)
+int start_next_comic(void)
 {
 	while (head && outstanding < thread_limit) {
 		if (links_only && !head->regexp) {
@@ -203,6 +205,7 @@ int process_html(struct connection *conn)
 }
 
 
+#ifndef WANT_CURL
 static int timeout_connections(void)
 {
 	struct connection *comic;
@@ -244,12 +247,75 @@ static void read_conn(struct connection *conn)
 	} else if (n < 0)
 		reset_connection(conn); /* Try again */
 }
+#endif
 
 #ifndef WIN32
 /* Polarssl can send a sigpipe when a connection is reset by the
  * peer. It is safe to just ignore it.
  */
 static void sigpipe(int signum) {}
+#endif
+
+#ifndef WANT_CURL
+void main_loop(void)
+{
+	int i, n, timeout = 250;
+	struct connection *conn;
+
+	npoll = thread_limit + 1; /* add one for stdin */
+	ufds = must_calloc(npoll, sizeof(struct pollfd));
+	for (i = 0; i < npoll; ++i)
+		ufds[i].fd = -1;
+
+#ifndef _WIN32
+	/* Add stdin - windows can poll only on sockets */
+	if (isatty(0)) {
+		ufds[0].fd = 0;
+		ufds[0].events = POLLIN;
+	}
+#endif
+
+	while (head || outstanding) {
+		start_next_comic();
+
+		n = poll(ufds, npoll, timeout);
+		if (n < 0) {
+			my_perror("poll");
+			continue;
+		}
+
+		if (n == 0) {
+			timeout_connections();
+			if (!start_next_comic())
+				/* Once we have all the comics
+				 * started, increase the timeout
+				 * period. */
+				timeout = 1000;
+			continue;
+		}
+
+		if (ufds[0].revents)
+			user_command();
+
+		for (conn = comics; conn; conn = conn->next)
+			if (!conn->poll)
+				continue;
+			else if (conn->poll->revents & POLLOUT) {
+				if (!conn->connected)
+					check_connect(conn);
+				else {
+					time(&conn->access);
+					write_request(conn);
+				}
+			} else if (conn->poll->revents & POLLIN) {
+				/* This check is needed for openssl */
+				if (!conn->connected)
+					check_connect(conn);
+				else
+					read_conn(conn);
+			}
+	}
+}
 #endif
 
 static void usage(int rc)
@@ -269,8 +335,7 @@ static void usage(int rc)
 int main(int argc, char *argv[])
 {
 	char *env;
-	int i, n, timeout = 250, verify = 0;
-	struct connection *conn;
+	int i, verify = 0;
 
 	while ((i = getopt(argc, argv, "d:hkl:p:rt:vCT:V")) != -1)
 		switch ((char)i) {
@@ -386,63 +451,10 @@ int main(int argc, char *argv[])
 	signal(SIGPIPE, sigpipe);
 #endif
 
-	npoll = thread_limit + 1; /* add one for stdin */
-	ufds = must_calloc(npoll, sizeof(struct pollfd));
-	for (i = 0; i < npoll; ++i)
-		ufds[i].fd = -1;
-
-#ifndef _WIN32
-	/* Add stdin - windows can poll only on sockets */
-	if (isatty(0)) {
-		ufds[0].fd = 0;
-		ufds[0].events = POLLIN;
-	}
-#endif
-
-	while (head || outstanding) {
-
-		start_next_comic();
-
-		n = poll(ufds, npoll, timeout);
-		if (n < 0) {
-			my_perror("poll");
-			continue;
-		}
-
-		if (n == 0) {
-			timeout_connections();
-			if (!start_next_comic())
-				/* Once we have all the comics
-				 * started, increase the timeout
-				 * period. */
-				timeout = 1000;
-			continue;
-		}
-
-		if (ufds[0].revents)
-			user_command();
-
-		for (conn = comics; conn; conn = conn->next)
-			if (!conn->poll)
-				continue;
-			else if (conn->poll->revents & POLLOUT) {
-				if (!conn->connected)
-					check_connect(conn);
-				else {
-					time(&conn->access);
-					write_request(conn);
-				}
-			} else if (conn->poll->revents & POLLIN) {
-				/* This check is needed for openssl */
-				if (!conn->connected)
-					check_connect(conn);
-				else
-					read_conn(conn);
-			}
-	}
-
 	if (links_only)
 		fclose(links_only);
+
+	main_loop();
 
 	out_results(comics, skipped);
 #ifdef WIN32
@@ -484,6 +496,7 @@ static void dump_outstanding(int sig)
 	fflush(stdout);
 }
 
+#ifndef WANT_CURL
 static void user_command(void)
 {
 	char buf[80], *p;
@@ -508,6 +521,7 @@ static void user_command(void)
 	} else if (*p)
 		printf("Unexpected command %s", buf);
 }
+#endif
 
 int set_conn_socket(struct connection *conn, int sock)
 {

@@ -81,6 +81,9 @@ struct connection {
 	int reset;
 	int redirect_ok;
 
+#ifdef WANT_CURL
+	int socket;
+#endif
 	struct pollfd *poll;
 	int connected;
 	int out;
@@ -180,12 +183,14 @@ int process_html(struct connection *conn);
 
 static inline void set_readable(struct connection *conn)
 {
-	conn->poll->events = POLLIN;
+	if (conn->poll)
+		conn->poll->events = POLLIN;
 }
 
 static inline void set_writable(struct connection *conn)
 {
-	conn->poll->events = POLLOUT;
+	if (conn->poll)
+		conn->poll->events = POLLOUT;
 }
 
 int set_conn_socket(struct connection *conn, int sock);
@@ -223,3 +228,8 @@ int openssl_read(struct connection *conn);
 int openssl_write(struct connection *conn);
 void openssl_close(struct connection *conn);
 void openssl_list_ciphers(void);
+
+/* export from get-comics.c */
+int start_next_comic(void);
+
+void main_loop(void);
