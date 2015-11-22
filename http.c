@@ -17,9 +17,6 @@
 #define MSG_NOSIGNAL 0
 #endif
 
-static char *proxy;
-static char *proxy_port = "3128";
-
 static char *http = "HTTP/1.1";
 
 #define MIN(a, b)	((a) < (b) ? (a) : (b))
@@ -64,6 +61,11 @@ int release_connection(struct connection *conn)
 			free(conn->zs_buf);
 	}
 
+	if (conn->url) {
+		free(conn->url);
+		conn->url = NULL;
+	}
+
 	return 0;
 }
 
@@ -81,29 +83,6 @@ static int fail_redirect(struct connection *conn)
 	}
 	log_clear(conn);
 	return 0;
-}
-
-void set_proxy(char *proxystr)
-{
-	char *p;
-
-	if (proxy) {
-		if (verbose)
-			printf("WARNING: proxy set to %s:%s. Ignoring %s\n",
-				   proxy, proxy_port, proxystr);
-		return;
-	}
-
-	p = strrchr(proxystr, ':');
-	if (p) {
-		*p++ = '\0';
-		proxy_port = must_strdup(p);
-	}
-
-	proxy = must_strdup(proxystr);
-
-	if (verbose)
-		printf("Proxy %s:%s\n", proxy, proxy_port);
 }
 
 static void add_full_header(struct connection *conn)

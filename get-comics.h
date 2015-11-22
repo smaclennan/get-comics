@@ -135,6 +135,9 @@ extern int read_timeout;
 extern int randomize;
 extern FILE *debug_fp;
 
+extern char *proxy;
+extern char *proxy_port;
+
 extern int outstanding;
 extern int gotit;
 extern int resets;

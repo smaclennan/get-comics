@@ -41,7 +41,8 @@ void main_loop(void)
 	int i, running, http_status_code, msgs_left;
 	CURLMsg *msg;
 
-	if (!(curlm = curl_multi_init())) {
+	/* For now do not enable SSL - make valgrind easier */
+	if (curl_global_init(0) || !(curlm = curl_multi_init())) {
 		printf("Unable to initialize curl\n");
 		exit(1);
 	}
@@ -84,39 +85,25 @@ void main_loop(void)
 
 int build_request(struct connection *conn)
 {
-	CURL *curl;
-
-	if (!(curl = curl_easy_init())) {
+	if (!(conn->curl = curl_easy_init())) {
 		printf("Unable to create curl context\n");
 		return -1;
 	}
 
-	conn->curl = curl;
+	curl_easy_setopt(conn->curl, CURLOPT_URL, conn->url);
+	curl_easy_setopt(conn->curl, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(conn->curl, CURLOPT_PRIVATE, conn);
+	curl_easy_setopt(conn->curl, CURLOPT_WRITEFUNCTION, write_callback);
+	curl_easy_setopt(conn->curl, CURLOPT_WRITEDATA, conn);
 
-	if (curl_easy_setopt(curl, CURLOPT_URL, conn->url) ||
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L) ||
-		curl_easy_setopt(curl, CURLOPT_PRIVATE, conn) ||
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback) ||
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, conn)) {
-		printf("Unable to setup curl\n");
-		goto failed;
-	}
-
-	if (curl_multi_add_handle(curlm, curl)) {
+	if (curl_multi_add_handle(curlm, conn->curl)) {
 		printf("Unable to add handle to multi handle\n");
-		goto failed;
+		curl_easy_cleanup(conn->curl);
+		conn->curl = NULL;
+		return -1;
 	}
 
 	return 0;
-
-failed:
-	conn->curl = NULL;
-
-	if (conn->out >= 0)
-		close(conn->out);
-
-	curl_easy_cleanup(curl);
-	return -1;
 }
 
 /* This is only for 2 stage comics and redirects */
@@ -135,13 +122,12 @@ int release_connection(struct connection *conn)
 
 	conn->connected = 0;
 
+	if (conn->url) {
+		free(conn->url);
+		conn->url = NULL;
+	}
+
 	return 0;
 }
 
-void set_proxy(char *proxystr)
-{
-}
-
-void free_cache()
-{
-}
+void free_cache() {}

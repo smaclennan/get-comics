@@ -346,6 +346,34 @@ static void usage(int rc)
 	exit(rc);
 }
 
+static void safe_free(void *mem)
+{
+	if (mem) free(mem);
+}
+
+static void free_comics(void)
+{
+	while (comics) {
+		struct connection *next = comics->next;
+
+		safe_free(comics->url);
+		safe_free(comics->host);
+		safe_free(comics->regexp);
+		safe_free(comics->regfname);
+		safe_free(comics->outname);
+		safe_free(comics->base_href);
+		safe_free(comics->referer);
+
+		free(comics);
+		comics = next;
+	}
+
+	safe_free(comics_dir);
+#ifndef WANT_CURL
+	safe_free(ufds);
+#endif
+}
+
 int main(int argc, char *argv[])
 {
 	char *env;
@@ -449,7 +477,7 @@ int main(int argc, char *argv[])
 			comics_dir = must_alloc(strlen(home) + 10);
 			sprintf(comics_dir, "%s/comics", home);
 		} else
-			comics_dir = "comics";
+			comics_dir = must_strdup("comics");
 	}
 
 	if (chdir(comics_dir)) {
@@ -477,6 +505,7 @@ int main(int argc, char *argv[])
 #endif
 
 	free_cache(); /* for valgrind */
+	free_comics(); /* for valgrind */
 	if (debug_fp)
 		fclose(debug_fp);
 	return 0;

@@ -12,6 +12,8 @@ const char *method = "GET";
 
 FILE *debug_fp;
 
+char *proxy;
+char *proxy_port = "3128";
 
 char *must_strdup(char *old)
 {
@@ -128,4 +130,26 @@ int reset_connection(struct connection *conn)
 	return 0;
 }
 
+void set_proxy(char *proxystr)
+{
+	char *p;
+
+	if (proxy) {
+		if (verbose)
+			printf("WARNING: proxy set to %s:%s. Ignoring %s\n",
+				   proxy, proxy_port, proxystr);
+		return;
+	}
+
+	p = strrchr(proxystr, ':');
+	if (p) {
+		*p++ = '\0';
+		proxy_port = must_strdup(p);
+	}
+
+	proxy = must_strdup(proxystr);
+
+	if (verbose)
+		printf("Proxy %s:%s\n", proxy, proxy_port);
+}
 
