@@ -81,9 +81,6 @@ struct connection {
 	int reset;
 	int redirect_ok;
 
-#ifdef WANT_CURL
-	int socket;
-#endif
 	struct pollfd *poll;
 	int connected;
 	int out;
@@ -179,6 +176,7 @@ static inline void my_perror(char *str)
 int reset_connection(struct connection *conn);
 int fail_connection(struct connection *conn);
 int release_connection(struct connection *conn);
+int close_connection(struct connection *conn);
 int process_html(struct connection *conn);
 
 static inline void set_readable(struct connection *conn)
@@ -198,10 +196,10 @@ void add_comic(struct connection *comic);
 char *must_strdup(char *str);
 void *must_calloc(int nmemb, int size);
 static inline void *must_alloc(int size) { return must_calloc(1, size); }
+char *lazy_imgtype(char *buf);
 
 /* export from config.c */
 int read_config(char *fname);
-static inline void write_comic(struct connection *conn) {}
 
 /* export from http.c */
 void set_proxy(char *proxystr);

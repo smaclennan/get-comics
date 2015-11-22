@@ -67,38 +67,6 @@ int release_connection(struct connection *conn)
 	return 0;
 }
 
-/* Normal way to close connection */
-static int close_connection(struct connection *conn)
-{
-	if (conn->poll) {
-		++gotit;
-		conn->gotit = 1;
-		--outstanding;
-		if (verbose > 1)
-			printf("Closed %s (%d)\n", conn->url, outstanding);
-		if (debug_fp)
-			fprintf(debug_fp, "%ld:   Closed %3d (%d)\n",
-					time(NULL), conn->id, outstanding);
-	} else
-		printf("Multiple Closes: %s\n", conn->url);
-	log_clear(conn);
-	return release_connection(conn);
-}
-
-
-/* Abnormal way to close connection */
-int fail_connection(struct connection *conn)
-{
-	if (conn->poll) {
-		write_comic(conn);
-		--outstanding;
-		if (verbose > 1)
-			printf("Failed %s (%d)\n", conn->url, outstanding);
-	} else
-		printf("Multiple Closes: %s\n", conn->url);
-	log_clear(conn);
-	return release_connection(conn);
-}
 
 /* Fail a redirect. We have already released the connection. */
 static int fail_redirect(struct connection *conn)
@@ -106,7 +74,6 @@ static int fail_redirect(struct connection *conn)
 	if (conn->poll)
 		printf("Failed redirect not closed: %s\n", conn->url);
 	else {
-		write_comic(conn);
 		--outstanding;
 		if (verbose > 1)
 			printf("Failed redirect %s (%d)\n",
@@ -115,24 +82,6 @@ static int fail_redirect(struct connection *conn)
 	log_clear(conn);
 	return 0;
 }
-
-/* Reset connection - try again */
-int reset_connection(struct connection *conn)
-{
-	++conn->reset;
-	if (conn->reset == 1)
-		++resets; /* only count each connection once */
-	if (conn->reset > 2)
-		return fail_connection(conn);
-
-	release_connection(conn);
-
-	if (build_request(conn))
-		return fail_connection(conn);
-
-	return 0;
-}
-
 
 void set_proxy(char *proxystr)
 {
@@ -500,34 +449,6 @@ int read_reply(struct connection *conn)
 }
 
 
-/* This is a very lazy checking heuristic since we expect the files to
- * be one of the four formats and well formed. Yes, Close To Home
- * actually used TIFF. TIFF is only tested on little endian machines. */
-static char *lazy_imgtype(struct connection *conn)
-{
-	static struct header {
-		char *ext;
-		unsigned char hdr[4];
-	} hdrs[] = {
-		{ ".gif", { 'G', 'I', 'F', '8' } }, /* gif89 and gif87a */
-		{ ".png", { 0x89, 'P', 'N', 'G' } },
-		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe0 } }, /* jfif */
-		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe1 } }, /* exif */
-		{ ".jpg", { 0xff, 0xd8, 0xff, 0xee } }, /* Adobe */
-		{ ".tif", { 'I', 'I', 42, 0 } }, /* little endian */
-		{ ".tif", { 'M', 'M', 0, 42 } }, /* big endian */
-	};
-	int i;
-	char *buf = conn->zs ? (char *)conn->zs_buf : conn->curp;
-
-	for (i = 0; i < sizeof(hdrs) / sizeof(struct header); ++i)
-		if (memcmp(buf, hdrs[i].hdr, 4) == 0)
-			return hdrs[i].ext;
-
-	printf("WARNING: Unknown file type %s\n", conn->outname);
-	return ".xxx";
-}
-
 /* This is the only place we write to the output file */
 static int write_output(struct connection *conn, int bytes)
 {
@@ -535,7 +456,8 @@ static int write_output(struct connection *conn, int bytes)
 
 	if (conn->out == -1) { /* deferred open */
 		/* We alloced space for the extension in add_outname */
-		strcat(conn->outname, lazy_imgtype(conn));
+		char *buf = conn->zs ? (char *)conn->zs_buf : conn->curp;
+		strcat(conn->outname, lazy_imgtype(buf));
 
 		conn->out = open(conn->outname, WRITE_FLAGS, 0664);
 		if (conn->out < 0) {
