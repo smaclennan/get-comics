@@ -112,6 +112,9 @@ int fail_connection(struct connection *conn)
 		--outstanding;
 		if (verbose > 1)
 			printf("Failed %s (%d)\n", conn->url, outstanding);
+		if (debug_fp)
+			fprintf(debug_fp, "%ld:   Failed %3d (%d)\n",
+					time(NULL), conn->id, outstanding);
 	} else
 		printf("Multiple Closes: %s\n", conn->url);
 	log_clear(conn);
@@ -169,6 +172,12 @@ int start_next_comic(void)
 		}
 
 		printf("build_request %s failed\n", head->url);
+		if (debug_fp) {
+			time(&head->access);
+			fprintf(debug_fp, "%ld: Start failed  %3d '%s' (%d)\n",
+					head->access, head->id,
+					head->outname ? head->outname : head->url, outstanding);
+		}
 		head = head->next;
 	}
 

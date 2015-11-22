@@ -751,7 +751,6 @@ static int read_file(struct connection *conn)
 }
 
 static struct pollfd *ufds;
-static int npoll;
 
 static int timeout_connections(void)
 {
@@ -800,15 +799,14 @@ void main_loop(void)
 	int i, n, timeout = 250;
 	struct connection *conn;
 
-	npoll = thread_limit;
-	ufds = must_calloc(npoll, sizeof(struct pollfd));
-	for (i = 0; i < npoll; ++i)
+	ufds = must_calloc(thread_limit, sizeof(struct pollfd));
+	for (i = 0; i < thread_limit; ++i)
 		ufds[i].fd = -1;
 
 	while (head || outstanding) {
 		start_next_comic();
 
-		n = poll(ufds, npoll, timeout);
+		n = poll(ufds, thread_limit, timeout);
 		if (n < 0) {
 			my_perror("poll");
 			continue;
@@ -850,7 +848,7 @@ int set_conn_socket(struct connection *conn, int sock)
 {
 	int i;
 
-	for (i = 1; i < npoll; ++i)
+	for (i = 0; i < thread_limit; ++i)
 		if (ufds[i].fd == -1) {
 			conn->poll = &ufds[i];
 			conn->poll->fd = sock;
