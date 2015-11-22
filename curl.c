@@ -122,11 +122,6 @@ int release_connection(struct connection *conn)
 
 	conn->connected = 0;
 
-	if (conn->url) {
-		free(conn->url);
-		conn->url = NULL;
-	}
-
 	return 0;
 }
 

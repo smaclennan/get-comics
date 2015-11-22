@@ -113,6 +113,7 @@ int fail_connection(struct connection *conn)
 	return release_connection(conn);
 }
 
+#ifndef WANT_CURL
 /* Reset connection - try again */
 int reset_connection(struct connection *conn)
 {
@@ -129,6 +130,7 @@ int reset_connection(struct connection *conn)
 
 	return 0;
 }
+#endif
 
 void set_proxy(char *proxystr)
 {

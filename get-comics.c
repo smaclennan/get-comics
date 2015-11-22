@@ -160,6 +160,7 @@ int process_html(struct connection *conn)
 
 	/* We are done with this socket, but not this connection */
 	release_connection(conn);
+	free(conn->url);
 
 	if (verbose > 1)
 		printf("Matched %s\n", p);

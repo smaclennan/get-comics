@@ -61,11 +61,6 @@ int release_connection(struct connection *conn)
 			free(conn->zs_buf);
 	}
 
-	if (conn->url) {
-		free(conn->url);
-		conn->url = NULL;
-	}
-
 	return 0;
 }
 
@@ -270,8 +265,7 @@ static int redirect(struct connection *conn, int status)
 				int len = strlen(conn->host) + strlen(p) + 2;
 				conn->url = malloc(len);
 				if (conn->url)
-					sprintf(conn->url, "%s/%s",
-						conn->host, p);
+					sprintf(conn->url, "%s/%s", conn->host, p);
 			}
 
 			if (!conn->url) {
