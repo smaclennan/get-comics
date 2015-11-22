@@ -197,8 +197,6 @@ static void parse_top_int(char *key, int val)
 			thread_limit = val;
 	} else if (strcmp(key, "timeout") == 0)
 		read_timeout = val;
-	else if (strcmp(key, "randomize") == 0)
-		randomize = val;
 	else
 		printf("Unexpected element '%s'\n", key);
 }

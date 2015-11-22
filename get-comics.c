@@ -29,14 +29,10 @@ char *comics_dir;
 int skipped;
 
 static int unlink_index = 1;
-int randomize;
 
 /* If the user specified this on the command line we do not want the
  * config file to override */
 int threads_set;
-
-
-static void randomize_comics(void);
 
 
 static char *find_regexp(struct connection *conn, char *reg, int regsize)
@@ -178,7 +174,6 @@ static void usage(int rc)
 	puts("                   [-t threads] [-T timeout] [config-file ...]");
 	puts("Where:  -h  this help");
 	puts("\t-k  keep index files");
-	puts("\t-r  randomize");
 	puts("\t-v  verbose");
 	puts("\t-C  list supported ciphers");
 	puts("\t-V  verify config");
@@ -215,7 +210,7 @@ int main(int argc, char *argv[])
 	char *env;
 	int i, verify = 0;
 
-	while ((i = getopt(argc, argv, "d:hkl:p:rt:vCT:V")) != -1)
+	while ((i = getopt(argc, argv, "d:hkl:p:t:vCT:V")) != -1)
 		switch ((char)i) {
 		case 'd':
 			comics_dir = optarg;
@@ -234,9 +229,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'p':
 			set_proxy(optarg);
-			break;
-		case 'r':
-			randomize = 1;
 			break;
 		case 't':
 			thread_limit = strtol(optarg, NULL, 0);
@@ -275,9 +267,6 @@ int main(int argc, char *argv[])
 		printf("Fatal error in config file\n");
 		exit(1);
 	}
-
-	if (randomize)
-		randomize_comics();
 
 	if (verify) {
 		printf("Comics: %u Skipped today: %u\n", n_comics + skipped, skipped);
@@ -357,32 +346,4 @@ void add_comic(struct connection *new)
 		comics = head = new;
 	tail = new;
 	++n_comics;
-}
-
-static void randomize_comics(void)
-{
-	struct connection **array, *tmp;
-	int i, n;
-
-	srand((unsigned)time(NULL));
-
-	array = must_calloc(n_comics, sizeof(struct connection *));
-
-	for (i = 0, tmp = comics; tmp; tmp = tmp->next, ++i)
-		array[i] = tmp;
-
-	for (i = 0; i < n_comics; ++i) {
-		n = (rand() >> 3) % n_comics;
-		tmp = array[i];
-		array[i] = array[n];
-		array[n] = tmp;
-	}
-
-	for (i = 0; i < n_comics - 1; ++i)
-		array[i]->next = array[i + 1];
-	array[i]->next = NULL;
-
-	comics = head = array[0];
-
-	free(array);
 }
