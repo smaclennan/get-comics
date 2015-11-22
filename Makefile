@@ -31,8 +31,6 @@ CFLAGS += -DWANT_OPENSSL
 #CFLAGS += -DWANT_ZLIB
 #ZDIR = zlib-1.2.8
 CFLAGS += -DWANT_GZIP
-
-EXTRA += link-check http-get
 endif
 
 # Currently I use gccgo
@@ -92,7 +90,7 @@ QUIET_GO      = $(Q:@=@echo    '     GO       '$@;)
 %.o: %.c
 	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
 
-all:	get-comics $(EXTRA)
+all:	get-comics link-check http-get $(EXTRA)
 
 get-comics: get-comics.o $(COMMON) config.o my-parser.o $(LLIBS)
 	$(QUIET_LINK)$(CC) $(CFLAGS) -o get-comics $+ $(LIBS)
