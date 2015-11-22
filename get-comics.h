@@ -109,10 +109,7 @@ struct connection {
 	int (*func)(struct connection *conn);
 #define NEXT_STATE(c, f)  ((c)->func = (f))
 
-#ifdef WANT_OPENSSL
-	void *ssl;
-#endif
-#ifdef WANT_POLARSSL
+#ifdef WANT_SSL
 	void *ssl;
 #endif
 #endif /* WANT_CURL */
