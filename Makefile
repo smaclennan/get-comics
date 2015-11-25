@@ -22,10 +22,13 @@ MAKEFLAGS += --no-print-directory
 # For curl we do not need ssl/gzip
 ifeq ($(findstring WANT_CURL,$(CFLAGS)),)
 # Comment in to enable https via openssl
-CFLAGS += -DWANT_OPENSSL
+#CFLAGS += -DWANT_OPENSSL
 
 # Comment in to enable https via polarssl
 #CFLAGS += -DWANT_POLARSSL
+
+# Comment in to enable https via mbedtls
+#CFLAGS += -DWANT_MBEDTLS
 
 # Comment in to enable gzip encoding
 CFLAGS += -DWANT_GZIP
@@ -43,19 +46,24 @@ endif
 
 CFILES  := log.c common.c
 
-# Optionally add polarssl
-ifneq ($(findstring WANT_POLARSSL,$(CFLAGS)),)
-PLIB=polarssl/library/libpolarssl.a
-CFLAGS += -DWANT_SSL -Ipolarssl/include
-LLIBS += $(PLIB)
-CFILES += polarssl.c
-else
 # Optionally add openssl
 ifneq ($(findstring WANT_OPENSSL,$(CFLAGS)),)
 CFLAGS += -DWANT_SSL
 LIBS += -lssl -lcrypto
 CFILES += openssl.c
 endif
+# Optionally add polarssl
+ifneq ($(findstring WANT_POLARSSL,$(CFLAGS)),)
+PLIB=polarssl/library/libpolarssl.a
+CFLAGS += -DWANT_SSL -Ipolarssl/include
+LIBS += $(PLIB)
+CFILES += polarssl.c
+endif
+ifneq ($(findstring WANT_MBEDTLS,$(CFLAGS)),)
+PDIR=$(HOME)/src/mbedtls-2.1.0
+CFLAGS += -DWANT_SSL -I$(PDIR)/include
+LIBS += -L$(PDIR)/library -lmbedtls -lmbedx509 -lmbedcrypto
+CFILES += mbedtls.c
 endif
 
 # Optionaly add gzip
@@ -106,9 +114,6 @@ http-get: http-get.o $(COMMON) $(LLIBS)
 
 go-get-comics: get-comics.go
 	$(QUIET_GO)$(GO) -o $@ $+
-
-$(PLIB):
-	@$(MAKE) -C polarssl/library
 
 $(ZLIB):
 	@$(MAKE) -C $(ZDIR)
