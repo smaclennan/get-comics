@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 	while ((i = getopt(argc, argv, "d:hkl:p:t:vCT:V")) != -1)
 		switch ((char)i) {
 		case 'd':
-			comics_dir = optarg;
+			comics_dir = must_strdup(optarg);
 			break;
 		case 'h':
 			usage(0);

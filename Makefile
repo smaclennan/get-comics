@@ -28,9 +28,11 @@ CFLAGS += -DWANT_OPENSSL
 #CFLAGS += -DWANT_POLARSSL
 
 # Comment in to enable gzip encoding
-#CFLAGS += -DWANT_ZLIB
-#ZDIR = zlib-1.2.8
 CFLAGS += -DWANT_GZIP
+
+# Comment in for zlib rather than gzip
+#CFLAGS += -DWANT_ZLIB
+#ZDIR = zlib
 endif
 
 # Currently I use gccgo
