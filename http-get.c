@@ -50,6 +50,8 @@ static void add_url(char *url)
 
 	conn->host = must_strdup(url);
 
+	conn->outname = create_outname(url);
+
 	if (comics)
 		tail->next = conn;
 	else
@@ -104,10 +106,13 @@ int main(int argc, char *argv[])
 	char *env;
 	int i;
 
-	while ((i = getopt(argc, argv, "hp:t:vT:")) != -1)
+	while ((i = getopt(argc, argv, "hl:p:t:vT:")) != -1)
 		switch ((char)i) {
 		case 'h':
 			usage(0);
+		case 'l':
+			read_link_file(optarg);
+			break;
 		case 'p':
 			set_proxy(optarg);
 			break;
@@ -124,11 +129,8 @@ int main(int argc, char *argv[])
 			usage(1);
 		}
 
-	if (optind < argc)
-		while (optind < argc)
-			read_link_file(argv[optind++]);
-	else
-		read_urls(stdin);
+	while (optind < argc)
+		add_url(argv[optind++]);
 
 	/* set_proxy will not use this if proxy already set */
 	env = getenv("COMICS_PROXY");

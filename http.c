@@ -80,9 +80,12 @@ static int fail_redirect(struct connection *conn)
 	return 0;
 }
 
-static void add_full_header(struct connection *conn)
+static void add_full_header(struct connection *conn, const char *host)
 {
 	int n = strlen(conn->buf);
+
+	/* Always need host */
+	n += snprintf(conn->buf + n, BUFSIZE - n, "Host: %s\r\n", host);
 
 	/* Header strings taken from Firefox. ~300 bytes.
 	 * Some comics (e.g. sinfest) require the user agent.
@@ -106,8 +109,12 @@ static void add_full_header(struct connection *conn)
 #endif
 
 #ifdef FULL_HEADER
-	n += snprintf(conn->buf + n, BUFSIZE - n,
-		      "Connection: keep-alive\r\n");
+	if (proxy)
+		n += snprintf(conn->buf + n, BUFSIZE - n,
+					  "Proxy-Connection: keep-alive\r\n");
+	else
+		n += snprintf(conn->buf + n, BUFSIZE - n,
+					  "Connection: keep-alive\r\n");
 #endif
 }
 
@@ -149,8 +156,8 @@ int build_request(struct connection *conn)
 			free(host);
 			return 1;
 		}
-		sprintf(conn->buf, "%s http://%s %s %s\r\n",
-			method, host, url, http);
+		sprintf(conn->buf, "%s http://%s/%s %s\r\n",
+				method, host, url, http);
 	} else {
 		char *port = is_https(conn->url) ? "443" : "80";
 
@@ -180,13 +187,13 @@ int build_request(struct connection *conn)
 					++in;
 				} else
 					*out++ = *in++;
-			sprintf(out, " %s\r\nHost: %s\r\n", http, host);
+			sprintf(out, " %s\r\n", http);
 		} else
-			sprintf(conn->buf, "%s %s %s\r\nHost: %s\r\n",
-				method, url, http, host);
+			sprintf(conn->buf, "%s %s %s\r\n", method, url, http);
 
-		add_full_header(conn);
 	}
+
+	add_full_header(conn, host);
 
 	free(host);
 

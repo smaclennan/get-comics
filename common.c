@@ -238,3 +238,17 @@ void dump_outstanding(int sig)
 	fflush(stdout);
 }
 
+char *create_outname(char *url)
+{
+	char *fname;
+	char *p = strrchr(url, '/');
+	if (p) {
+		++p;
+		if (*p)
+			fname = p;
+		else
+			fname = "index.html";
+	} else
+		fname = url;
+	return must_strdup(fname);
+}

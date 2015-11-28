@@ -52,20 +52,9 @@ static void sanity_check_comic(struct connection *new)
 		++skipped;
 		free(new);
 		return;
-	} else if (!new->outname) {
+	} else if (!new->outname)
 		/* User did not supply a filename. Get it from the URL. */
-		char *fname;
-		char *p = strrchr(new->url, '/');
-		if (p) {
-			++p;
-			if (*p)
-				fname = p;
-			else
-				fname = "index.html";
-		} else
-			fname = new->url;
-		new->outname = must_strdup(fname);
-	}
+		new->outname = create_outname(new->url);
 
 	add_comic(new);
 }

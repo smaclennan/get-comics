@@ -212,6 +212,7 @@ void *must_calloc(int nmemb, int size);
 static inline void *must_alloc(int size) { return must_calloc(1, size); }
 char *lazy_imgtype(char *buf);
 void dump_outstanding(int sig);
+char *create_outname(char *url);
 
 /* export from config.c */
 int read_config(char *fname);
