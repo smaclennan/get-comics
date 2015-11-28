@@ -132,11 +132,13 @@ tarball: COPYING Makefile README* *.[ch] get-today get-comics.1 comics.json
 	tar zcf slackware/get-comics-$(VERSION).tar.gz get-comics-$(VERSION)
 	rm -rf get-comics-$(VERSION)
 
-install: all
+$(DESTDIR)/usr/share/get-comics/comics.json:
+	install -D -m 644 comics.json $(DESTDIR)/usr/share/get-comics/comics.json
+
+install: all $(DESTDIR)/usr/share/get-comics/comics.json
 	install -D -s -m 755 get-comics $(DESTDIR)/usr/bin/get-comics
 	install -D -m 644 get-comics.1 $(DESTDIR)/usr/man/man1/get-comics.1
-	gzip $(DESTDIR)/usr/man/man1/get-comics.1
-	install -D -m 644 comics.json $(DESTDIR)/usr/share/get-comics/comics.json
+	gzip -f $(DESTDIR)/usr/man/man1/get-comics.1
 
 clean:
 	rm -f get-comics link-check http-get *.o .*.o.d get-comics.html TAGS
