@@ -22,7 +22,7 @@ MAKEFLAGS += --no-print-directory
 # For curl we do not need ssl/gzip
 ifeq ($(findstring WANT_CURL,$(CFLAGS)),)
 # Comment in to enable https via openssl
-#CFLAGS += -DWANT_OPENSSL
+CFLAGS += -DWANT_OPENSSL
 
 # Comment in to enable https via polarssl
 #CFLAGS += -DWANT_POLARSSL
