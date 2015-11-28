@@ -169,14 +169,14 @@ static void sigpipe(int signum) {}
 
 static void usage(int rc)
 {
-	fputs("usage:  get-comics [-hkrvCV] [-d comics_dir]", stdout);
+	fputs("usage:  get-comics [-hkvCV] [-d comics_dir]", stdout);
 	puts(" [-l links_file] [-p proxy]");
 	puts("                   [-t threads] [-T timeout] [config-file ...]");
 	puts("Where:  -h  this help");
 	puts("\t-k  keep index files");
 	puts("\t-v  verbose");
-	puts("\t-C  list supported ciphers");
-	puts("\t-V  verify config");
+	puts("\t-C  list supported ciphers (ssl only)");
+	puts("\t-V  verify config but don't download comics");
 	exit(rc);
 }
 
