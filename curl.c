@@ -96,6 +96,8 @@ int build_request(struct connection *conn)
 	curl_easy_setopt(conn->curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(conn->curl, CURLOPT_WRITEDATA, conn);
 	curl_easy_setopt(conn->curl, CURLOPT_USERAGENT, user_agent);
+	/* The empty string tells curl to send all the encodings it supports */
+	curl_easy_setopt(conn->curl, CURLOPT_ACCEPT_ENCODING, "");
 
 	if (proxy) {
 		curl_easy_setopt(conn->curl, CURLOPT_PROXY, proxy);
