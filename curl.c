@@ -71,7 +71,7 @@ void main_loop(void)
 				if (http_status_code == 200) {
 					if (conn->regexp && !conn->matched) {
 						if (process_html(conn))
-							close_connection(conn);
+							fail_connection(conn);
 					} else
 						close_connection(conn);
 				} else {
