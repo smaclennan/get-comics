@@ -69,9 +69,10 @@ void main_loop(void)
 				curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
 
 				if (http_status_code == 200) {
-					if (conn->regexp && !conn->matched)
-						process_html(conn);
-					else
+					if (conn->regexp && !conn->matched) {
+						if (process_html(conn))
+							close_connection(conn);
+					} else
 						close_connection(conn);
 				} else {
 					fprintf(stderr, "GET %s returned %d\n", conn->url, http_status_code);
