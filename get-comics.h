@@ -135,6 +135,7 @@ extern int verbose;
 extern int thread_limit;
 extern int threads_set;
 extern int read_timeout;
+extern int want_extensions;
 extern FILE *debug_fp;
 extern FILE *links_only;
 

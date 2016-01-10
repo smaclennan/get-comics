@@ -8,6 +8,7 @@ int gotit;
 int resets;
 int n_comics;
 int read_timeout = SOCKET_TIMEOUT;
+int want_extensions;
 const char *method = "GET";
 int thread_limit = THREAD_LIMIT;
 

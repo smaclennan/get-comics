@@ -15,8 +15,9 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
 		if (conn->regexp && !conn->matched)
 			fname = conn->regfname;
 		else {
-			/* We allocated space for the extension in add_outname */
-			strcat(conn->outname, lazy_imgtype(ptr));
+			if (want_extensions)
+				/* We allocated space for the extension in add_outname */
+				strcat(conn->outname, lazy_imgtype(ptr));
 			fname = conn->outname;
 		}
 

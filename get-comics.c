@@ -321,6 +321,7 @@ int main(int argc, char *argv[])
 	if (links_only)
 		fclose(links_only);
 
+	want_extensions = 1;
 	main_loop();
 
 	out_results(comics, skipped);
