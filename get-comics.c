@@ -23,7 +23,7 @@
 #include <regex.h>
 #include <getopt.h>
 #include <signal.h>
-
+#include <dirent.h>
 
 char *comics_dir;
 int skipped;
@@ -167,19 +167,6 @@ int process_html(struct connection *conn)
 static void sigpipe(int signum) {}
 #endif
 
-static void usage(int rc)
-{
-	fputs("usage:  get-comics [-hkvCV] [-d comics_dir]", stdout);
-	puts(" [-l links_file] [-p proxy]");
-	puts("                   [-t threads] [-T timeout] [config-file ...]");
-	puts("Where:  -h  this help");
-	puts("\t-k  keep index files");
-	puts("\t-v  verbose");
-	puts("\t-C  list supported ciphers (ssl only)");
-	puts("\t-V  verify config but don't download comics");
-	exit(rc);
-}
-
 static void safe_free(void *mem)
 {
 	if (mem) free(mem);
@@ -205,13 +192,49 @@ static void free_comics(void)
 	safe_free(comics_dir);
 }
 
+/* We have done a chdir to the comics dir */
+static void clean_dir(void)
+{
+	DIR *dir = opendir(".");
+	if (!dir)
+		return;
+
+	struct dirent *ent;
+	while ((ent = readdir(dir))) {
+		if (*ent->d_name == '.') continue;
+		char *p = strrchr(ent->d_name, '.');
+		if (p && is_imgtype(p))
+			unlink(ent->d_name);
+		else
+			printf("Warning: %s\n", ent->d_name);
+	}
+
+	closedir(dir);
+}
+
+static void usage(int rc)
+{
+	fputs("usage:  get-comics [-hkvCV] [-d comics_dir]", stdout);
+	puts(" [-l links_file] [-p proxy]");
+	puts("                   [-t threads] [-T timeout] [config-file ...]");
+	puts("Where:  -h  this help");
+	puts("\t-k  keep index files");
+	puts("\t-v  verbose");
+	puts("\t-C  list supported ciphers (ssl only)");
+	puts("\t-V  verify config but don't download comics");
+	exit(rc);
+}
+
 int main(int argc, char *argv[])
 {
 	char *env;
-	int i, verify = 0;
+	int i, verify = 0, clean = 0;
 
-	while ((i = getopt(argc, argv, "d:hkl:p:t:vCT:V")) != -1)
+	while ((i = getopt(argc, argv, "cd:hkl:p:t:vCT:V")) != -1)
 		switch ((char)i) {
+		case 'c':
+			clean = 1;
+			break;
 		case 'd':
 			comics_dir = must_strdup(optarg);
 			break;
@@ -309,6 +332,9 @@ int main(int argc, char *argv[])
 		my_perror(comics_dir);
 		exit(1);
 	}
+
+	if (clean)
+		clean_dir();
 
 #ifdef _WIN32
 	win32_init();

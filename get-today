@@ -13,8 +13,7 @@ fi
 mkdir -p $BASE/$DIR
 cd $BASE/$DIR || { echo "Problems with $BASE/$DIR"; exit 1; }
 
-rm -f *
-get-comics -d. 2> $BASE/probs.xml | tee $BASE/output
+get-comics -cd . | tee $BASE/output
 
 # Move any leftover html files
 rm -rf $BASE/debug

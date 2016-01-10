@@ -64,23 +64,24 @@ void out_results(struct connection *conn, int skipped)
 
 }
 
+static struct header {
+	char *ext;
+	unsigned char hdr[4];
+} hdrs[] = {
+	{ ".gif", { 'G', 'I', 'F', '8' } }, /* gif89 and gif87a */
+	{ ".png", { 0x89, 'P', 'N', 'G' } },
+	{ ".jpg", { 0xff, 0xd8, 0xff, 0xe0 } }, /* jfif */
+	{ ".jpg", { 0xff, 0xd8, 0xff, 0xe1 } }, /* exif */
+	{ ".jpg", { 0xff, 0xd8, 0xff, 0xee } }, /* Adobe */
+	{ ".tif", { 'I', 'I', 42, 0 } }, /* little endian */
+	{ ".tif", { 'M', 'M', 0, 42 } }, /* big endian */
+};
+
 /* This is a very lazy checking heuristic since we expect the files to
  * be one of the four formats and well formed. Yes, Close To Home
  * actually used TIFF. TIFF is only tested on little endian machines. */
 char *lazy_imgtype(char *buf)
 {
-	static struct header {
-		char *ext;
-		unsigned char hdr[4];
-	} hdrs[] = {
-		{ ".gif", { 'G', 'I', 'F', '8' } }, /* gif89 and gif87a */
-		{ ".png", { 0x89, 'P', 'N', 'G' } },
-		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe0 } }, /* jfif */
-		{ ".jpg", { 0xff, 0xd8, 0xff, 0xe1 } }, /* exif */
-		{ ".jpg", { 0xff, 0xd8, 0xff, 0xee } }, /* Adobe */
-		{ ".tif", { 'I', 'I', 42, 0 } }, /* little endian */
-		{ ".tif", { 'M', 'M', 0, 42 } }, /* big endian */
-	};
 	int i;
 
 	for (i = 0; i < sizeof(hdrs) / sizeof(struct header); ++i)
@@ -88,6 +89,17 @@ char *lazy_imgtype(char *buf)
 			return hdrs[i].ext;
 
 	return ".xxx";
+}
+
+int is_imgtype(const char *ext)
+{
+	int i;
+
+	for (i = 0; i < sizeof(hdrs) / sizeof(struct header); ++i)
+		if (strcmp(ext, hdrs[i].ext) == 0)
+			return 1;
+
+	return strcmp(ext, ".xxx") == 0;
 }
 
 /* Normal way to close connection */

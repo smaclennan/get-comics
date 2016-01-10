@@ -212,6 +212,7 @@ char *must_strdup(char *str);
 void *must_calloc(int nmemb, int size);
 static inline void *must_alloc(int size) { return must_calloc(1, size); }
 char *lazy_imgtype(char *buf);
+int is_imgtype(const char *ext);
 void dump_outstanding(int sig);
 char *create_outname(char *url);
 
