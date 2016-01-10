@@ -214,10 +214,11 @@ static void clean_dir(void)
 
 static void usage(int rc)
 {
-	fputs("usage:  get-comics [-hkvCV] [-d comics_dir]", stdout);
+	fputs("usage:  get-comics [-hckvCV] [-d comics_dir]", stdout);
 	puts(" [-l links_file] [-p proxy]");
 	puts("                   [-t threads] [-T timeout] [config-file ...]");
 	puts("Where:  -h  this help");
+	puts("\t-c  remove images from comics dir before downloading (clean)");
 	puts("\t-k  keep index files");
 	puts("\t-v  verbose");
 	puts("\t-C  list supported ciphers (ssl only)");
