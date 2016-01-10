@@ -250,5 +250,7 @@ char *create_outname(char *url)
 			fname = "index.html";
 	} else
 		fname = url;
-	return must_strdup(fname);
+
+	char *outname = must_alloc(strlen(fname) + 4 + 1);
+	return strcpy(outname, fname);
 }
