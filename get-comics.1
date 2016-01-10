@@ -3,13 +3,13 @@
 get-comics \- download comics from the net
 .SH SYNOPSIS
 .B get-comics
-[\fI-hkrvCV\fR]
+[\fI-hckvCV\fR]
 [\fI-d directory\fR]
 [\fI-l links_file\fR]
 [\fI-p proxy\fR]
 [\fI-t threads\fR]
 [\fI-T timeout\fR]
-[\fIjson_file...\fR]
+[\fIconfig-file...\fR]
 .br
 .B get-today
 .SH DESCRIPTION
@@ -24,6 +24,9 @@ get-today is a small shell script that puts all the days comics in a
 subdirectory based on the date. It then builds an index.html of the
 comics. It is here as a sample only.
 .SH OPTIONS
+.TP
+\fB\-c\fR
+clean (remove) images from comics dir before downloading
 .TP
 \fB\-d directory\fR
 where to download the comics to. Overrides the json file. Defaults to
@@ -43,9 +46,6 @@ comics.
 \fB\-p proxy[:port]\fR
 proxy and optional port (defaults to 3128). Overrides the json file.
 .TP
-\fB\-r\fR
-randomize the order of the comics.
-.TP
 \fB\-t threads\fR
 number of simultaneous download threads
 .TP
@@ -59,7 +59,7 @@ list ciphers if SSL enabled.
 read timeout in seconds. (default 5 minutes)
 .TP
 \fB\-V\fR
-verify the json file.
+verify the json file and exit.
 .TP
 \fBjson_file(s)\fR
 alternate json file, or files, to use. Defaults to /usr/share/get-comics/comics.json
@@ -67,7 +67,7 @@ alternate json file, or files, to use. Defaults to /usr/share/get-comics/comics.
 .PP
 get-comics reads the json file and downloads the comics. It can
 download more than one comic at a time. The default
-is to limit to 10 concurrent connections, but the \fB\-t threads\fR option
+is to limit to 100 concurrent connections, but the \fB\-t threads\fR option
 can be used to override this.
 .PP
 The comics are divided into two types: direct download and
@@ -87,7 +87,7 @@ is applied to the page and the result is the comic to download.
 The json file is very powerful. The sample \fIget-comics.json\fR file has a lot of
 examples, some fairly complex.
 .PP
-C style comments \f/* */\fR can be placed almost anywhere.
+C style comments \f\/* */\fR can be placed almost anywhere.
 .PP
 .SH "Top Level Tags"
 .PP
@@ -160,10 +160,11 @@ All proxies are specified as an url with an optional port:
 The three methods above are listed in order of priority. i.e. The
 command line option overrides the proxy tag which overrides the
 environment variable.
+.SH "FILES"
+.BR comics.json
 .SH "SEE ALSO"
 .BR strftime (3),
-.BR regex (7),
-.BR comics.json
+.BR regex (7)
 .SH AUTHOR
 Written by Sean MacLennan
 .SH "REPORTING BUGS"

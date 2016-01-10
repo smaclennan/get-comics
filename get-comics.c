@@ -218,7 +218,7 @@ static void usage(int rc)
 	puts(" [-l links_file] [-p proxy]");
 	puts("                   [-t threads] [-T timeout] [config-file ...]");
 	puts("Where:  -h  this help");
-	puts("\t-c  remove images from comics dir before downloading (clean)");
+	puts("\t-c  clean (remove) images from comics dir before downloading");
 	puts("\t-k  keep index files");
 	puts("\t-v  verbose");
 	puts("\t-C  list supported ciphers (ssl only)");
