@@ -78,7 +78,7 @@ endif
 
 # Optionally add libcurl
 ifneq ($(findstring WANT_CURL,$(CFLAGS)),)
-LIBS += -lcurl -levent
+LIBS += -lcurl
 CFILES += curl.c
 else
 CFILES += http.c socket.c
