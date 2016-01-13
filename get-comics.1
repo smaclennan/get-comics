@@ -4,7 +4,8 @@ get-comics \- download comics from the net
 .SH SYNOPSIS
 .B get-comics
 [\fI-hckvCV\fR]
-[\fI-d directory\fR]
+[\fI-d comics-directory\fR]
+[\fI-i index-directory\fR]
 [\fI-l links_file\fR]
 [\fI-p proxy\fR]
 [\fI-t threads\fR]
@@ -26,11 +27,18 @@ comics. It is here as a sample only.
 .SH OPTIONS
 .TP
 \fB\-c\fR
-clean (remove) images from comics dir before downloading
+clean (remove) images from comics dir before downloading. Also removes
+html files from the index directory if specified.
 .TP
-\fB\-d directory\fR
+\fB\-d comics-directory\fR
 where to download the comics to. Overrides the json file. Defaults to
 $HOME/comics.
+.TP
+\fB\-h\fR
+usage help message.
+.TP
+\fB\-i index-directory\fR
+where to download the index files to. Defaults to the comics directory.
 .TP
 \fB\-h\fR
 usage help message.

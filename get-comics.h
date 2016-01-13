@@ -176,7 +176,7 @@ static inline int is_https(char *p)
 }
 
 /* Send to stdout, not stderr */
-static inline void my_perror(char *str)
+static inline void my_perror(const char *str)
 {
 #ifdef _WIN32
 	printf("%s: error %d\n", str, WSAGetLastError());
@@ -217,7 +217,9 @@ void dump_outstanding(int sig);
 char *create_outname(char *url);
 
 /* export from config.c */
-int read_config(char *fname);
+int read_config(const char *fname);
+void add_index_dir(const char *dir);
+void clean_index_dir(void);
 
 /* export from http.c */
 void set_proxy(char *proxystr);

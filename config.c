@@ -1,10 +1,11 @@
 #include "get-comics.h"
 #include "my-parser.h"
+#include <dirent.h>
 
 static struct tm *today;
 static unsigned wday;
 static char *gocomics_regexp;
-
+static char *index_dir;
 
 static void add_comic(struct connection *new)
 {
@@ -112,7 +113,10 @@ static void add_regexp(struct connection **conn, char *regexp)
 	new_comic(conn);
 	(*conn)->regexp = must_strdup(out);
 	if ((*conn)->regfname == NULL) {
-		sprintf(out, "index-%08x.html", ++unique);
+		if (index_dir)
+			snprintf(out, sizeof(out), "%s/index-%08x.html", index_dir, ++unique);
+		else
+			snprintf(out, sizeof(out), "index-%08x.html", ++unique);
 		(*conn)->regfname = must_strdup(out);
 	}
 }
@@ -312,7 +316,7 @@ static int parse(void *ctxin, int type, const JSON_value *value)
 	return 1;
 }
 
-int read_config(char *fname)
+int read_config(const char *fname)
 {
 	/* Get the time for the urls */
 	time_t now = time(NULL);
@@ -326,4 +330,47 @@ int read_config(char *fname)
 	if (gocomics_regexp) free(gocomics_regexp);
 
 	return 0;
+}
+
+/* Because we cd to the comics dir this must be absolute. */
+void add_index_dir(const char *dir)
+{
+	if (access(dir, F_OK)) {
+		char cmd[PATH_MAX + 12];
+		snprintf(cmd, sizeof(cmd), "mkdir -p %s", dir);
+		if (system(cmd)) {
+			my_perror(dir);
+			exit(1);
+		}
+	}
+
+	if (!(index_dir = realpath(dir, NULL))) {
+		my_perror(dir);
+		exit(1);
+	}
+}
+
+void clean_index_dir(void)
+{
+	if (!index_dir || access(index_dir, F_OK))
+		return;
+
+	DIR *dir = opendir(index_dir);
+	if (!dir) {
+		my_perror(index_dir);
+		exit(1);
+	}
+
+	struct dirent *ent;
+	while ((ent = readdir(dir))) {
+		if (*ent->d_name == '.') continue;
+		char *p = strrchr(ent->d_name, '.');
+		if (p && strcmp(p, ".html") == 0) {
+			if (unlinkat(dirfd(dir), ent->d_name, 0))
+				my_perror(ent->d_name);
+		} else
+			printf("Warning: %s/%s\n", index_dir, ent->d_name);
+	}
+
+	closedir(dir);
 }

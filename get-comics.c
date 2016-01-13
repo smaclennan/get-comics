@@ -210,13 +210,15 @@ static void clean_dir(void)
 	}
 
 	closedir(dir);
+
+	clean_index_dir();
 }
 
 static void usage(int rc)
 {
 	fputs("usage:  get-comics [-hckvCV] [-d comics_dir]", stdout);
-	puts(" [-l links_file] [-p proxy]");
-	puts("                   [-t threads] [-T timeout] [config-file ...]");
+	puts(" [-i index_dir] [-l links_file]");
+	puts("                   [-p proxy] [-t threads] [-T timeout] [config-file ...]");
 	puts("Where:  -h  this help");
 	puts("\t-c  clean (remove) images from comics dir before downloading");
 	puts("\t-k  keep index files");
@@ -231,7 +233,7 @@ int main(int argc, char *argv[])
 	char *env;
 	int i, verify = 0, clean = 0;
 
-	while ((i = getopt(argc, argv, "cd:hkl:p:t:vCT:V")) != -1)
+	while ((i = getopt(argc, argv, "cd:hi:kl:p:t:vCT:V")) != -1)
 		switch ((char)i) {
 		case 'c':
 			clean = 1;
@@ -241,6 +243,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'h':
 			usage(0);
+		case 'i':
+			add_index_dir(optarg);
+			break;
 		case 'k':
 			unlink_index = 0;
 			break;
