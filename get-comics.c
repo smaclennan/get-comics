@@ -23,7 +23,9 @@
 #include <regex.h>
 #include <getopt.h>
 #include <signal.h>
+#ifndef WIN32
 #include <dirent.h>
+#endif
 
 char *comics_dir;
 int skipped;
@@ -70,7 +72,7 @@ static char *find_regexp(struct connection *conn, char *reg, int regsize)
 
 			if (match[mn].rm_so == -1) {
 				printf("%s did not have match %d\n",
-				       conn->url, mn);
+					   conn->url, mn);
 				return NULL;
 			}
 
@@ -195,6 +197,7 @@ static void free_comics(void)
 /* We have done a chdir to the comics dir */
 static void clean_dir(void)
 {
+#ifndef WIN32
 	DIR *dir = opendir(".");
 	if (!dir)
 		return;
@@ -212,6 +215,7 @@ static void clean_dir(void)
 	closedir(dir);
 
 	clean_index_dir();
+#endif
 }
 
 static void usage(int rc)
@@ -236,6 +240,10 @@ int main(int argc, char *argv[])
 	while ((i = getopt(argc, argv, "cd:hi:kl:p:t:vCT:V")) != -1)
 		switch ((char)i) {
 		case 'c':
+#ifdef WIN32
+			puts("Sorry, not supported in windows.");
+			exit(1);
+#endif
 			clean = 1;
 			break;
 		case 'd':

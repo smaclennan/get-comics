@@ -60,7 +60,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>.;..;win32;C:\Program Files\Microsoft SDKs\Windows\v7.1\Include;%(AdditionalIncludeDirectories);../polarssl/include;../zlib</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;WANT_ZLIB;WANT_GZIP;WANT_SSL;WANT_POLARSSL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -132,52 +132,13 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\common.c" />
     <ClCompile Include="..\config.c" />
     <ClCompile Include="..\get-comics.c" />
     <ClCompile Include="..\http.c" />
     <ClCompile Include="..\log.c" />
     <ClCompile Include="..\my-parser.c" />
-    <ClCompile Include="..\openssl.c" />
     <ClCompile Include="..\polarssl.c" />
-    <ClCompile Include="..\polarssl\library\aes.c" />
-    <ClCompile Include="..\polarssl\library\aesni.c" />
-    <ClCompile Include="..\polarssl\library\asn1parse.c" />
-    <ClCompile Include="..\polarssl\library\base64.c" />
-    <ClCompile Include="..\polarssl\library\bignum.c" />
-    <ClCompile Include="..\polarssl\library\certs.c" />
-    <ClCompile Include="..\polarssl\library\cipher.c" />
-    <ClCompile Include="..\polarssl\library\cipher_wrap.c" />
-    <ClCompile Include="..\polarssl\library\ctr_drbg.c" />
-    <ClCompile Include="..\polarssl\library\debug.c" />
-    <ClCompile Include="..\polarssl\library\dhm.c" />
-    <ClCompile Include="..\polarssl\library\entropy.c" />
-    <ClCompile Include="..\polarssl\library\entropy_poll.c" />
-    <ClCompile Include="..\polarssl\library\error.c" />
-    <ClCompile Include="..\polarssl\library\md.c" />
-    <ClCompile Include="..\polarssl\library\md5.c" />
-    <ClCompile Include="..\polarssl\library\md_wrap.c" />
-    <ClCompile Include="..\polarssl\library\oid.c" />
-    <ClCompile Include="..\polarssl\library\pem.c" />
-    <ClCompile Include="..\polarssl\library\pk.c" />
-    <ClCompile Include="..\polarssl\library\pkparse.c" />
-    <ClCompile Include="..\polarssl\library\pk_wrap.c" />
-    <ClCompile Include="..\polarssl\library\rsa.c" />
-    <ClCompile Include="..\polarssl\library\sha1.c" />
-    <ClCompile Include="..\polarssl\library\sha256.c" />
-    <ClCompile Include="..\polarssl\library\sha512.c" />
-    <ClCompile Include="..\polarssl\library\ssl_ciphersuites.c" />
-    <ClCompile Include="..\polarssl\library\ssl_cli.c" />
-    <ClCompile Include="..\polarssl\library\ssl_tls.c" />
-    <ClCompile Include="..\polarssl\library\version.c" />
-    <ClCompile Include="..\polarssl\library\x509.c" />
-    <ClCompile Include="..\polarssl\library\x509_crt.c" />
-    <ClCompile Include="..\zlib\adler32.c" />
-    <ClCompile Include="..\zlib\crc32.c" />
-    <ClCompile Include="..\zlib\infback.c" />
-    <ClCompile Include="..\zlib\inffast.c" />
-    <ClCompile Include="..\zlib\inflate.c" />
-    <ClCompile Include="..\zlib\inftrees.c" />
-    <ClCompile Include="..\zlib\zutil.c" />
     <ClCompile Include="poll.c" />
     <ClCompile Include="regex.c" />
     <ClCompile Include="..\socket.c" />
@@ -186,14 +147,6 @@
   <ItemGroup>
     <ClInclude Include="..\get-comics.h" />
     <ClInclude Include="..\my-parser.h" />
-    <ClInclude Include="..\zlib\crc32.h" />
-    <ClInclude Include="..\zlib\inffast.h" />
-    <ClInclude Include="..\zlib\inffixed.h" />
-    <ClInclude Include="..\zlib\inflate.h" />
-    <ClInclude Include="..\zlib\inftrees.h" />
-    <ClInclude Include="..\zlib\zconf.h" />
-    <ClInclude Include="..\zlib\zlib.h" />
-    <ClInclude Include="..\zlib\zutil.h" />
     <ClInclude Include="getopt.h" />
     <ClInclude Include="regex.h" />
     <ClInclude Include="win32.h" />

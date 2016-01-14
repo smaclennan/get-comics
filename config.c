@@ -1,6 +1,8 @@
 #include "get-comics.h"
 #include "my-parser.h"
+#ifndef WIN32
 #include <dirent.h>
+#endif
 
 static struct tm *today;
 static unsigned wday;
@@ -335,6 +337,9 @@ int read_config(const char *fname)
 /* Because we cd to the comics dir this must be absolute. */
 void add_index_dir(const char *dir)
 {
+#ifdef WIN32
+	index_dir = strdup(dir);
+#else
 	if (access(dir, F_OK)) {
 		char cmd[PATH_MAX + 12];
 		snprintf(cmd, sizeof(cmd), "mkdir -p %s", dir);
@@ -348,10 +353,12 @@ void add_index_dir(const char *dir)
 		my_perror(dir);
 		exit(1);
 	}
+#endif
 }
 
 void clean_index_dir(void)
 {
+#ifndef WIN32
 	if (!index_dir || access(index_dir, F_OK))
 		return;
 
@@ -373,4 +380,5 @@ void clean_index_dir(void)
 	}
 
 	closedir(dir);
+#endif
 }

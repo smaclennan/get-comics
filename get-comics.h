@@ -9,7 +9,7 @@
 #ifdef _WIN32
 #include "win32/win32.h"
 
-#define JSON_FILE		"comics.json"
+#define JSON_FILE		"../comics.json"
 #else
 #include <unistd.h>
 #include <sys/time.h>
