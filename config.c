@@ -1,8 +1,6 @@
 #include "get-comics.h"
 #include "my-parser.h"
-#ifndef WIN32
 #include <dirent.h>
-#endif
 
 static struct tm *today;
 static unsigned wday;
@@ -358,7 +356,6 @@ void add_index_dir(const char *dir)
 
 void clean_index_dir(void)
 {
-#ifndef WIN32
 	if (!index_dir || access(index_dir, F_OK))
 		return;
 
@@ -380,5 +377,4 @@ void clean_index_dir(void)
 	}
 
 	closedir(dir);
-#endif
 }
