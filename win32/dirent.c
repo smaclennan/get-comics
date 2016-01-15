@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <stdio.h> /* snprintf */
 #include <dirent.h>
 
 DIR *opendir(const char *name)

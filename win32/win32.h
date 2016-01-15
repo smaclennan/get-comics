@@ -16,6 +16,7 @@
 #define write _write
 #define close _close
 #define unlink _unlink
+#define access _access
 #define strdup _strdup
 #define chdir _chdir
 #define stricmp _stricmp
@@ -23,6 +24,7 @@
 #define strcasecmp stricmp
 #define snprintf _snprintf
 
+#define F_OK 0
 #define S_ISREG(m) ((m) & _S_IFREG)
 
 /* from win32.c */

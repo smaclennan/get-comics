@@ -336,7 +336,7 @@ int read_config(const char *fname)
 void add_index_dir(const char *dir)
 {
 #ifdef WIN32
-	index_dir = strdup(dir);
+	index_dir = must_strdup(dir);
 #else
 	if (access(dir, F_OK)) {
 		char cmd[PATH_MAX + 12];
@@ -353,6 +353,15 @@ void add_index_dir(const char *dir)
 	}
 #endif
 }
+
+#ifdef WIN32
+static int unlinkat(HANDLE unused, const char *name, int flags)
+{	/* Fake unlinkat. */
+	char path[MAX_PATH];
+	snprintf(path, sizeof(path), "%s/%s", index_dir, name);
+	return unlink(path);
+}
+#endif
 
 void clean_index_dir(void)
 {

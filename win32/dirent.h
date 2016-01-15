@@ -20,4 +20,6 @@ DIR *opendir(const char *name);
 struct dirent *readdir(DIR *dirp);
 int closedir(DIR *dirp);
 
+#define dirfd(n) (n->hfind)
+
 #endif

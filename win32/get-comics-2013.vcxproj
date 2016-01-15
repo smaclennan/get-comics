@@ -139,6 +139,7 @@
     <ClCompile Include="..\log.c" />
     <ClCompile Include="..\my-parser.c" />
     <ClCompile Include="..\polarssl.c" />
+    <ClCompile Include="dirent.c" />
     <ClCompile Include="poll.c" />
     <ClCompile Include="regex.c" />
     <ClCompile Include="..\socket.c" />
@@ -147,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="..\get-comics.h" />
     <ClInclude Include="..\my-parser.h" />
+    <ClInclude Include="dirent.h" />
     <ClInclude Include="getopt.h" />
     <ClInclude Include="regex.h" />
     <ClInclude Include="win32.h" />
