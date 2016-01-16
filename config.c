@@ -365,11 +365,11 @@ static int unlinkat(HANDLE unused, const char *name, int flags)
 
 void clean_index_dir(void)
 {
+	DIR *dir;
 	if (!index_dir || access(index_dir, F_OK))
 		return;
 
-	DIR *dir = opendir(index_dir);
-	if (!dir) {
+	if (!(dir = opendir(index_dir))) {
 		my_perror(index_dir);
 		exit(1);
 	}

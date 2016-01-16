@@ -24,7 +24,7 @@ char *proxy_port = "3128";
 const char *user_agent =
 	"Mozilla/5.0 (X11; Linux i686; rv:6.0.2) Gecko/20100101 Firefox/6.0.2";
 
-char *must_strdup(char *old)
+char *must_strdup(const char *old)
 {
 	char *new = strdup(old);
 	if (!new) {
