@@ -28,8 +28,6 @@ in a single thread using the `select' call. I find this version much
 more reliable than the multi-threaded version. It also has lower
 resource usage.
 
-This is the current version.
-
 get-comics 3
 ------------
 
@@ -43,6 +41,12 @@ get-comics 4
 I rewrote get-comics in go just because I could ;) I used it
 exclusively for months. But it requires libgo, so I have reverted back
 to the C version.
+
+get-comics 5
+------------
+
+I am now using libcurl again. This time around it seems much more
+stable.
 
 JSON Parsers
 ------------
