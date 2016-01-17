@@ -27,3 +27,8 @@ Or:
 git clone https://github.com/smaclennan/get-comics.git
 git submodule init
 git submodule update
+
+IMPORTANT: After getting the submodules from git, you must copy
+mbedtls-config.h to mbedtls/include/mbedtls/config.h. This contains a
+version of mbedtls/configs/config-mini-tls1_1.h with server side code
+removed. get-comics will not compile with the stock mbedtls config.

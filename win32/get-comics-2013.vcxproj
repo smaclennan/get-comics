@@ -59,8 +59,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.;..;win32;C:\Program Files\Microsoft SDKs\Windows\v7.1\Include;%(AdditionalIncludeDirectories);../polarssl/include;../zlib</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;WANT_GZIP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.;..;win32;C:\Program Files\Microsoft SDKs\Windows\v7.1\Include;%(AdditionalIncludeDirectories);../mbedtls/include;../zlib</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;WANT_GZIP;WANT_MBEDTLS;WANT_SSL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -137,8 +137,8 @@
     <ClCompile Include="..\get-comics.c" />
     <ClCompile Include="..\http.c" />
     <ClCompile Include="..\log.c" />
+    <ClCompile Include="..\mbedtls.c" />
     <ClCompile Include="..\my-parser.c" />
-    <ClCompile Include="..\polarssl.c" />
     <ClCompile Include="dirent.c" />
     <ClCompile Include="poll.c" />
     <ClCompile Include="regex.c" />
@@ -154,6 +154,9 @@
     <ClInclude Include="win32.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\mbedtls\mbedtls.vcxproj">
+      <Project>{5925e97d-990e-41c1-8a7c-c6338ffc3fe5}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\zlib\zlib.vcxproj">
       <Project>{f84d2cea-9ec1-4428-8fa6-f8c1c4e6621d}</Project>
     </ProjectReference>

@@ -38,48 +38,6 @@ int openssl_check_connect(struct connection *conn)
 	}
 }
 
-static int netrecv(void *ctx, unsigned char *buf, size_t len)
-{
-	int fd = *(int *)ctx;
-	int n = recv(fd, buf, len, 0);
-	if (n < 0) {
-#ifdef WIN32
-		if (WSAGetLastError() == WSAEWOULDBLOCK)
-			return MBEDTLS_ERR_NET_WANT_READ;
-		if (WSAGetLastError() == WSAECONNRESET)
-			return MBEDTLS_ERR_NET_CONN_RESET;
-#else
-		if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
-			return MBEDTLS_ERR_SSL_WANT_READ;
-		if (errno == EPIPE || errno == ECONNRESET)
-			return MBEDTLS_ERR_NET_CONN_RESET;
-#endif
-		return MBEDTLS_ERR_NET_RECV_FAILED;
-	}
-	return n;
-}
-
-static int netsend(void *ctx, const unsigned char *buf, size_t len)
-{
-	int fd = *(int *)ctx;
-	int n = send(fd, buf, len, 0);
-	if (n < 0) {
-#ifdef WIN32
-		if (WSAGetLastError() == WSAEWOULDBLOCK)
-			return MBEDTLS_ERR_SSL_WANT_WRITE;
-		if (WSAGetLastError() == WSAECONNRESET)
-			return MBEDTLS_ERR_NET_CONN_RESET;
-#else
-		if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
-			return MBEDTLS_ERR_SSL_WANT_WRITE;
-		if (errno == EPIPE || errno == ECONNRESET)
-			return MBEDTLS_ERR_NET_CONN_RESET;
-#endif
-		return MBEDTLS_ERR_NET_SEND_FAILED;
-	}
-	return n;
-}
-
 /* Returns an opaque ssl context */
 int openssl_connect(struct connection *conn)
 {
@@ -117,7 +75,7 @@ int openssl_connect(struct connection *conn)
 //	mbedtls_ssl_set_rng(ssl, ctr_drbg_random, &ctr_drbg);
 
 	int *fd = &conn->poll->fd;
-	mbedtls_ssl_set_bio(ssl, fd, netsend, netrecv, NULL);
+	mbedtls_ssl_set_bio(ssl, fd, mbedtls_net_send, mbedtls_net_recv, NULL);
 
 	return openssl_check_connect(conn);
 }
