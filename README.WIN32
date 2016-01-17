@@ -7,9 +7,23 @@ uses winsocks 2. Compile it from the win32 directory.
 Windows now uses my-parser.c and does not need any external
 libraries, only the standard SDK ones.
 
-Does not support the -c option.
 The -i directory must be a full path and exist.
 
 Tested May 2011 on Vista.
 Tested Nov 2013 on Windows 8.
 Tested Jan 2016 on Windows 10.
+
+ZLIB and MBEDTLS
+----------------
+
+zlib and mbedtls are git submodules of get-comics.
+
+There are two methods of getting the submodules:
+
+git clone --recursive https://github.com/smaclennan/get-comics.git
+
+Or:
+
+git clone https://github.com/smaclennan/get-comics.git
+git submodule init
+git submodule update

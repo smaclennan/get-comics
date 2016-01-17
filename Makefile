@@ -60,7 +60,7 @@ LIBS += $(PLIB)
 CFILES += polarssl.c
 endif
 ifneq ($(findstring WANT_MBEDTLS,$(CFLAGS)),)
-PDIR=$(HOME)/src/mbedtls-2.1.0
+PDIR=mbedtls
 CFLAGS += -DWANT_SSL -I$(PDIR)/include
 LIBS += -L$(PDIR)/library -lmbedtls -lmbedx509 -lmbedcrypto
 CFILES += mbedtls.c
