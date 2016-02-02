@@ -72,6 +72,11 @@
   "output": "maxim",
   "days": "XmtwtfX"
 },
+{ /* The Other End */
+  "url": "http://theotherendcomics.com",
+  "regexp": "http://i2.wp.com/www.kohney.com/wp-content/uploads/%Y/%m/[^.]+.jpg",
+  "output": "otherend"
+},
 { /* Poorly Drawn Lines */
   "url": "http://poorlydrawnlines.com/",
   "regexp": "wp-content/uploads/%Y/%m/[0-9a-zA-Z_-]+.png",
