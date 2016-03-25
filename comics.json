@@ -38,7 +38,7 @@
 },
 { /* Diesel Sweeties */
   "url": "http://www.dieselsweeties.com/",
-  "regexp": "/h?strips/[^.]+.(png|gif)",
+  "regexp": "/h?strips[0-9]*/[^.]+.(png|gif)",
   "output": "diesel",
   "days": "XmtwtfX"
 },
