@@ -45,7 +45,7 @@ static inline int inflateEnd(void *strm) { return -1; }
  * Maximum length of time to wait for a read/write
  * In seconds
  */
-#define SOCKET_TIMEOUT	(5 * 60)
+#define SOCKET_TIMEOUT	(2 * 60)
 
 /* The depth of the regexp matchs. */
 /* Affects the maximum value of the <regmatch> tag */
