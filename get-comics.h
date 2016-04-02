@@ -36,12 +36,6 @@ static inline int inflateEnd(void *strm) { return -1; }
 #define THREAD_LIMIT	6
 
 /*
- * Maximum length of time to wait for a read
- * In milliseconds
- */
-#define READ_TIMEOUT	(5 * 60 * 1000)
-
-/*
  * Maximum length of time to wait for a read/write
  * In seconds
  */
