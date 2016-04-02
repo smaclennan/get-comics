@@ -33,7 +33,7 @@ static inline int inflateEnd(void *strm) { return -1; }
 #define HTTP_PORT		80
 
 /* Limit the number of concurrent sockets. */
-#define THREAD_LIMIT	6
+#define THREAD_LIMIT	100
 
 /*
  * Maximum length of time to wait for a read/write
