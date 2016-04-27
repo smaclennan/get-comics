@@ -1,8 +1,11 @@
 #include "get-comics.h"
+#include <pthread.h>
 
 #define MAX_WAIT_MSECS (30 * 1000) /* Wait max. 30 seconds */
 
+#ifndef MULTI_THREADED
 static CURLM *curlm;
+#endif
 
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
@@ -37,6 +40,47 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
 	return n;
 }
 
+#ifdef MULTI_THREADED
+static void *comic_thread(void *arg)
+{
+	struct connection *conn = arg;
+	int http_status_code;
+
+	start_one_comic(conn);
+
+again:
+	curl_easy_perform(conn->curl);
+
+	curl_easy_getinfo(conn->curl, CURLINFO_RESPONSE_CODE, &http_status_code);
+
+	if (http_status_code == 200) {
+		if (conn->regexp && !conn->matched) {
+			if (process_html(conn))
+				fail_connection(conn);
+			else
+				goto again;
+		} else
+			close_connection(conn);
+	} else {
+	}
+
+	return NULL;
+}
+
+void main_loop(void)
+{
+	struct connection *conn;
+
+	thread_limit = n_comics;
+
+	for (conn = comics; conn; conn = conn->next)
+		if (pthread_create(&conn->thread, NULL, comic_thread, conn))
+			printf("Unable to create thread\n");
+
+	for (conn = comics; conn; conn = conn->next)
+		pthread_join(conn->thread, NULL);
+}
+#else
 void main_loop(void)
 {
 	int i, running, http_status_code, msgs_left;
@@ -84,6 +128,7 @@ void main_loop(void)
 
 	curl_multi_cleanup(curlm);
 }
+#endif
 
 int build_request(struct connection *conn)
 {
@@ -110,12 +155,14 @@ int build_request(struct connection *conn)
 		curl_easy_setopt(conn->curl, CURLOPT_PROXYPORT, strtol(proxy_port, NULL, 10));
 	}
 
+#ifndef MULTI_THREADED
 	if (curl_multi_add_handle(curlm, conn->curl)) {
 		printf("Unable to add handle to multi handle\n");
 		curl_easy_cleanup(conn->curl);
 		conn->curl = NULL;
 		return -1;
 	}
+#endif
 
 	return 0;
 }
@@ -124,7 +171,9 @@ int build_request(struct connection *conn)
 int release_connection(struct connection *conn)
 {
 	if (conn->curl) {
+#ifndef MULTI_THREADED
 		curl_multi_remove_handle(curlm, conn->curl);
+#endif
 		curl_easy_cleanup(conn->curl);
 		conn->curl = NULL;
 	}

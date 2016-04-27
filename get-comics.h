@@ -81,6 +81,9 @@ struct connection {
 
 #ifdef WANT_CURL
 	CURL *curl;
+#ifdef MULTI_THREADED
+	pthread_t thread;
+#endif
 #else
 	struct pollfd *poll;
 
@@ -243,5 +246,6 @@ void openssl_list_ciphers(void);
 
 /* export from get-comics.c */
 int start_next_comic(void);
+int start_one_comic(struct connection *conn);
 
 void main_loop(void);

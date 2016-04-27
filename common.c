@@ -167,34 +167,40 @@ static void add_link(struct connection *conn)
 	++gotit;
 }
 
+int start_one_comic(struct connection *conn)
+{
+	if (links_only && !conn->regexp) {
+		add_link(conn);
+		return 0;
+	} else if (build_request(conn) == 0) {
+		time(&conn->access);
+		if (verbose)
+			printf("Started %s (%d)\n", conn->url, outstanding);
+		if (debug_fp)
+			fprintf(debug_fp, "%ld: Started  %3d '%s' (%d)\n",
+					conn->access, conn->id,
+					conn->outname ? conn->outname : conn->url, outstanding);
+		++outstanding;
+		return 1;
+	}
+
+	printf("build_request %s failed\n", conn->url);
+	if (debug_fp) {
+		time(&conn->access);
+		fprintf(debug_fp, "%ld: Start failed  %3d '%s' (%d)\n",
+				conn->access, conn->id,
+				conn->outname ? conn->outname : conn->url, outstanding);
+	}
+	return 0;
+}
+
 int start_next_comic(void)
 {
 	while (head && outstanding < thread_limit) {
-		if (links_only && !head->regexp) {
-			add_link(head);
-			head = head->next;
-			continue;
-		} else if (build_request(head) == 0) {
-			time(&head->access);
-			if (verbose)
-				printf("Started %s (%d)\n", head->url, outstanding);
-			if (debug_fp)
-				fprintf(debug_fp, "%ld: Started  %3d '%s' (%d)\n",
-						head->access, head->id,
-						head->outname ? head->outname : head->url, outstanding);
-			++outstanding;
-			head = head->next;
-			return 1;
-		}
-
-		printf("build_request %s failed\n", head->url);
-		if (debug_fp) {
-			time(&head->access);
-			fprintf(debug_fp, "%ld: Start failed  %3d '%s' (%d)\n",
-					head->access, head->id,
-					head->outname ? head->outname : head->url, outstanding);
-		}
+		int rc = start_one_comic(head);
 		head = head->next;
+		if (rc)
+			return rc;
 	}
 
 	return head != NULL;
