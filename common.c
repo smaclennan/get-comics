@@ -1,4 +1,5 @@
 #include "get-comics.h"
+#include <regex.h>
 
 /* Globals and some helper functions common to all the executables. */
 
@@ -11,6 +12,8 @@ int read_timeout = SOCKET_TIMEOUT;
 int want_extensions;
 const char *method = "GET";
 int thread_limit = THREAD_LIMIT;
+int unlink_index = 1;
+
 
 struct connection *comics;
 struct connection *head;
@@ -272,4 +275,133 @@ char *create_outname(char *url)
 
 	char *outname = must_alloc(strlen(fname) + 4 + 1);
 	return strcpy(outname, fname);
+}
+
+static char *find_regexp(struct connection *conn, char *reg, int regsize)
+{
+	FILE *fp;
+	regex_t regex;
+	regmatch_t match[MATCH_DEPTH];
+	int err, mn = conn->regmatch;
+	/* Max line I have seen is 114k from comics.com! */
+	char buf[128 * 1024];
+
+	err = regcomp(&regex, conn->regexp, REG_EXTENDED);
+	if (err) {
+		char errstr[200];
+
+		regerror(err, &regex, errstr, sizeof(errstr));
+		printf("%s\n", errstr);
+		regfree(&regex);
+		return NULL;
+	}
+
+	fp = fopen(conn->regfname, "r");
+	if (!fp) {
+		my_perror(conn->regfname);
+		return NULL;
+	}
+
+	while (fgets(buf, sizeof(buf), fp)) {
+		if (regexec(&regex, buf, MATCH_DEPTH, match, 0) == 0) {
+			/* got a match */
+			fclose(fp);
+			regfree(&regex);
+			if (unlink_index)
+				unlink(conn->regfname);
+
+			if (match[mn].rm_so == -1) {
+				printf("%s did not have match %d\n",
+					   conn->url, mn);
+				return NULL;
+			}
+
+			*(buf + match[mn].rm_eo) = '\0';
+			snprintf(reg, regsize, "%s", buf + match[mn].rm_so);
+			return reg;
+		}
+	}
+
+	if (ferror(fp))
+		printf("PROBLEMS\n");
+
+	fclose(fp);
+
+	printf("%s DID NOT MATCH REGEXP\n", conn->url);
+	regfree(&regex);
+
+	return NULL;
+}
+
+int process_html(struct connection *conn)
+{
+	char imgurl[1024], regmatch[1024], *p;
+
+	if (conn->out >= 0) {
+		close(conn->out);
+		conn->out = -1;
+	}
+
+	p = find_regexp(conn, regmatch, sizeof(regmatch));
+	if (p == NULL)
+		return 1;
+
+	/* We are done with this socket, but not this connection */
+	release_connection(conn);
+	free(conn->url);
+
+	if (verbose > 1)
+		printf("Matched %s\n", p);
+
+	/* For the writer we need to know if url was modified */
+	conn->matched = 1;
+
+	if (is_http(p))
+		/* fully rooted */
+		conn->url = strdup(p);
+	else if (strncmp(p, "//", 2) == 0) {
+		/* partially rooted - let's assume http */
+		snprintf(imgurl, sizeof(imgurl), "http:%s", p);
+		conn->url = strdup(imgurl);
+	} else {
+		if (conn->base_href)
+			snprintf(imgurl, sizeof(imgurl), "%s%s", conn->base_href, p);
+		else if (*p == '/')
+			snprintf(imgurl, sizeof(imgurl), "%s%s", conn->host, p);
+		else
+			snprintf(imgurl, sizeof(imgurl), "%s/%s", conn->host, p);
+		conn->url = strdup(imgurl);
+	}
+
+	if (links_only) {
+		add_link(conn);
+		--outstanding;
+		return 0;
+	}
+
+	if (build_request(conn) == 0)
+		set_writable(conn);
+	else
+		printf("build_request %s failed\n", conn->url);
+
+	if (verbose)
+		printf("Started %s\n", conn->url);
+
+	return 0;
+}
+
+void do_add_regexp(struct connection *conn, const char *regexp, const char *index_dir)
+{
+	static int unique;
+
+	conn->regexp = must_strdup(regexp);
+	if (conn->regfname == NULL) {
+		char out[256];
+
+		if (index_dir)
+			snprintf(out, sizeof(out), "%s/index-%08x.html", index_dir, ++unique);
+		else
+			snprintf(out, sizeof(out), "index-%08x.html", ++unique);
+		conn->regfname = must_strdup(out);
+	}
 }

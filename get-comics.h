@@ -133,6 +133,7 @@ extern int thread_limit;
 extern int threads_set;
 extern int read_timeout;
 extern int want_extensions;
+extern int unlink_index;
 extern FILE *debug_fp;
 extern FILE *links_only;
 
@@ -188,6 +189,7 @@ int fail_connection(struct connection *conn);
 int release_connection(struct connection *conn);
 int close_connection(struct connection *conn);
 int process_html(struct connection *conn);
+void do_add_regexp(struct connection *conn, const char *regexp, const char *index_dir);
 
 #ifdef WANT_CURL
 static inline void set_writable(struct connection *conn) {}

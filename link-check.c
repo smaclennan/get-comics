@@ -82,14 +82,6 @@ static int read_link_file(char *fname)
 	return 0;
 }
 
-int process_html(struct connection *conn)
-{	/* Should never be called with HEAD method */
-	printf("Internal Error: %s called\n", __func__);
-	fail_connection(conn);
-	return 1;
-}
-
-
 static void usage(int rc)
 {
 	fputs("usage: link-check [-dv] [-p proxy] [-t threads]", stdout);

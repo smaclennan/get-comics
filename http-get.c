@@ -25,7 +25,22 @@
 #include <signal.h>
 
 
-static void add_url(char *url)
+static char *regexp;
+static int regmatch;
+static int create_unique;
+
+static char *unique_outname(void)
+{
+	static unsigned unique;
+	char out[24], *p;
+
+	snprintf(out, sizeof(out), "out%03u", ++unique);
+	p = must_alloc(strlen(out) + 1 + 4);
+	want_extensions = 1;
+	return strcpy(p, out);
+}
+
+static void add_get_url(char *url)
 {
 	static struct connection *tail;
 	char *e;
@@ -50,7 +65,15 @@ static void add_url(char *url)
 
 	conn->host = must_strdup(url);
 
-	conn->outname = create_outname(url);
+	if (create_unique)
+		conn->outname = unique_outname();
+	else
+		conn->outname = create_outname(url);
+
+	if (regexp) {
+		do_add_regexp(conn, regexp, NULL);
+		conn->regmatch = regmatch;
+	}
 
 	if (comics)
 		tail->next = conn;
@@ -68,7 +91,7 @@ static void read_urls(FILE *fp)
 		p = strrchr(line, '\n');
 		if (p)
 			*p = '\0';
-		add_url(line);
+		add_get_url(line);
 	}
 }
 
@@ -84,14 +107,6 @@ static int read_link_file(char *fname)
 	return 0;
 }
 
-int process_html(struct connection *conn)
-{	/* Should never be called with HEAD method */
-	printf("Internal Error: %s called\n", __func__);
-	fail_connection(conn);
-	return 1;
-}
-
-
 static void usage(int rc)
 {
 	fputs("usage: http-get [-v] [-p proxy] [-t threads]", stdout);
@@ -106,7 +121,7 @@ int main(int argc, char *argv[])
 	char *env;
 	int i;
 
-	while ((i = getopt(argc, argv, "hl:p:t:vT:")) != -1)
+	while ((i = getopt(argc, argv, "hl:p:r:R:t:uUvT:")) != -1)
 		switch ((char)i) {
 		case 'h':
 			usage(0);
@@ -116,8 +131,22 @@ int main(int argc, char *argv[])
 		case 'p':
 			set_proxy(optarg);
 			break;
+		case 'r':
+			regexp = optarg;
+			break;
+		case 'R':
+			regmatch = strtol(optarg, NULL, 0);
+			if (regmatch >= MATCH_DEPTH)
+				printf("-R %d >= %d.\n", regmatch, MATCH_DEPTH);
+			break;
 		case 't':
 			thread_limit = strtol(optarg, NULL, 0);
+			break;
+		case 'u':
+			unlink_index = 0;
+			break;
+		case 'U':
+			create_unique = 1;
 			break;
 		case 'v':
 			verbose++;
@@ -130,7 +159,7 @@ int main(int argc, char *argv[])
 		}
 
 	while (optind < argc)
-		add_url(argv[optind++]);
+		add_get_url(argv[optind++]);
 
 	/* set_proxy will not use this if proxy already set */
 	env = getenv("COMICS_PROXY");
