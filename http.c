@@ -523,8 +523,7 @@ static int read_chunkblock(struct connection *conn)
 static int read_file_chunked(struct connection *conn)
 {
 	if (conn->curp >= conn->endp) {
-		if (verbose > 1)
-			printf("Hmmm, already empty\n");
+		printf("Hmmm, already empty\n");
 		return 1;
 	}
 
