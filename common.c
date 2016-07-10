@@ -328,6 +328,8 @@ static char *find_regexp(struct connection *conn, char *reg, int regsize)
 	fclose(fp);
 
 	printf("%s DID NOT MATCH REGEXP\n", conn->url);
+	if (verbose)
+		printf("  regexp '%s'\n", conn->regexp);
 	regfree(&regex);
 
 	return NULL;

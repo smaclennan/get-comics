@@ -110,8 +110,6 @@ static void add_regexp(struct connection **conn, char *regexp)
 		printf("strftime failed for '%s'\n", regexp);
 		exit(1);
 	}
-	if (verbose > 1 && strcmp(out, regexp))
-		printf("regexp: '%s'\n", out);
 
 	do_add_regexp(*conn, out, index_dir);
 }
