@@ -118,6 +118,24 @@ static void add_full_header(struct connection *conn, const char *host)
 #endif
 }
 
+static int open_socket(struct connection *conn, char *host)
+{
+	char *port, *p;
+
+	if (proxy)
+		return connect_socket(conn, proxy, proxy_port);
+
+	p = strchr(host, ':');
+	if (p) {
+		/* port specified */
+		*p++ = '\0';
+		port = p;
+	} else
+		port = is_https(conn->url) ? "443" : "80";
+
+	return connect_socket(conn, host, port);
+}
+
 int build_request(struct connection *conn)
 {
 	char *url, *host, *p;
@@ -150,48 +168,29 @@ int build_request(struct connection *conn)
 		return 1;
 	}
 
-	if (proxy) {
-		if (connect_socket(conn, proxy, proxy_port)) {
-			printf("Connection failed to %s\n", host);
-			free(host);
-			return 1;
-		}
-		sprintf(conn->buf, "%s http://%s/%s %s\r\n",
-				method, host, url, http);
-	} else {
-		char *port = is_https(conn->url) ? "443" : "80";
-
-		p = strchr(host, ':');
-		if (p) {
-			/* port specified */
-			*p++ = '\0';
-			port = p;
-		}
-
-		if (connect_socket(conn, host, port)) {
-			printf("Connection failed to %s\n", host);
-			free(host);
-			return 1;
-		}
-
-		if (strchr(url, ' ')) {
-			/* Some sites cannot handle spaces in the url. */
-			char *in = url, *out = conn->buf + 4;
-			strcpy(conn->buf, method);
-			strcat(conn->buf, " ");
-			while (*in)
-				if (*in == ' ') {
-					*out++ = '%';
-					*out++ = '2';
-					*out++ = '0';
-					++in;
-				} else
-					*out++ = *in++;
-			sprintf(out, " %s\r\n", http);
-		} else
-			sprintf(conn->buf, "%s %s %s\r\n", method, url, http);
-
+	if (open_socket(conn, host)) {
+		printf("Connection failed to %s\n", host);
+		free(host);
+		return 1;
 	}
+	if (proxy)
+		snprintf(conn->buf, BUFSIZE, "%s http://%s/%s %s\r\n",
+				method, host, url, http);
+	else if (strchr(url, ' ')) {
+		/* Some sites cannot handle spaces in the url. */
+		int n = sprintf(conn->buf, "%s ", method);
+		char *in = url, *out = conn->buf + n;
+		while (*in)
+			if (*in == ' ') {
+				*out++ = '%';
+				*out++ = '2';
+				*out++ = '0';
+				++in;
+			} else
+				*out++ = *in++;
+		sprintf(out, " %s\r\n", http);
+	} else
+		snprintf(conn->buf, BUFSIZE, "%s %s %s\r\n", method, url, http);
 
 	add_full_header(conn, host);
 
@@ -523,7 +522,7 @@ static int read_chunkblock(struct connection *conn)
 static int read_file_chunked(struct connection *conn)
 {
 	if (conn->curp >= conn->endp) {
-		printf("Hmmm, already empty\n");
+		printf("Hmmm, %s already empty\n", conn->url);
 		return 1;
 	}
 
