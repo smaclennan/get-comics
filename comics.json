@@ -62,7 +62,7 @@
   "url": "http://www.thefrumps.com",
   "regexp": "wp-content/uploads/%Y/%m/%Y-%m-%d-[^.]*\\.jpg",
   "output": "frumps",
-  "days": "XmXwXXX"
+  "days": "XmXXtXX"
 },
 { /*invisible bread */
   "url": "http://invisiblebread.com/",
