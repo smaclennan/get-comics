@@ -36,6 +36,9 @@ CFLAGS += -DWANT_GZIP
 # Comment in for zlib rather than gzip
 #CFLAGS += -DWANT_ZLIB
 #ZDIR = zlib
+
+# Comment in for persistent connections
+CFLAGS += -DREUSE_SOCKET
 endif
 
 # Currently I use gccgo

@@ -1,0 +1,16 @@
+TODO
+
+* for REUSE_SOCKET redirect should update conn->host
+
+* curl could have persistent connections
+
+
+PERSISTENT CONNECTIONS
+
+This didn't help as much as I hoped. Only 12 of the 38 comics I tested
+have the image on the same site as the page. It doesn't help that
+gocomics (23/38) redirects :(
+
+However, it is pretty easy to implement and doesn't really cost
+anything so let's leave it on for the non-curl case.
+

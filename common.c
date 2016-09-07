@@ -348,8 +348,10 @@ int process_html(struct connection *conn)
 	if (p == NULL)
 		return 1;
 
+#ifndef REUSE_SOCKET
 	/* We are done with this socket, but not this connection */
 	release_connection(conn);
+#endif
 	free(conn->url);
 
 	if (verbose > 1)
@@ -377,6 +379,8 @@ int process_html(struct connection *conn)
 
 	if (links_only) {
 		add_link(conn);
+		if (CONN_OPEN)
+			close_connection(conn);
 		--outstanding;
 		return 0;
 	}

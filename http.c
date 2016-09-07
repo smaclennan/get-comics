@@ -136,6 +136,20 @@ static int open_socket(struct connection *conn, char *host)
 	return connect_socket(conn, host, port);
 }
 
+static int hostcmp(char *host1, char *host2)
+{
+	char *h[2] = { host1, host2 };
+	int i;
+
+	for (i = 0; i < 2; ++i)
+		if (strncmp(h[i], "http://", 7) == 0)
+			h[i] += 7;
+		else if (strncmp(h[i], "https://", 8) == 0)
+			h[i] += 8;
+
+	return strcmp(h[0], h[1]);
+}
+
 int build_request(struct connection *conn)
 {
 	char *url, *host, *p;
@@ -168,11 +182,24 @@ int build_request(struct connection *conn)
 		return 1;
 	}
 
-	if (open_socket(conn, host)) {
-		printf("Connection failed to %s\n", host);
-		free(host);
-		return 1;
+#ifdef REUSE_SOCKET
+	if (CONN_OPEN) {
+		if (hostcmp(conn->host, host)) {
+			if (verbose)
+				printf("New connection for %s\n", host);
+			release_connection(conn);
+		} else if (verbose)
+			printf("Reuse connection for %s\n", conn->host);
 	}
+#endif
+
+	if (!CONN_OPEN)
+		if (open_socket(conn, host)) {
+			printf("Connection failed to %s\n", host);
+			free(host);
+			return 1;
+		}
+
 	if (proxy)
 		snprintf(conn->buf, BUFSIZE, "%s http://%s/%s %s\r\n",
 				method, host, url, http);
