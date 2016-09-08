@@ -336,7 +336,7 @@ int read_reply(struct connection *conn)
 			printf("- Reply %d bytes\n",
 			       (int)(conn->curp - conn->buf));
 	} else if (conn->curp == conn->endp) {
-		printf("Unexpected EOF %s\n", conn->url);
+		printf("Unexpected reply EOF %s\n", conn->url);
 		return 1;
 	} else if (conn->rlen > 0) {
 		/* I have never seen this happen */
@@ -549,7 +549,7 @@ static int read_chunkblock(struct connection *conn)
 static int read_file_chunked(struct connection *conn)
 {
 	if (conn->curp >= conn->endp) {
-		printf("Hmmm, %s already empty\n", conn->url);
+		printf("Hmmm, %s already empty (%d)\n", conn->url, conn->rlen);
 		return 1;
 	}
 
@@ -817,7 +817,7 @@ static void read_conn(struct connection *conn)
 		n = recv(conn->poll->fd, conn->curp, conn->rlen, 0);
 	if (n >= 0) {
 		if (verbose > 1)
-			printf("+ Read %d\n", n);
+			printf("+ Read %d/%d\n", n, conn->rlen);
 		conn->endp = conn->curp + n;
 		conn->rlen -= n;
 		*conn->endp = '\0';
