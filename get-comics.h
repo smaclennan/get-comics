@@ -45,7 +45,7 @@ static inline int inflateEnd(void *strm) { return -1; }
 /* Affects the maximum value of the <regmatch> tag */
 #define MATCH_DEPTH		4
 
-/* I seem to get 1360 byte "chunks"
+/* I seem to get 1440 byte "chunks"
  * This seems a good compromise
  * http://www.parts-express.com/index.cfm is 2155
  */
@@ -88,7 +88,6 @@ struct connection {
 	struct pollfd *poll;
 
 	char buf[BUFSIZE + 1];
-	int  bufn;
 	int  rlen;
 	char *curp; /* for chunking */
 	char *endp; /* for chunking */

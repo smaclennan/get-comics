@@ -28,6 +28,12 @@ static int gzip_init(struct connection *conn);
 static int read_file_gzip(struct connection *conn);
 static int write_output_gzipped(struct connection *conn, size_t bytes);
 
+static inline void reset_buf(struct connection *conn)
+{
+	conn->curp = conn->buf;
+	conn->rlen = BUFSIZE;
+}
+
 /* This is only for 2 stage comics and redirects */
 int release_connection(struct connection *conn)
 {
@@ -154,8 +160,6 @@ int build_request(struct connection *conn)
 {
 	char *url, *host, *p;
 
-	conn->bufn = sizeof(conn->buf) - 1;
-
 	url = is_http(conn->url);
 	if (!url) {
 #ifdef WANT_SSL
@@ -262,8 +266,7 @@ void write_request(struct connection *conn)
 
 		/* reset for read */
 		set_readable(conn);
-		conn->curp = conn->buf;
-		conn->rlen = conn->bufn;
+		reset_buf(conn);
 		NEXT_STATE(conn, read_reply);
 	} else if (n > 0) {
 		conn->length -= n;
@@ -353,10 +356,10 @@ int read_reply(struct connection *conn)
 		fputs(conn->buf, stdout);
 
 	if (strncmp(conn->buf, "HTTP/1.1 ", 9) &&
-	    strncmp(conn->buf, "HTTP/1.0 ", 9)) {
+		strncmp(conn->buf, "HTTP/1.0 ", 9)) {
 		if (verbose)
 			printf("%s: Bad status line %s\n",
-			       conn->host, conn->buf);
+				   conn->host, conn->buf);
 		return 1;
 	}
 
@@ -399,7 +402,7 @@ int read_reply(struct connection *conn)
 		}
 		if (verbose > 1 && conn->length == 0 && !chunked)
 			printf("Warning: No content length for %s\n",
-			       conn->url);
+				   conn->url);
 		break;
 
 	case 301: /* Moved Permanently */
@@ -485,10 +488,10 @@ static int write_output(struct connection *conn, int bytes)
 	if (n != bytes) {
 		if (n < 0)
 			printf("%s: Write error: %s\n",
-			       conn->outname, strerror(errno));
+				   conn->outname, strerror(errno));
 		else
 			printf("%s: Write error: %d/%d\n",
-			       conn->outname, n, bytes);
+				   conn->outname, n, bytes);
 		return 0;
 	}
 
@@ -528,8 +531,7 @@ static int read_chunkblock(struct connection *conn)
 		return 0;
 	}
 
-	conn->curp = conn->buf;
-	conn->rlen = conn->bufn;
+	reset_buf(conn);
 	return 0;
 }
 
@@ -709,8 +711,7 @@ static int read_file_gzip(struct connection *conn)
 		return 0;
 	}
 
-	conn->curp = conn->buf;
-	conn->rlen = conn->bufn;
+	reset_buf(conn);
 	return 0;
 }
 #else
@@ -749,8 +750,7 @@ static int read_file_unsized(struct connection *conn)
 		return 0;
 	}
 
-	conn->curp = conn->buf;
-	conn->rlen = conn->bufn;
+	reset_buf(conn);
 	return 0;
 }
 
@@ -779,8 +779,7 @@ static int read_file(struct connection *conn)
 		return 1;
 	}
 
-	conn->curp = conn->buf;
-	conn->rlen = conn->bufn;
+	reset_buf(conn);
 	return 0;
 }
 
@@ -814,13 +813,17 @@ static void read_conn(struct connection *conn)
 			return;
 	} else
 #endif
-		n = recv(conn->poll->fd, conn->curp, conn->rlen, 0);
+		do
+			n = recv(conn->poll->fd, conn->curp, conn->rlen, 0);
+		while (n < 0 && errno == EINTR);
 	if (n >= 0) {
 		if (verbose > 1)
 			printf("+ Read %d/%d\n", n, conn->rlen);
-		conn->endp = conn->curp + n;
-		conn->rlen -= n;
-		*conn->endp = '\0';
+		if (n > 0) {
+			conn->endp = conn->curp + n;
+			conn->rlen -= n;
+			*conn->endp = '\0';
+		}
 
 		if (conn->func && conn->func(conn))
 			fail_connection(conn);
