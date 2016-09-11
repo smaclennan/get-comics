@@ -14,3 +14,7 @@ gocomics (23/38) redirects :(
 However, it is pretty easy to implement and doesn't really cost
 anything so let's leave it on for the non-curl case.
 
+INDEX FILES
+
+Ignoring Poorly Drawn Lines (883k!!!) the index files range from 15k
+to 55k. The average is 40k. 88% of the files are <= 48k.
