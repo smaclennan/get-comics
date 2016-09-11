@@ -65,7 +65,7 @@ void log_dump(struct connection *conn)
 	if (conn->log->failed & 1)
 		printf(">WARNING: Log entries incomplete\n");
 	for (i = 0; i < conn->log->n_events; ++i)
-		puts(conn->log->events[i]);
+		fputs(conn->log->events[i], stderr);
 	puts("> EOD");
 }
 
