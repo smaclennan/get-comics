@@ -45,11 +45,11 @@ static inline int inflateEnd(void *strm) { return -1; }
 /* Affects the maximum value of the <regmatch> tag */
 #define MATCH_DEPTH		4
 
-/* I seem to get 1440 byte "chunks"
- * This seems a good compromise
- * http://www.parts-express.com/index.cfm is 2155
+/* I seem to get 1440 byte "chunks". However, if the connection is
+ * slow, you will get more bytes. Basically, the bigger the buffer the
+ * better if congested.
  */
-#define BUFSIZE		2222
+#define BUFSIZE		4096
 
 struct log {
 	char **events;

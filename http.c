@@ -528,6 +528,8 @@ static int read_chunkblock(struct connection *conn)
 		NEXT_STATE(conn, read_file_chunked);
 		if (conn->endp > conn->curp)
 			return read_file_chunked(conn);
+		else if (conn->rlen == 0)
+			reset_buf(conn);
 		return 0;
 	}
 
@@ -774,8 +776,7 @@ static int read_file(struct connection *conn)
 			return 0;
 		}
 	} else {
-		printf("Read file problems %zu for %s!\n",
-		       bytes, conn->url);
+		printf("Read file problems %zu for %s!\n", bytes, conn->url);
 		return 1;
 	}
 
