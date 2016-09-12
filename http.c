@@ -28,10 +28,42 @@ static int gzip_init(struct connection *conn);
 static int read_file_gzip(struct connection *conn);
 static int write_output_gzipped(struct connection *conn, size_t bytes);
 
+static struct buflist {
+	struct buflist *next; /* must be first */
+	char *buf;
+} *freelist;
+
 static inline void reset_buf(struct connection *conn)
 {
 	conn->curp = conn->buf;
 	conn->rlen = BUFSIZE;
+}
+
+static char *get_buf(struct connection *conn)
+{
+	if (!conn->buf) {
+		if (freelist) {
+			conn->buf = freelist->buf;
+			freelist = freelist->next;
+			reset_buf(conn);
+		} else
+			conn->buf = malloc(BUFSIZE + 1);
+	}
+	return conn->buf;
+}
+
+static void free_buf(struct connection *conn)
+{
+	struct buflist *b;
+
+	if (!conn->buf)
+		return;
+
+	b = (struct buflist *)conn->buf;
+	b->buf = conn->buf;
+	conn->buf = NULL;
+	b->next = freelist;
+	freelist = b;
 }
 
 /* This is only for 2 stage comics and redirects */
@@ -66,6 +98,8 @@ int release_connection(struct connection *conn)
 		if (conn->zs_buf)
 			free(conn->zs_buf);
 	}
+
+	free_buf(conn);
 
 	return 0;
 }
@@ -197,10 +231,16 @@ int build_request(struct connection *conn)
 	}
 #endif
 
+	if (!get_buf(conn)) {
+		free(host);
+		return 1;
+	}
+
 	if (!CONN_OPEN)
 		if (open_socket(conn, host)) {
 			printf("Connection failed to %s\n", host);
 			free(host);
+			free_buf(conn);
 			return 1;
 		}
 

@@ -48,8 +48,10 @@ static inline int inflateEnd(void *strm) { return -1; }
 /* I seem to get 1440 byte "chunks". However, if the connection is
  * slow, you will get more bytes. Basically, the bigger the buffer the
  * better if congested.
+ *
+ * On my slow DSL (2016), it seems to peak out about 64k.
  */
-#define BUFSIZE		4096
+#define BUFSIZE		(64 * 1024)
 
 struct log {
 	char **events;
@@ -87,7 +89,7 @@ struct connection {
 #else
 	struct pollfd *poll;
 
-	char buf[BUFSIZE + 1];
+	char *buf;
 	int  rlen;
 	char *curp; /* for chunking */
 	char *endp; /* for chunking */

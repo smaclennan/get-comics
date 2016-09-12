@@ -175,7 +175,9 @@ int start_one_comic(struct connection *conn)
 	if (links_only && !conn->regexp) {
 		add_link(conn);
 		return 0;
-	} else if (build_request(conn) == 0) {
+	}
+
+	if (build_request(conn) == 0) {
 		time(&conn->access);
 		if (verbose)
 			printf("Started %s (%d)\n", conn->url, outstanding);
