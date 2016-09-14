@@ -1,4 +1,5 @@
 {
+"threads": 12,
 "gocomics-regexp": "http://assets.amuniversal.com/[0-9a-f]{32}",
 "comics": [
 
@@ -16,7 +17,7 @@
 },
 { /* chainsawsuit */
   "url": "http://chainsawsuit.com/",
-  "regexp": "wp-content/uploads/%Y/%m/[0-9a-zA-Z_-]+.png",
+  "regexp": "wp-content/uploads/%Y/[01][0-9]/[0-9a-zA-Z_-]+\\.png",
   "output": "chainsawsuit"
 },
 { /* Channelate */
@@ -55,8 +56,9 @@
 },
 { /* Freefall */
   "url": "http://freefall.purrsia.com/",
-  "days": "XmXwXfX",
-  "regexp": "/ff[0-9]+/f[vc][0-9]+\\.(gif|png)"
+  "regexp": "/ff[0-9]+/f[vc][0-9]+\\.(gif|png)",
+  "output": "freefall",
+  "days": "XmXwXfX"
 },
 { /* The Frumps */
   "url": "http://www.thefrumps.com",
@@ -70,7 +72,8 @@
   "output": "invisiblebread"
 },
 { /* Kevin and Kell */
-  "url": "http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.jpg"
+  "url": "http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.jpg",
+  "output": "kandk"
 },
 { /* Maximumble */
   "url": "http://maximumble.thebookofbiff.com",
