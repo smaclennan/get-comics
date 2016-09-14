@@ -829,11 +829,13 @@ static struct pollfd *ufds;
 static int timeout_connections(void)
 {
 	struct connection *comic;
-	time_t timeout = time(NULL) - read_timeout;
+	time_t now = time(NULL);
+	time_t timeout = now - read_timeout;
 
 	for (comic = comics; comic; comic = comic->next)
 		if (comic->poll && comic->access < timeout) {
-			printf("TIMEOUT %s\n", comic->url);
+			printf("TIMEOUT %s (n:%ld t:%ld a:%ld)\n",
+				   comic->url, now, timeout, comic->access);
 			fail_connection(comic);
 		}
 
