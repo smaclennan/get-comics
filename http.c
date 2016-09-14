@@ -27,6 +27,7 @@ static int read_file_chunked(struct connection *conn);
 static int gzip_init(struct connection *conn);
 static int read_file_gzip(struct connection *conn);
 static int write_output_gzipped(struct connection *conn, size_t bytes);
+static void gzip_free(struct connection *conn);
 
 static struct buflist {
 	struct buflist *next; /* must be first */
@@ -66,6 +67,14 @@ static void free_buf(struct connection *conn)
 	freelist = b;
 }
 
+
+static int do_process_html(struct connection *conn)
+{
+	/* for reused sockets we must close any gzip connection */
+	gzip_free(conn);
+	return process_html(conn);
+}
+
 /* This is only for 2 stage comics and redirects */
 int release_connection(struct connection *conn)
 {
@@ -91,13 +100,7 @@ int release_connection(struct connection *conn)
 
 	conn->connected = 0;
 
-	if (conn->zs) {
-		inflateEnd(conn->zs);
-		free(conn->zs);
-		conn->zs = NULL;
-		if (conn->zs_buf)
-			free(conn->zs_buf);
-	}
+	gzip_free(conn);
 
 	free_buf(conn);
 
@@ -661,7 +664,7 @@ static int read_file_chunked(struct connection *conn)
 		printf("Last chunk\n");
 	conn->cstate = CS_NONE;
 	if (conn->regexp && !conn->matched)
-		return process_html(conn);
+		return do_process_html(conn);
 	close_connection(conn);
 	return 0;
 }
@@ -748,13 +751,26 @@ static int read_file_gzip(struct connection *conn)
 		if (verbose)
 			printf("OK %s\n", conn->url);
 		if (conn->regexp && !conn->matched)
-			return process_html(conn);
+			return do_process_html(conn);
 		close_connection(conn);
 		return 0;
 	}
 
 	reset_buf(conn);
 	return 0;
+}
+
+static void gzip_free(struct connection *conn)
+{
+	if (conn->zs) {
+		inflateEnd(conn->zs);
+		free(conn->zs);
+		conn->zs = NULL;
+		if (conn->zs_buf) {
+			free(conn->zs_buf);
+			conn->zs_buf = NULL;
+		}
+	}
 }
 #else
 static int gzip_init(struct connection *conn)
@@ -772,6 +788,8 @@ static int write_output_gzipped(struct connection *conn, size_t bytes)
 {
 	return -1;
 }
+
+static void gzip_free(struct connection *conn) {}
 #endif
 
 /* State function */
@@ -787,7 +805,7 @@ static int read_file_unsized(struct connection *conn)
 		if (verbose)
 			printf("OK %s\n", conn->url);
 		if (conn->regexp && !conn->matched)
-			return process_html(conn);
+			return do_process_html(conn);
 		close_connection(conn);
 		return 0;
 	}
@@ -811,7 +829,7 @@ static int read_file(struct connection *conn)
 			if (verbose)
 				printf("OK %s\n", conn->url);
 			if (conn->regexp && !conn->matched)
-				return process_html(conn);
+				return do_process_html(conn);
 			close_connection(conn);
 			return 0;
 		}
