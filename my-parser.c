@@ -40,7 +40,7 @@ static struct JSON_parser_struct JC;
 
 static void new_state(JSON_parser jc, enum states new)
 {
-	if (verbose > 2)
+	if (verbose > 3)
 		printf("state %d -> %d\n", jc->state, new);
 	jc->state = new;
 }

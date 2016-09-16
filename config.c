@@ -169,7 +169,7 @@ static void add_redirect_ok(struct connection **conn, int val)
 
 static void parse_top_str(char *key, char *val)
 {
-	if (verbose > 1)
+	if (verbose > 2)
 		printf("key '%s' val '%s'\n", key, val);
 
 	if (strcmp(key, "directory") == 0) {
@@ -188,7 +188,7 @@ static void parse_top_str(char *key, char *val)
 
 static void parse_top_int(char *key, int val)
 {
-	if (verbose > 1)
+	if (verbose > 2)
 		printf("key '%s' val %d\n", key, val);
 
 	if (strcmp(key, "threads") == 0) {
@@ -202,7 +202,7 @@ static void parse_top_int(char *key, int val)
 
 static void parse_comic_str(struct connection **new, char *key, char *val)
 {
-	if (verbose > 1)
+	if (verbose > 2)
 		printf("  key '%s' val '%s'\n", key, val);
 
 	if (strcmp(key, "url") == 0)
@@ -225,7 +225,7 @@ static void parse_comic_str(struct connection **new, char *key, char *val)
 
 static void parse_comic_int(struct connection **new, char *key, int val)
 {
-	if (verbose > 1)
+	if (verbose > 2)
 		printf("  key '%s' val %d\n", key, val);
 
 	if (strcmp(key, "regmatch") == 0)
@@ -249,6 +249,10 @@ static int parse(void *ctxin, int type, const JSON_value *value)
 
 	switch (type) {
 	case JSON_T_KEY:
+		if (ctx->s_iskey) {
+			printf("Parse error: Key within key\n");
+			exit(1);
+		}
 		ctx->s_iskey = 1;
 		snprintf(ctx->s_key, sizeof(ctx->s_key), "%s", value->vu.str.value);
 		return 1; /* do not break */
@@ -291,7 +295,7 @@ static int parse(void *ctxin, int type, const JSON_value *value)
 	case JSON_T_OBJECT_BEGIN:
 		if (ctx->in_comics) {
 			ctx->new = NULL;
-			if (verbose > 1)
+			if (verbose > 2)
 				printf("Comic:\n");
 		}
 		break;
