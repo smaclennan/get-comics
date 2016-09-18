@@ -81,9 +81,29 @@ void main_loop(void)
 		pthread_join(conn->thread, NULL);
 }
 #else
+static void msg_done(CURL *curl)
+{
+	struct connection *conn;
+	int http_status_code;
+
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status_code);
+	curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
+
+	if (http_status_code == 200) {
+		if (conn->regexp && !conn->matched) {
+			if (process_html(conn))
+				fail_connection(conn);
+		} else
+			close_connection(conn);
+	} else {
+		fprintf(stderr, "GET %s returned %d\n", conn->url, http_status_code);
+		fail_connection(conn);
+	}
+}
+
 void main_loop(void)
 {
-	int i, running, http_status_code, msgs_left;
+	int i, running, msgs_left;
 	CURLMsg *msg;
 
 	/* For now do not enable SSL - make valgrind easier */
@@ -106,24 +126,8 @@ void main_loop(void)
 		curl_multi_perform(curlm, &running);
 
 		while ((msg = curl_multi_info_read(curlm, &msgs_left)))
-			if (msg->msg == CURLMSG_DONE) {
-				struct connection *conn;
-				CURL *curl = msg->easy_handle;
-
-				curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status_code);
-				curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
-
-				if (http_status_code == 200) {
-					if (conn->regexp && !conn->matched) {
-						if (process_html(conn))
-							fail_connection(conn);
-					} else
-						close_connection(conn);
-				} else {
-					fprintf(stderr, "GET %s returned %d\n", conn->url, http_status_code);
-					fail_connection(conn);
-				}
-			}
+			if (msg->msg == CURLMSG_DONE)
+				msg_done(msg->easy_handle);
 	}
 
 	curl_multi_cleanup(curlm);

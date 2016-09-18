@@ -86,6 +86,34 @@ static void clean_dir(void)
 	clean_index_dir();
 }
 
+static void cd_comics_dir(int clean)
+{
+	if (!comics_dir) {
+#ifdef WIN32
+		char *homedrive = getenv("HOMEDRIVE");
+		char *homepath = getenv("HOMEPATH");
+		char home[64];
+		snprintf(home, sizeof(home), "%s%s", homedrive, homepath);
+#else
+		char *home = getenv("HOME");
+#endif
+
+		if (home) {
+			comics_dir = must_alloc(strlen(home) + 10);
+			sprintf(comics_dir, "%s/comics", home);
+		} else
+			comics_dir = must_strdup("comics");
+	}
+
+	if (chdir(comics_dir)) {
+		my_perror(comics_dir);
+		exit(1);
+	}
+
+	if (clean)
+		clean_dir();
+}
+
 static void usage(int rc)
 {
 	fputs("usage:  get-comics [-hckvCV] [-d comics_dir]", stdout);
@@ -189,30 +217,7 @@ int main(int argc, char *argv[])
 	if (thread_limit > n_comics)
 		thread_limit = n_comics;
 
-	if (!comics_dir) {
-#ifdef WIN32
-		char *homedrive = getenv("HOMEDRIVE");
-		char *homepath = getenv("HOMEPATH");
-		char home[64];
-		snprintf(home, sizeof(home), "%s%s", homedrive, homepath);
-#else
-		char *home = getenv("HOME");
-#endif
-
-		if (home) {
-			comics_dir = must_alloc(strlen(home) + 10);
-			sprintf(comics_dir, "%s/comics", home);
-		} else
-			comics_dir = must_strdup("comics");
-	}
-
-	if (chdir(comics_dir)) {
-		my_perror(comics_dir);
-		exit(1);
-	}
-
-	if (clean)
-		clean_dir();
+	cd_comics_dir(clean);
 
 #ifdef _WIN32
 	win32_init();
