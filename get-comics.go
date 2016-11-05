@@ -359,7 +359,12 @@ func get_comic(cur int, cs chan int) {
 		if strings.HasPrefix(match, "http") {
 			comic.url = match
 		} else if match[0] == '/' {
-			comic.url = comic.host + match
+			if match[1] == '/' {
+				/* partially rooted - let's assume http */
+				comic.url = "http:" + match
+			} else {
+				comic.url = comic.host + match
+			}
 		} else {
 			comic.url = comic.host + "/" + match
 		}
