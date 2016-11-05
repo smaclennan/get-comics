@@ -24,9 +24,6 @@ ifeq ($(findstring WANT_CURL,$(CFLAGS)),)
 # Comment in to enable https via openssl
 CFLAGS += -DWANT_OPENSSL
 
-# Comment in to enable https via polarssl
-#CFLAGS += -DWANT_POLARSSL
-
 # Comment in to enable https via mbedtls
 #CFLAGS += -DWANT_MBEDTLS
 
@@ -55,13 +52,7 @@ CFLAGS += -DWANT_SSL
 LIBS += -lssl -lcrypto
 CFILES += openssl.c
 endif
-# Optionally add polarssl
-ifneq ($(findstring WANT_POLARSSL,$(CFLAGS)),)
-PLIB=polarssl/library/libpolarssl.a
-CFLAGS += -DWANT_SSL -Ipolarssl/include
-LIBS += $(PLIB)
-CFILES += polarssl.c
-endif
+# Optionally add mbedtls
 ifneq ($(findstring WANT_MBEDTLS,$(CFLAGS)),)
 PDIR=mbedtls
 CFLAGS += -DWANT_SSL -I$(PDIR)/include
