@@ -216,6 +216,7 @@ char *lazy_imgtype(char *buf);
 int is_imgtype(const char *ext);
 void dump_outstanding(int sig);
 char *create_outname(char *url);
+char *fixup_url(char *url, char *tmp, int len);
 
 /* export from config.c */
 int read_config(const char *fname);

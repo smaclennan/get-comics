@@ -957,3 +957,31 @@ int set_conn_socket(struct connection *conn, int sock)
 
 	return 0;
 }
+
+char *fixup_url(char *url, char *tmp, int len)
+{
+	uint8_t *turl = (uint8_t *)url; /* must be unsigned */
+	char *ttmp = tmp;
+	int n, did_something = 0;
+
+	--len; /* leave room for NULL */
+	while (*turl && len > 0) {
+		if (*turl & 0x80) {
+			n = snprintf(ttmp, len, "%%%2x", *turl);
+			len -= n;
+			++turl;
+			ttmp += 3;
+			did_something = 1;
+		} else {
+			*ttmp++ = *turl++;
+			--len;
+		}
+	}
+	*ttmp = 0;
+
+	if (did_something)
+		strcpy(url, tmp);
+
+	return url;
+}
+

@@ -193,3 +193,8 @@ int release_connection(struct connection *conn)
 }
 
 void free_cache() {}
+
+char *fixup_url(char *url, char *tmp, int len)
+{   /* curl deals with this */
+	return url;
+}
