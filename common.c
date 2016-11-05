@@ -279,6 +279,33 @@ char *create_outname(char *url)
 	return strcpy(outname, fname);
 }
 
+static char *fixup_url(char *url, char *tmp, int len)
+{
+	uint8_t *turl = (uint8_t *)url; /* must be unsigned */
+	char *ttmp = tmp;
+	int n, did_something = 0;
+
+	--len; /* leave room for NULL */
+	while (*turl && len > 0) {
+		if (*turl & 0x80) {
+			n = snprintf(ttmp, len, "%%%2x", *turl);
+			len -= n;
+			++turl;
+			ttmp += 3;
+			did_something = 1;
+		} else {
+			*ttmp++ = *turl++;
+			--len;
+		}
+	}
+	*ttmp = 0;
+
+	if (did_something)
+		strcpy(url, tmp);
+
+	return url;
+}
+
 static char *find_regexp(struct connection *conn, char *reg, int regsize)
 {
 	FILE *fp;
@@ -349,6 +376,9 @@ int process_html(struct connection *conn)
 	p = find_regexp(conn, regmatch, sizeof(regmatch));
 	if (p == NULL)
 		return 1;
+
+	/* imgurl just used as a tmp buffer */
+	p = fixup_url(regmatch, imgurl, sizeof(imgurl));
 
 #ifndef REUSE_SOCKET
 	/* We are done with this socket, but not this connection */
