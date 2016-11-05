@@ -82,7 +82,7 @@
   "days": "XmtwtfX"
 },
 { /* The Other End */
-  "url": "http://theotherendcomics.com",
+  "url": "http://www.kohney.com",
   "regexp": "http://i[0-9]\\.wp\\.com/www\\.kohney\\.com/wp-content/uploads/%Y/%m/[^.]+\\.jpg",
   "output": "otherend"
 },
