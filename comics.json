@@ -83,7 +83,7 @@
 },
 { /* The Other End */
   "url": "http://www.kohney.com",
-  "regexp": "http://i[0-9]\\.wp\\.com/www\\.kohney\\.com/wp-content/uploads/%Y/%m/[^.]+\\.jpg",
+  "regexp": "https?://i[0-9]\\.wp\\.com/www\\.kohney\\.com/wp-content/uploads/%Y/%m/[^.]+\\.jpg",
   "output": "otherend"
 },
 { /* Poorly Drawn Lines */
