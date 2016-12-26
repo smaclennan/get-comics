@@ -45,8 +45,8 @@ to the C version.
 get-comics 5
 ------------
 
-I am now using libcurl again. This time around it seems much more
-stable.
+It can now use libcurl again. This time around it seems much more
+stable. I still tend to use the non-curl version.
 
 Documentation
 -------------
