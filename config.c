@@ -27,6 +27,7 @@ static void new_comic(struct connection **conn)
 		*conn = must_alloc(sizeof(struct connection));
 		(*conn)->out = -1;
 		(*conn)->id = ++id;
+		(*conn)->days = 0x7f;
 	}
 }
 
@@ -41,7 +42,7 @@ static void sanity_check_comic(struct connection *new)
 	} else if (!new->host) {
 		printf("ERROR: comic with no host!\n");
 		exit(1);
-	} else if (new->days && (new->days & wday) == 0) {
+	} else if ((new->days & wday) == 0) {
 		if (verbose)
 			printf("Skipping: %s\n", new->url);
 		++skipped;
@@ -95,6 +96,7 @@ static void add_days(struct connection **conn, char *days)
 
 	new_comic(conn);
 
+	(*conn)->days = 0;
 	for (i = 0; *days && i < 7; ++days, ++i)
 		if (*days != 'X' && *days != 'x')
 			(*conn)->days |= 1 << i;
