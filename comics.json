@@ -4,13 +4,13 @@
 "comics": [
 
 { /* Bizarro via ArcaMax */
-  "url": "http://www.arcamax.com/thefunnies/bizarro/",
+  "url": "https://www.arcamax.com/thefunnies/bizarro/",
   "regexp": "/newspics/[a-z0-9]+/[0-9/]+\\.(jpg|gif)",
   "output": "bizarro",
   "days": "Xmtwtfs"
 },
 { /* Bizarro via ArcaMax - Sunday */
-  "url": "http://www.arcamax.com/thefunnies/bizarro/",
+  "url": "https://www.arcamax.com/thefunnies/bizarro/",
   "regexp": "/newspics/cache/[a-z0-9]+/[0-9/]+\\.(jpg|gif)",
   "output": "bizarro",
   "days": "sXXXXXX"
@@ -44,7 +44,7 @@
   "days": "XmtwtfX"
 },
 { /* Dilbert via ArcaMax */
-  "url": "http://www.arcamax.com/thefunnies/dilbert/",
+  "url": "https://www.arcamax.com/thefunnies/dilbert/",
   "regexp": "/newspics/[a-z0-9]+/[0-9/]+\\.(jpg|gif)",
   "output": "dilbert"
 },
@@ -119,7 +119,7 @@
   "output": "somethingp"
 },
 { /* Tinkersons */
-  "url": "http://www.arcamax.com/thefunnies/takeitfromthetinkersons/",
+  "url": "https://www.arcamax.com/thefunnies/takeitfromthetinkersons/",
   "regexp": "newspics/(cache/[a-z0-9]+/)?[0-9]+/[0-9]+/[0-9]+.(gif|jpg)",
   "output": "tinkersons"
 },
