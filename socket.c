@@ -114,16 +114,27 @@ void free_cache(void) {}
 
 #ifdef USE_CACHE
 static struct addrinfo *cache;
+
+/* Works for both ipv4 and ipv6 */
+struct sockaddr_both {
+	short            sin_family;
+	unsigned short   sin_port;
+};
 #endif
 
-static struct addrinfo *get_cache(char *hostname)
+static struct addrinfo *get_cache(char *hostname, char *port_str)
 {
 #ifdef USE_CACHE
 	struct addrinfo *r;
+	uint16_t port = htons(strtol(port_str, NULL, 10));
 
 	for (r = cache; r; r = r->ai_next)
-		if (strcmp(hostname, r->ai_canonname) == 0)
-			return r;
+		if (strcmp(hostname, r->ai_canonname) == 0) {
+			struct sockaddr_both *sa = (struct sockaddr_both *)r->ai_addr;
+
+			if (sa->sin_port == port)
+				return r;
+		}
 #endif
 
 	return NULL;
@@ -207,7 +218,7 @@ int connect_socket(struct connection *conn, char *hostname, char *port)
 	int sock = -1, deferred;
 	struct addrinfo hints, *result, *r;
 
-	r = get_cache(hostname);
+	r = get_cache(hostname, port);
 	if (r)
 		sock = try_connect(r, &deferred);
 
