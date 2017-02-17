@@ -64,7 +64,7 @@
   "url": "http://www.thefrumps.com",
   "regexp": "wp-content/uploads/%Y/%m/%Y-%m-%d-[^.]*\\.jpg",
   "output": "frumps",
-  "days": "XmXXtXX"
+  "days": "XXXXXXX"
 },
 { /*invisible bread */
   "url": "http://invisiblebread.com/",
@@ -100,7 +100,7 @@
 },
 { /* Red Meat */
   "url": "http://www.redmeat.com/max-cannon/FreshMeat",
-  "regexp": "http://[^/]+/redmeat/imager/u/redmeat/[^\"]*",
+  "regexp": "https?://[^/]+/redmeat/imager/u/redmeat/[^\"]*",
   "output": "redmeat",
   "days": "XXXXXfX"
 },
@@ -124,8 +124,8 @@
   "output": "tinkersons"
 },
 { /* xkcd */
-  "url": "http://xkcd.com/",
-  "regexp": "http://imgs.xkcd.com/comics/[^.]*\\.(jpg|png|gif)",
+  "url": "https://xkcd.com/",
+  "regexp": "https://imgs.xkcd.com/comics/[^.]*\\.(jpg|png|gif)",
   "output": "xkcd",
   "days": "XmXwXfX"
 },
