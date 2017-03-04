@@ -1,0 +1,4 @@
+Get-comics should compile straight out of the box on FreeBSD with one
+caveat: you have to use gmake. If you really want to use the BSD make,
+then just remove all the appropriate if/endif statements from the
+Makefile.
