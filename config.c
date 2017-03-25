@@ -119,9 +119,10 @@ static void add_regexp(struct connection **conn, char *regexp)
 static void add_regmatch(struct connection **conn, int match)
 {
 	new_comic(conn);
-	if (match >= MATCH_DEPTH)
+	if (match >= MATCH_DEPTH) {
 		printf("<regmatch> %d too big.\n", match);
-	else
+		exit(1);
+	} else
 		(*conn)->regmatch = match;
 }
 
