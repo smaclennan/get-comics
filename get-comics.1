@@ -151,6 +151,11 @@ prepend with the \fB<href>\fR tag.
 Some pages must see a referer to work. You can specify the referer
 here. You can also specify \fBurl\fR and the value from the
 \fB<url>\fR tag will be used.
+.TP
+.B insecure
+If you set insecure to non-zero, then curl will not verify the peer or
+the hostname. This is less secure, but might be needed for some
+comics.
 .SH "A NOTE ABOUT PROXIES"
 .PP
 get-comics supports accessing the comics via a proxy. There are three
