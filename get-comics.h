@@ -74,9 +74,10 @@ struct connection {
 	char *base_href;
 	char *referer; /* king features needs this */
 	unsigned days; /* bitmask */
-	int   gotit;
+	int gotit;
 	int reset;
 	int redirect_ok;
+	int insecure;
 
 	int connected;
 	int out;
@@ -163,7 +164,7 @@ static inline char *is_http(char *p)
 {
 	if (strncmp(p, "http://", 7) == 0)
 		return p + 7;
-#ifdef WANT_SSL
+#if defined(WANT_SSL) || defined(WANT_CURL)
 	if (strncmp(p, "https://", 8) == 0)
 		return p + 8;
 #endif

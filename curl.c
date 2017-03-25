@@ -106,8 +106,7 @@ void main_loop(void)
 	int i, running, msgs_left;
 	CURLMsg *msg;
 
-	/* For now do not enable SSL - make valgrind easier */
-	if (curl_global_init(0) || !(curlm = curl_multi_init())) {
+	if (curl_global_init(CURL_GLOBAL_DEFAULT) || !(curlm = curl_multi_init())) {
 		printf("Unable to initialize curl\n");
 		exit(1);
 	}
@@ -139,6 +138,14 @@ int build_request(struct connection *conn)
 	if (!(conn->curl = curl_easy_init())) {
 		printf("Unable to create curl context\n");
 		return -1;
+	}
+
+	if (conn->insecure && is_https(conn->url)) {
+		/* Skip peer validation and hostname validate. Less secure,
+		 * but we are getting comics.
+		 */
+		curl_easy_setopt(conn->curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(conn->curl, CURLOPT_SSL_VERIFYHOST, 0L);
 	}
 
 	curl_easy_setopt(conn->curl, CURLOPT_URL, conn->url);

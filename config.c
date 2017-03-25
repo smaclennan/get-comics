@@ -169,6 +169,11 @@ static void add_redirect_ok(struct connection **conn, int val)
 	(*conn)->redirect_ok = val;
 }
 
+static void add_insecure(struct connection **conn, int val)
+{
+	new_comic(conn);
+	(*conn)->insecure = val;
+}
 
 static void parse_top_str(char *key, char *val)
 {
@@ -235,6 +240,8 @@ static void parse_comic_int(struct connection **new, char *key, int val)
 		add_regmatch(new, val);
 	else if (strcmp(key, "redirect") == 0)
 		add_redirect_ok(new, val);
+	else if (strcmp(key, "insecure") == 0)
+		add_insecure(new, val);
 	else
 		printf("Unexpected entry %s\n", key);
 }
