@@ -81,7 +81,7 @@ find $PKG/usr/man -type f -exec gzip -9 {} \;
 for i in $( find $PKG/usr/man -type l ) ; do ln -s $( readlink $i ).gz $i.gz ; rm $i ; done
 
 mkdir -p $PKG/usr/doc/$PRGNAM-$VERSION
-cp -a COPYING README* get-today $PKG/usr/doc/$PRGNAM-$VERSION
+cp -a COPYING README* $PKG/usr/doc/$PRGNAM-$VERSION
 man2html $CWD/get-comics.1 > $PKG/usr/doc/$PRGNAM-$VERSION/get-comics.html
 cat $CWD/$PRGNAM.SlackBuild > $PKG/usr/doc/$PRGNAM-$VERSION/$PRGNAM.SlackBuild
 

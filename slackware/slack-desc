@@ -7,6 +7,6 @@ get-comics: vacation and computerless.
 get-comics:
 get-comics: get-comics uses an JSON file to describe how to download the comics.
 get-comics:
-get-comics: get-today is a small shell script that puts all the days comics in a
-get-comics: subdirectory based on the date. It then builds an index.html of the
-get-comics: comics. It is here as a sample only.
+get-comics:
+get-comics:
+get-comics:

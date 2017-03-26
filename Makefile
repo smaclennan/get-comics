@@ -120,7 +120,7 @@ get-comics.html: get-comics.1
 check:
 	sparse get-comics.c $(CFILES) config.c my-parser.c
 
-tarball: COPYING Makefile README* *.[ch] get-today get-comics.1 comics.json
+tarball: COPYING Makefile README* *.[ch] get-comics.1 comics.json
 	mkdir get-comics-$(VERSION)
 	cp $+ get-comics-$(VERSION)
 	tar zcf slackware/get-comics-$(VERSION).tar.gz get-comics-$(VERSION)
