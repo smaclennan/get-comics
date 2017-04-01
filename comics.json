@@ -92,6 +92,12 @@
   "output": "pdl",
   "days": "XXtXtXs"
 },
+{ /* Puck */
+  "url": "http://www.puckcomics.com/",
+  "regexp": "wp-content/uploads/%Y/%m/puck-[0-9]+\.jpg",
+  "output": "puck",
+  "days": "smtwtfs"
+},
 { /* Questionable Content */
   "url": "http://www.questionablecontent.net",
   "regexp": "http://www.questionablecontent.net/comics/[0-9]*\\.(png|gif|jpg)",
