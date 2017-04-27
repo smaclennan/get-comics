@@ -12,12 +12,12 @@ enum states {
 	J_END,
 	J_DONE,
 	J_FAILED,
-	J_C1,
-	J_C2,
-	J_C3
+	J_COMMENT,
 };
 
 typedef struct JSON_parser_struct {
+	FILE *fp;
+
 	JSON_parser_callback callback;
 	void *callback_ctx;
 
@@ -31,8 +31,9 @@ typedef struct JSON_parser_struct {
 	/* JSON_T_INTEGER only */
 	int integer;
 
-	/* J_Cn states only */
+	/* J_COMMENT only */
 	enum states start_state;
+	int nested;
 
 	/* sanity checking */
 	int in_array;
@@ -40,6 +41,19 @@ typedef struct JSON_parser_struct {
 } *JSON_parser;
 
 static struct JSON_parser_struct JC;
+
+static inline int get_char(JSON_parser jc)
+{
+	return fgetc(jc->fp);
+}
+
+/* Only one level of peek */
+static inline int peek_char(JSON_parser jc)
+{
+	int ch = fgetc(jc->fp);
+	ungetc(ch, jc->fp);
+	return ch;
+}
 
 static void new_state(JSON_parser jc, enum states new)
 {
@@ -62,6 +76,14 @@ static void new_state(JSON_parser jc, enum states new)
 		jc->next_state = next_statein;	\
 	} while (0)
 
+static void start_comment(JSON_parser jc)
+{
+	get_char(jc);
+	jc->start_state = jc->state;
+	new_state(jc, J_COMMENT);
+	jc->nested = 1;
+}
+
 static int JSON_parser_char(JSON_parser jc, int next_char)
 {
 	JSON_value value;
@@ -77,20 +99,18 @@ static int JSON_parser_char(JSON_parser jc, int next_char)
 			jc->callback(jc->callback_ctx, JSON_T_ARRAY_END, NULL);
 		} else if (next_char == '}')
 			LEAVE_OBJECT(J_DONE);
-		else if (next_char == '/') {
-			jc->start_state = J_START;
-			new_state(jc, J_C1);
-		} else if (!isspace(next_char))
+		else if (next_char == '/' && peek_char(jc) == '*')
+			start_comment(jc);
+		else if (!isspace(next_char))
 			goto failed;
 		break;
 
 	case J_KEY_START:
 		if (next_char == '"')
 			STRING_OBJ(JSON_T_KEY, J_COLON);
-		else if (next_char == '/') {
-			jc->start_state = J_KEY_START;
-			new_state(jc, J_C1);
-		} else if (next_char == '}') /* empty object allowed */
+		else if (next_char == '/' && peek_char(jc) == '*')
+			start_comment(jc);
+		else if (next_char == '}') /* empty object allowed */
 			LEAVE_OBJECT(J_START);
 		else if (!isspace(next_char))
 			goto failed;
@@ -124,23 +144,15 @@ static int JSON_parser_char(JSON_parser jc, int next_char)
 		}
 		break;
 
-	case J_C1:
-		if (next_char == '*')
-			new_state(jc, J_C2);
-		else
-			goto failed;
-		break;
-
-	case J_C2:
-		if (next_char == '*')
-			new_state(jc, J_C3);
-		break;
-
-	case J_C3:
-		if (next_char == '/')
-			new_state(jc, jc->start_state);
-		else
-			new_state(jc, J_C2);
+	case J_COMMENT:
+		if (next_char == '*' && peek_char(jc) == '/') {
+			get_char(jc);
+			if (--jc->nested <= 0)
+				new_state(jc, jc->start_state);
+		} else if (next_char == '/' && peek_char(jc) == '*') {
+			get_char(jc);
+			jc->nested++;
+		}
 		break;
 
 	case J_COLON:
@@ -210,14 +222,14 @@ int JSON_parse_file(const char *fname, JSON_parser_callback callback, void *call
 	JC.callback = callback;
 	JC.callback_ctx = callback_ctx;
 
-	FILE *fp = fopen(fname, "r");
-	if (!fp) {
+	JC.fp = fopen(fname, "r");
+	if (!JC.fp) {
 		my_perror((char *)fname);
 		return -1;
 	}
 
 	int count = 0, next_char;
-	while ((next_char = fgetc(fp)) > 0) {
+	while ((next_char = get_char(&JC)) > 0) {
 		++count;
 		if (!JSON_parser_char(&JC, next_char)) {
 			printf("JSON_parser: syntax error byte %d\n", count);
@@ -226,7 +238,7 @@ int JSON_parse_file(const char *fname, JSON_parser_callback callback, void *call
 		}
 	}
 
-	fclose(fp);
+	fclose(JC.fp);
 
 	int rc = JC.state == J_DONE ? 0 : 1;
 	if (rc)
