@@ -31,6 +31,9 @@ typedef struct JSON_parser_struct {
 	/* JSON_T_INTEGER only */
 	int integer;
 
+	/* J_Cn states only */
+	enum states start_state;
+
 	/* sanity checking */
 	int in_array;
 	int in_object;
@@ -74,16 +77,20 @@ static int JSON_parser_char(JSON_parser jc, int next_char)
 			jc->callback(jc->callback_ctx, JSON_T_ARRAY_END, NULL);
 		} else if (next_char == '}')
 			LEAVE_OBJECT(J_DONE);
-		else if (!isspace(next_char))
+		else if (next_char == '/') {
+			jc->start_state = J_START;
+			new_state(jc, J_C1);
+		} else if (!isspace(next_char))
 			goto failed;
 		break;
 
 	case J_KEY_START:
 		if (next_char == '"')
 			STRING_OBJ(JSON_T_KEY, J_COLON);
-		else if (next_char == '/')
+		else if (next_char == '/') {
+			jc->start_state = J_KEY_START;
 			new_state(jc, J_C1);
-		else if (next_char == '}') /* empty object allowed */
+		} else if (next_char == '}') /* empty object allowed */
 			LEAVE_OBJECT(J_START);
 		else if (!isspace(next_char))
 			goto failed;
@@ -131,11 +138,10 @@ static int JSON_parser_char(JSON_parser jc, int next_char)
 
 	case J_C3:
 		if (next_char == '/')
-			new_state(jc, J_KEY_START);
+			new_state(jc, jc->start_state);
 		else
 			new_state(jc, J_C2);
 		break;
-
 
 	case J_COLON:
 		if (next_char == ':')
