@@ -66,11 +66,13 @@
   "output": "frumps",
   "days": "XXXXXXX"
 },
-{ /*invisible bread */
+/*
+{ *invisible bread *
   "url": "http://invisiblebread.com/",
   "regexp": "comics/[0-9a-zA-Z-]+.(png|gif)",
   "output": "invisiblebread"
 },
+*/
 { /* Kevin and Kell */
   "url": "http://www.kevinandkell.com/%Y/strips/kk%Y%m%d.jpg",
   "output": "kandk"
