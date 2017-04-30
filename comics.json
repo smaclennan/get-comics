@@ -112,10 +112,12 @@
   "output": "redmeat",
   "days": "XXXXXfX"
 },
+/*
 { /* Sinfest */
   "url": "http://www.sinfest.net/btphp/comics/%Y-%m-%d.gif",
   "output": "sinfest"
 },
+*/
 { /* SMBC */
   "url": "http://www.smbc-comics.com/",
   "regexp": "comics/[0-9 ()-]+\.png",
