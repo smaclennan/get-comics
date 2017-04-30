@@ -118,7 +118,7 @@ get-comics.html: get-comics.1
 	man2html get-comics.1 > get-comics.html
 
 check:
-	sparse get-comics.c $(CFILES) config.c my-parser.c
+	sparse $(CFLAGS) get-comics.c $(CFILES) config.c my-parser.c
 
 tarball: COPYING Makefile README* *.[ch] get-comics.1 comics.json
 	mkdir get-comics-$(VERSION)

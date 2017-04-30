@@ -16,7 +16,7 @@ static void print_errors(void)
 		printf("OpenSSL: %s\n", ERR_error_string(err, NULL));
 }
 
-static int openssl_init()
+static int openssl_init(void)
 {
 	if (ssl_ctx)
 		return 0;

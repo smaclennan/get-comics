@@ -199,7 +199,7 @@ int release_connection(struct connection *conn)
 	return 0;
 }
 
-void free_cache() {}
+void free_cache(void) {}
 
 char *fixup_url(char *url, char *tmp, int len)
 {   /* curl deals with this */
