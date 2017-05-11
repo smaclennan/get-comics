@@ -118,11 +118,13 @@
   "output": "sinfest"
 },
 */
+/*
 { /* SMBC */
   "url": "http://www.smbc-comics.com/",
   "regexp": "comics/[0-9 ()-]+\.png",
   "output": "smbc"
 },
+*/
 { /* Something Positive */
   "url": "http://www.somethingpositive.net/",
   "regexp": "sp[0-9]*\\.png",
