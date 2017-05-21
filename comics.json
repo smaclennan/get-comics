@@ -49,8 +49,8 @@
   "output": "dilbert"
 },
 { /* Extra Fabulous Comics */
-  "url": "http://extrafabulouscomics.com/",
-  "regexp": "src=\"http://extrafabulouscomics.com/(wp-content/uploads/[^\"]*)",
+  "url": "http://www.extrafabulouscomics.com/",
+  "regexp": "src=\"http://www.extrafabulouscomics.com/(wp-content/uploads/[^\"]*)",
   "regmatch": 1,
   "output": "extrafab"
 },
