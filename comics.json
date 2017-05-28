@@ -22,7 +22,7 @@
 },
 { /* Channelate */
   "url": "http://www.channelate.com/",
-  "regexp": "comics/.*\\.png",
+  "regexp": "comics/.*\\.(png|gif)",
   "output": "channelate"
 },
 { /* Cyanide & Happiness */
