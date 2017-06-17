@@ -64,6 +64,7 @@ struct log {
 
 struct connection {
 	int id; /* for debugging */
+	int out;
 	char *url;
 	char *host; /* filled by read_config */
 	char *regexp;
@@ -80,7 +81,6 @@ struct connection {
 	int insecure;
 
 	int connected;
-	int out;
 	time_t access;
 
 #ifdef WANT_CURL
@@ -90,14 +90,13 @@ struct connection {
 #endif
 #else
 	struct pollfd *poll;
-
 	char *buf;
-	int  rlen;
 	char *curp; /* for chunking */
 	char *endp; /* for chunking */
 	z_stream *zs; /* for gzip */
 	unsigned char *zs_buf; /* for gzip */
 	int  length; /* content length if available */
+	int  rlen;
 	enum {
 		CS_NONE,
 		CS_START_CR,
