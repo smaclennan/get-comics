@@ -243,5 +243,7 @@ int main(int argc, char *argv[])
 	free_comics(); /* for valgrind */
 	if (debug_fp)
 		fclose(debug_fp);
-	return 0;
+
+	/* Return 0 only if we got all comics */
+	return gotit != n_comics;
 }
