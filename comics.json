@@ -96,7 +96,7 @@
 },
 { /* Puck */
   "url": "http://www.puckcomics.com/",
-  "regexp": "wp-content/uploads/%Y/[0-1][0-9]/puck-[0-9]+\.jpg",
+  "regexp": "wp-content/uploads/%Y/[0-1][0-9]/puck-[0-9]+\.(jpg|png)",
   "output": "puck",
   "days": "XXtXXXX"
 },
