@@ -48,12 +48,6 @@
   "regexp": "/newspics/[a-z0-9]+/[0-9/]+\\.(jpg|gif)",
   "output": "dilbert"
 },
-{ /* Extra Fabulous Comics */
-  "url": "http://www.extrafabulouscomics.com/",
-  "regexp": "src=\"http://www.extrafabulouscomics.com/(wp-content/uploads/[^\"]*)",
-  "regmatch": 1,
-  "output": "extrafab"
-},
 /*
 { /* Freefall */
   "url": "http://freefall.purrsia.com/",
