@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, os, re, json, threading, requests, argparse, time
+import sys, os, re, json, threading, requests, argparse, time, random
 from datetime import date
 
 comment_re = re.compile(r"/\*(.*?)\*/")
@@ -128,20 +128,28 @@ def stage2 (comic, match):
     outfile(comic, r.content)
 
 def comic_thread (comic):
+    global sema
+
     r = requests.get(comic.url)
-    if r.status_code != 200:
-        print "Error:" + comic.url + " " + str(r.status_code)
-        return
-
-    if comic.regexp:
-        m = re.search(comic.regexp, r.text)
-        if m:
-            stage2(comic, m)
+    if r.status_code == 200:
+        if comic.regexp:
+            m = re.search(comic.regexp, r.text)
+            if m:
+                stage2(comic, m)
+            else:
+                print comic.url + " did not match regexp"
         else:
-            print comic.url + " did not match regexp"
+            outfile(comic, r.content)
     else:
-        outfile(comic, r.content)
+        print "Error:" + comic.url + " " + str(r.status_code)
 
+    sema.release()
+
+def comic_thread2 (comic): # Dummy version for testing
+    global sema
+
+    time.sleep(random.randint(1, 4))
+    sema.release()
 
 ### Main
 
@@ -160,8 +168,12 @@ if os.path.isdir(comics_dir) == None:
     print "ERROR: " + comics_dir + " does not exist"
     sys.exit(1)
 
+# We use a semaphore to limit the number of outstanding threads
+sema = threading.Semaphore(nthreads)
+
 for comic in comics:
     if comic.skip == False:
+        sema.acquire()
         thread = threading.Thread(target=comic_thread, args=(comic, ))
         threads.append(thread)
         print "Starting " + thread.name + " " + comic.url # SAM DBG
