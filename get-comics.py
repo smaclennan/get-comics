@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-import sys, os, re, json, threading, requests, argparse
+import sys, os, re, json, threading, requests, argparse, time
+from datetime import date
 
 comment_re = re.compile(r"/\*(.*?)\*/")
 multi_comment_re = re.compile(r"/\*(.*?)\*/", re.DOTALL)
@@ -13,6 +14,7 @@ threads = list()
 
 class Comic:
     gocomics_regexp = None
+    today = 0
 
     def __init__(self):
         self.url = None
@@ -22,9 +24,11 @@ class Comic:
         self.outname = None
         self.base_href = None
         self.referer = None
+        self.skip = False
 
     def add_days(self, days):
-        print("Warning: days not supported yet")
+        if days[Comic.today] == 'X':
+            self.skip = True
 
     def add_gocomic(self, comic):
         if self.gocomics_regexp == None:
@@ -92,6 +96,10 @@ def read_config (fname):
     try: Comic.gocomics_regexp = data['gocomics-regexp']
     except: pass
 
+    # Get the weekday and make Sunday 0
+    Comic.today = date.today().weekday() + 1
+    if Comic.today == 7: Comic.today = 0
+
     for each in data:
         if each == 'comics':
             for comic in data['comics']:
@@ -153,11 +161,13 @@ if os.path.isdir(comics_dir) == None:
     sys.exit(1)
 
 for comic in comics:
-    thread = threading.Thread(target=comic_thread, args=(comic, ))
-    threads.append(thread)
-    print "Starting " + thread.name + " " + comic.url # SAM DBG
-    thread.start()
+    if comic.skip == False:
+        thread = threading.Thread(target=comic_thread, args=(comic, ))
+        threads.append(thread)
+        print "Starting " + thread.name + " " + comic.url # SAM DBG
+        thread.start()
 
 for thread in threads:
-    thread.join()
-    print "Done " + thread.name # SAM DBG
+    if comic.skip == False:
+        thread.join()
+        print "Done " + thread.name # SAM DBG
