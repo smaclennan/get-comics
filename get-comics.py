@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
-import sys, re, json, threading, requests
+import sys, os, re, json, threading, requests, argparse
 
 comment_re = re.compile(r"/\*(.*?)\*/")
 multi_comment_re = re.compile(r"/\*(.*?)\*/", re.DOTALL)
+
+comics_dir = None
 
 comics = list()
 nthreads = 10
@@ -72,6 +74,8 @@ def parse_comic (comic):
             print("Unexpected key " + each)
 
 def read_config (fname):
+    global comics_dir
+
     try:
         fp = open(fname)
         data = fp.read()
@@ -95,12 +99,14 @@ def read_config (fname):
                     parse_comic(comic)
         elif each == 'threads':
             nthreads = data['threads']
+        elif each == 'directory':
+            comics_dir = data['directory']
         elif each != 'gocomics-regexp':
             print "WARNING: " + str(each)
 
 def outfile (comic, text):
     try:
-        fp = open(comic.outname, 'w')
+        fp = open(comics_dir + '/' + comic.outname, 'w')
         fp.write(text)
         fp.close()
     except Exception,e:
@@ -129,9 +135,22 @@ def comic_thread (comic):
         outfile(comic, r.content)
 
 
-### Main loop
+### Main
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', metavar='directory', help='comics directory')
+args = parser.parse_args()
 
 read_config("/tmp/comics.json")
+
+# Setup comics_dir and make sure it exists
+if args.d:
+    comics_dir = args.d
+elif comics_dir == None:
+    comics_dir = os.getenv('HOME') + '/comics'
+if os.path.isdir(comics_dir) == None:
+    print "ERROR: " + comics_dir + " does not exist"
+    sys.exit(1)
 
 for comic in comics:
     thread = threading.Thread(target=comic_thread, args=(comic, ))
