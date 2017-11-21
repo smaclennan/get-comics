@@ -14,6 +14,7 @@ threads = list()
 
 class Comic:
     gocomics_regexp = None
+    weekday = 0
     today = 0
 
     def __init__(self):
@@ -22,12 +23,22 @@ class Comic:
         self.regexp = None
         self.regmatch = 0
         self.outname = None
-        self.base_href = None
+        self.base_href = None # Unused
         self.referer = None
         self.skip = False
 
+    def add_url(self, url):
+        self.url = time.strftime(url, Comic.today)
+        m = re.match(r"https?://([^/]+)", url)
+        if m:
+            self.host = m.group(1)
+        else:
+            self.host = ""
+            print "ERROR: Unable to isolate host: " + url
+        print url + " -> " + self.url + " (" + self.host + ")" # SAM DBG
+
     def add_days(self, days):
-        if days[Comic.today] == 'X':
+        if days[Comic.weekday] == 'X':
             self.skip = True
 
     def add_gocomic(self, comic):
@@ -61,7 +72,7 @@ def parse_comic (comic):
     comics.append(new_comic)
     for each in comic:
         if each == 'url':
-            new_comic.url = comic['url']
+            new_comic.add_url(comic['url'])
         elif each == 'days':
             new_comic.add_days(comic['days'])
         elif each == 'regexp':
@@ -97,8 +108,9 @@ def read_config (fname):
     except: pass
 
     # Get the weekday and make Sunday 0
-    Comic.today = date.today().weekday() + 1
-    if Comic.today == 7: Comic.today = 0
+    Comic.today = time.localtime();
+    Comic.weekday = date.today().weekday() + 1
+    if Comic.weekday == 7: Comic.weekday = 0
 
     for each in data:
         if each == 'comics':
@@ -158,6 +170,8 @@ parser.add_argument('-d', metavar='directory', help='comics directory')
 args = parser.parse_args()
 
 read_config("/tmp/comics.json")
+
+sys.exit(42)
 
 # Setup comics_dir and make sure it exists
 if args.d:
