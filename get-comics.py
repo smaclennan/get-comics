@@ -267,6 +267,8 @@ if not os.path.isdir(index_dir):
 
 if args.c:
     clean_directory(comics_dir)
+    if args.i:
+        clean_directory(index_dir)
 
 if args.l:
     try:
