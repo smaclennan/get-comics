@@ -16,6 +16,8 @@ multi_comment_re = re.compile(r"/\*(.*?)\*/", re.DOTALL)
 
 comics_dir = None
 index_dir = None
+links_only = None
+links_lock = None
 
 comics = list()
 nthreads = 10
@@ -89,6 +91,8 @@ def parse_comic (comic):
             new_comic.add_days(comic['days'])
         elif each == 'regexp':
             new_comic.add_regexp(comic['regexp'])
+        elif each == 'regmatch':
+            new_comic.regmatch = comic['regmatch']
         elif each == 'output':
             new_comic.outname = comic['output']
         elif each == 'referer':
@@ -187,6 +191,12 @@ def stage2 (comic, url):
     else:
         url = comic.host + "/" + url
 
+    if links_only:
+        links_lock.acquire()
+        links_only.write(url + '\n')
+        links_lock.release()
+        return
+
     r = requests.get(url)
     if r.status_code != 200:
         print "Error:" + url + " " + str(r.status_code)
@@ -207,6 +217,10 @@ def comic_thread (comic):
                 # Save the file for debugging
                 comic.outname = comic.outname + ".html"
                 outfile(comic, r.text.encode('ascii', 'ignore'), False, index_dir)
+        elif links_only:
+            links_lock.acquire()
+            links_only.write(comic.url + '\n')
+            links_lock.release()
         else:
             outfile(comic, r.content)
     else:
@@ -226,6 +240,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-c', action='store_true', help='clean comics directory')
 parser.add_argument('-d', metavar='comics dir', help='comics directory')
 parser.add_argument('-i', metavar='index dir', help='index directory')
+parser.add_argument('-l', metavar='links file', help='links file')
 parser.add_argument('-v', action='count', help='verbose')
 parser.add_argument('config', nargs='?', help='config file', default="/usr/share/get-comics/comics.json")
 args = parser.parse_args()
@@ -253,6 +268,14 @@ if not os.path.isdir(index_dir):
 if args.c:
     clean_directory(comics_dir)
 
+if args.l:
+    try:
+        links_only = open(args.l, 'w');
+    except Exception,e:
+        print str(e.args[1]) + ": " + args.l
+        sys.exit(1)
+    links_lock = threading.Lock()
+
 # We use a semaphore to limit the number of outstanding threads
 sema = threading.Semaphore(nthreads)
 
@@ -268,3 +291,6 @@ for thread in threads:
     if comic.skip == False:
         thread.join()
         if args.v: print "Done " + thread.name
+
+if links_only:
+    links_only.close()
