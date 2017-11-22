@@ -199,18 +199,19 @@ def comic_thread2 (comic): # Dummy version for testing
 ### Main
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', metavar='directory', help='comics directory')
-parser.add_argument('-v', help='verbose')
+parser.add_argument('-d', metavar='comics dir', help='comics directory')
+parser.add_argument('-v', action='count', help='verbose')
+parser.add_argument('config', nargs='?', help='config file', default="/usr/share/get-comics/comics.json")
 args = parser.parse_args()
 
-read_config("/tmp/comics.json")
+read_config(args.config)
 
 # Setup comics_dir and make sure it exists
 if args.d:
     comics_dir = args.d
 elif comics_dir == None:
     comics_dir = os.getenv('HOME') + '/comics'
-if os.path.isdir(comics_dir) == None:
+if not os.path.isdir(comics_dir):
     print "ERROR: " + comics_dir + " does not exist"
     sys.exit(1)
 
