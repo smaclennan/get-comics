@@ -7,6 +7,7 @@ comment_re = re.compile(r"/\*(.*?)\*/")
 multi_comment_re = re.compile(r"/\*(.*?)\*/", re.DOTALL)
 
 comics_dir = None
+index_dir = None
 
 comics = list()
 nthreads = 10
@@ -152,15 +153,19 @@ def clean_directory (dir):
         if os.path.splitext(file)[1] in file_exts:
             os.remove(comics_dir + '/' + file)
         else:
-            print 'Skipping ' + file
+            print 'Warning: Not cleaning ' + file
 
-def outfile (comic, text, addext = True):
+def outfile (comic, text, addext = True, dir = None):
+    global comics_dir
+
+    if dir == None: dir = comics_dir
+
     if addext:
         ext = lazy_imgtype(text)
     else:
         ext = ""
     try:
-        fp = open(comics_dir + '/' + comic.outname + ext, 'w')
+        fp = open(dir + '/' + comic.outname + ext, 'w')
         fp.write(text)
         fp.close()
     except Exception,e:
@@ -193,7 +198,7 @@ def comic_thread (comic):
                 print "ERROR: " + comic.url + " did not match regexp"
                 # Save the file for debugging
                 comic.outname = comic.outname + ".html"
-                outfile(comic, r.text.encode('ascii', 'ignore'), False)
+                outfile(comic, r.text.encode('ascii', 'ignore'), False, index_dir)
         else:
             outfile(comic, r.content)
     else:
@@ -212,6 +217,7 @@ def comic_thread2 (comic): # Dummy version for testing
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', action='store_true', help='clean comics directory')
 parser.add_argument('-d', metavar='comics dir', help='comics directory')
+parser.add_argument('-i', metavar='index dir', help='index directory')
 parser.add_argument('-v', action='count', help='verbose')
 parser.add_argument('config', nargs='?', help='config file', default="/usr/share/get-comics/comics.json")
 args = parser.parse_args()
@@ -225,6 +231,15 @@ elif comics_dir == None:
     comics_dir = os.getenv('HOME') + '/comics'
 if not os.path.isdir(comics_dir):
     print "ERROR: " + comics_dir + " does not exist"
+    sys.exit(1)
+
+# Setup index_dir and make sure it exists
+if args.i:
+    index_dir = args.i
+else:
+    index_dir = comics_dir
+if not os.path.isdir(index_dir):
+    print "ERROR: " + index_dir + " does not exist"
     sys.exit(1)
 
 if args.c:
