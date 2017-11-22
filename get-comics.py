@@ -16,26 +16,29 @@ class Comic:
     gocomics_regexp = None
     weekday = 0
     today = 0
+    __id = 0
 
     def __init__(self):
         self.url = None
         self.host = None
         self.regexp = None
         self.regmatch = 0
-        self.outname = None
-        self.base_href = None # Unused
-        self.referer = None
         self.skip = False
+        # Make sure every comic has an outname
+        self.outname = "comic" + str(Comic.__id)
+        Comic.__id = Comic.__id + 1
 
     def add_url(self, url):
         self.url = time.strftime(url, Comic.today)
-        m = re.match(r"https?://([^/]+)", url)
+        m = re.match(r"(https?://[^/]+)", url)
         if m:
             self.host = m.group(1)
         else:
             self.host = ""
             print "ERROR: Unable to isolate host: " + url
-        print url + " -> " + self.url + " (" + self.host + ")" # SAM DBG
+
+    def add_regexp(self, regexp):
+        self.regexp = time.strftime(regexp, Comic.today)
 
     def add_days(self, days):
         if days[Comic.weekday] == 'X':
@@ -76,13 +79,11 @@ def parse_comic (comic):
         elif each == 'days':
             new_comic.add_days(comic['days'])
         elif each == 'regexp':
-            new_comic.regexp = comic['regexp']
+            new_comic.add_regexp(comic['regexp'])
         elif each == 'output':
-            new_comic.output = comic['output']
-        elif each == 'href':
-            new_comic.href = comic['href']
+            new_comic.outname = comic['output']
         elif each == 'referer':
-            new_comic.referer = comic['referer']
+            pass
         elif each == 'gocomic':
             new_comic.add_gocomic(comic['gocomic'])
         else:
@@ -124,18 +125,50 @@ def read_config (fname):
         elif each != 'gocomics-regexp':
             print "WARNING: " + str(each)
 
-def outfile (comic, text):
+# SAM use dictionary?
+def lazy_imgtype (content):
+    # print ':'.join(x.encode('hex') for x in content[0:4])
+    # print content[0:4]
+    if content[0:4] == 'GIF8':
+        return '.gif'
+    if content[0:4] == '\x89PNG':
+        return '.png'
+    if content[0:4] == '\xff\xd8\xff\xe0': # jfif
+        return '.jpg'
+    if content[0:4] == '\xff\xd8\xff\xe1': # exif
+        return '.jpg'
+    if content[0:4] == '\xff\xd8\xff\xee': # Adobe
+        return '.jpg'
+    if content[0:4] == 'II\x42\0': # little endian
+        return '.tif'
+    if content[0:4] == 'MM\0\x42': # little endian
+        return '.tif'
+    return '.xxx'
+
+
+def outfile (comic, text, addext = True):
+    if addext:
+        ext = lazy_imgtype(text)
+    else:
+        ext = ""
     try:
-        fp = open(comics_dir + '/' + comic.outname, 'w')
+        fp = open(comics_dir + '/' + comic.outname + ext, 'w')
         fp.write(text)
         fp.close()
     except Exception,e:
         print str(e.args[1]) + ": " + comic.outname
 
-def stage2 (comic, match):
-    r = requests.get(match.group(comic.regmatch))
+def stage2 (comic, url):
+    if url.startswith("http"):
+        pass
+    elif url.startswith("//"):
+        url = "http:" + url
+    else:
+        url = comic.host + "/" + url
+
+    r = requests.get(url)
     if r.status_code != 200:
-        print "Error:" + comic.url + " " + str(r.status_code)
+        print "Error:" + url + " " + str(r.status_code)
         return
     outfile(comic, r.content)
 
@@ -147,9 +180,12 @@ def comic_thread (comic):
         if comic.regexp:
             m = re.search(comic.regexp, r.text)
             if m:
-                stage2(comic, m)
+                stage2(comic, m.group(comic.regmatch))
             else:
-                print comic.url + " did not match regexp"
+                print "ERROR: " + comic.url + " did not match regexp"
+                # Save the file for debugging
+                comic.outname = comic.outname + ".html"
+                outfile(comic, r.text.encode('ascii', 'ignore'), False)
         else:
             outfile(comic, r.content)
     else:
@@ -170,8 +206,6 @@ parser.add_argument('-d', metavar='directory', help='comics directory')
 args = parser.parse_args()
 
 read_config("/tmp/comics.json")
-
-sys.exit(42)
 
 # Setup comics_dir and make sure it exists
 if args.d:
