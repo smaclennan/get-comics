@@ -159,11 +159,9 @@ def lazy_imgtype (content):
     except: return '.xxx'
 
 def clean_directory (dir):
-    global comics_dir
-
     for file in os.listdir(dir):
         if os.path.splitext(file)[1] in file_exts:
-            os.remove(comics_dir + '/' + file)
+            os.remove(dir + '/' + file)
         else:
             print 'Warning: Not cleaning ' + file
 
