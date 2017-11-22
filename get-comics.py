@@ -1,7 +1,15 @@
 #!/usr/bin/python
 
-import sys, os, re, json, threading, requests, argparse, time, random
+import sys, os, re, json, threading, argparse, time, random
 from datetime import date
+
+# You probably don't have requests. First make sure you have pip, if not:
+#    sudo python -m ensurepip
+# Then grab requests and install it:
+#    git clone git://github.com/requests/requests.git
+#    cd requests
+#    sudo pip install .
+import requests
 
 comment_re = re.compile(r"/\*(.*?)\*/")
 multi_comment_re = re.compile(r"/\*(.*?)\*/", re.DOTALL)
