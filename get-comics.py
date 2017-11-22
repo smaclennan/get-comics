@@ -134,6 +134,8 @@ imgtype = { 'GIF8':             '.gif',
             'MM\0\x42':         '.tif' # little endian
             }
 
+file_exts = { '.gif', '.png', '.jpg', '.tif', '.xxx', '.html' }
+
 # This is a very lazy checking heuristic since we expect the files to
 # be one of the four formats and well formed. Yes, Close To Home
 # actually used TIFF. TIFF is only tested on little endian machines.
@@ -142,6 +144,15 @@ def lazy_imgtype (content):
     # print content[0:4]
     try: return imgtype[content[0:4]]
     except: return '.xxx'
+
+def clean_directory (dir):
+    global comics_dir
+
+    for file in os.listdir(dir):
+        if os.path.splitext(file)[1] in file_exts:
+            os.remove(comics_dir + '/' + file)
+        else:
+            print 'Skipping ' + file
 
 def outfile (comic, text, addext = True):
     if addext:
@@ -199,6 +210,7 @@ def comic_thread2 (comic): # Dummy version for testing
 ### Main
 
 parser = argparse.ArgumentParser()
+parser.add_argument('-c', action='store_true', help='clean comics directory')
 parser.add_argument('-d', metavar='comics dir', help='comics directory')
 parser.add_argument('-v', action='count', help='verbose')
 parser.add_argument('config', nargs='?', help='config file', default="/usr/share/get-comics/comics.json")
@@ -214,6 +226,9 @@ elif comics_dir == None:
 if not os.path.isdir(comics_dir):
     print "ERROR: " + comics_dir + " does not exist"
     sys.exit(1)
+
+if args.c:
+    clean_directory(comics_dir)
 
 # We use a semaphore to limit the number of outstanding threads
 sema = threading.Semaphore(nthreads)
