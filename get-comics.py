@@ -125,26 +125,23 @@ def read_config (fname):
         elif each != 'gocomics-regexp':
             print "WARNING: " + str(each)
 
-# SAM use dictionary?
+imgtype = { 'GIF8':             '.gif',
+            '\x89PNG':          '.png',
+            '\xff\xd8\xff\xe0': '.jpg', # jfif
+            '\xff\xd8\xff\xe1': '.jpg', # exif
+            '\xff\xd8\xff\xee': '.jpg', # Adobe
+            'II\x42\0':         '.tif', # little endian
+            'MM\0\x42':         '.tif' # little endian
+            }
+
+# This is a very lazy checking heuristic since we expect the files to
+# be one of the four formats and well formed. Yes, Close To Home
+# actually used TIFF. TIFF is only tested on little endian machines.
 def lazy_imgtype (content):
     # print ':'.join(x.encode('hex') for x in content[0:4])
     # print content[0:4]
-    if content[0:4] == 'GIF8':
-        return '.gif'
-    if content[0:4] == '\x89PNG':
-        return '.png'
-    if content[0:4] == '\xff\xd8\xff\xe0': # jfif
-        return '.jpg'
-    if content[0:4] == '\xff\xd8\xff\xe1': # exif
-        return '.jpg'
-    if content[0:4] == '\xff\xd8\xff\xee': # Adobe
-        return '.jpg'
-    if content[0:4] == 'II\x42\0': # little endian
-        return '.tif'
-    if content[0:4] == 'MM\0\x42': # little endian
-        return '.tif'
-    return '.xxx'
-
+    try: return imgtype[content[0:4]]
+    except: return '.xxx'
 
 def outfile (comic, text, addext = True):
     if addext:
@@ -203,6 +200,7 @@ def comic_thread2 (comic): # Dummy version for testing
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', metavar='directory', help='comics directory')
+parser.add_argument('-v', help='verbose')
 args = parser.parse_args()
 
 read_config("/tmp/comics.json")
@@ -224,10 +222,10 @@ for comic in comics:
         sema.acquire()
         thread = threading.Thread(target=comic_thread, args=(comic, ))
         threads.append(thread)
-        print "Starting " + thread.name + " " + comic.url # SAM DBG
+        if args.v: print "Starting " + thread.name + " " + comic.url
         thread.start()
 
 for thread in threads:
     if comic.skip == False:
         thread.join()
-        print "Done " + thread.name # SAM DBG
+        if args.v: print "Done " + thread.name
