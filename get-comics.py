@@ -41,9 +41,9 @@ class Comic:
 
     def add_url(self, url):
         self.url = time.strftime(url, Comic.today)
-        m = re.match(r"(https?://[^/]+)", url)
+        m = re.match(r"https?://[^/]+", url)
         if m:
-            self.host = m.group(1)
+            self.host = m.group(0)
         else:
             self.host = ""
             print "ERROR: Unable to isolate host: " + url
