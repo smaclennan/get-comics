@@ -29,6 +29,11 @@ class Comic:
     today = 0
     __id = 0
 
+    # stats
+    total = 0
+    got = 0
+    skipped = 0
+
     def __init__(self):
         self.url = None
         self.host = None
@@ -37,7 +42,8 @@ class Comic:
         self.skip = False
         # Make sure every comic has an outname
         self.outname = "comic" + str(Comic.__id)
-        Comic.__id = Comic.__id + 1
+        Comic.__id += 1
+        Comic.total += 1
 
     def add_url(self, url):
         self.url = time.strftime(url, Comic.today)
@@ -178,8 +184,10 @@ def outfile (comic, text, addext = True, dir = None):
         fp = open(dir + '/' + comic.outname + ext, 'w')
         fp.write(text)
         fp.close()
+        return True
     except Exception,e:
         print str(e.args[1]) + ": " + comic.outname
+        return False
 
 def stage2 (comic, url):
     if url.startswith("http"):
@@ -193,13 +201,15 @@ def stage2 (comic, url):
         links_lock.acquire()
         links_only.write(url + '\n')
         links_lock.release()
+        Comic.got += 1
         return
 
     r = requests.get(url)
     if r.status_code != 200:
         print "Error:" + url + " " + str(r.status_code)
         return
-    outfile(comic, r.content)
+    if outfile(comic, r.content):
+        Comic.got += 1
 
 def comic_thread (comic):
     global sema
@@ -219,8 +229,10 @@ def comic_thread (comic):
             links_lock.acquire()
             links_only.write(comic.url + '\n')
             links_lock.release()
+            Comic.got += 1
         else:
-            outfile(comic, r.content)
+            if outfile(comic, r.content):
+                Comic.got += 1
     else:
         print "Error:" + comic.url + " " + str(r.status_code)
 
@@ -280,7 +292,9 @@ if args.l:
 sema = threading.Semaphore(nthreads)
 
 for comic in comics:
-    if comic.skip == False:
+    if comic.skip:
+        Comic.skipped += 1
+    else:
         sema.acquire()
         thread = threading.Thread(target=comic_thread, args=(comic, ))
         threads.append(thread)
@@ -294,3 +308,5 @@ for thread in threads:
 
 if links_only:
     links_only.close()
+
+print "Got " + str(Comic.got) + " skipped " + str(Comic.skipped) + " of " + str(Comic.total)
