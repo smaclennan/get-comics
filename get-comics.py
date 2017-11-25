@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, os, re, json, threading, argparse, time, random
+import sys, os, re, json, threading, argparse, time, random, signal
 from datetime import date
 
 # You probably don't have requests. First make sure you have pip, if not:
@@ -40,6 +40,7 @@ class Comic:
         self.regexp = None
         self.regmatch = 0
         self.skip = False
+        self.state = 0
         # Make sure every comic has an outname
         self.outname = "comic" + str(Comic.__id)
         Comic.__id += 1
@@ -171,6 +172,15 @@ def clean_directory (dir):
         else:
             print 'Warning: Not cleaning ' + file
 
+def handler(signum, frame):
+    print "Current state:"
+    for comic in comics:
+        if not (comic.state == 2 or comic.skip):
+            if comic.state == 1:
+                print "  Running " + comic.url
+            else:
+                print "  Queued  " + comic.url
+
 def outfile (comic, text, addext = True, dir = None):
     global comics_dir
 
@@ -214,6 +224,7 @@ def stage2 (comic, url):
 def comic_thread (comic):
     global sema
 
+    comic.state = 1 # Running
     r = requests.get(comic.url)
     if r.status_code == 200:
         if comic.regexp:
@@ -236,6 +247,7 @@ def comic_thread (comic):
     else:
         print "Error:" + comic.url + " " + str(r.status_code)
 
+    comic.state = 2 # Done
     sema.release()
 
 def comic_thread2 (comic): # Dummy version for testing
@@ -290,6 +302,8 @@ if args.l:
 
 # We use a semaphore to limit the number of outstanding threads
 sema = threading.Semaphore(nthreads)
+
+signal.signal(signal.SIGUSR1, handler)
 
 for comic in comics:
     if comic.skip:
