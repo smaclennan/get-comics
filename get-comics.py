@@ -264,6 +264,7 @@ parser.add_argument('-d', metavar='comics dir', help='comics directory')
 parser.add_argument('-i', metavar='index dir', help='index directory')
 parser.add_argument('-l', metavar='links file', help='links file')
 parser.add_argument('-v', action='count', help='verbose')
+parser.add_argument('-V', action='store_true', help='verify config')
 parser.add_argument('config', nargs='?', help='config file', default="/usr/share/get-comics/comics.json")
 args = parser.parse_args()
 
@@ -286,6 +287,9 @@ else:
 if not os.path.isdir(index_dir):
     print "ERROR: " + index_dir + " does not exist"
     sys.exit(1)
+
+if args.V:
+    sys.exit(0)
 
 if args.c:
     clean_directory(comics_dir)
