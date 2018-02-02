@@ -1,6 +1,6 @@
 VERSION=0.5
 
-CC = clang -fno-color-diagnostics
+#CC = clang -fno-color-diagnostics
 
 # If you set D=1 on the command line then $(D:1=-g)
 # returns -g, else it returns the default (-O2).
@@ -76,6 +76,10 @@ LIBS += -lcurl
 CFILES += curl.c
 else
 CFILES += http.c socket.c
+endif
+
+ifneq ($(findstring nto-qnx,$(shell $(CC) -dumpmachine)),)
+LIBS += -lsocket
 endif
 
 LIBS += $(LLIBS)

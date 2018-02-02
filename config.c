@@ -361,13 +361,19 @@ void add_index_dir(const char *dir)
 #endif
 }
 
-#ifdef WIN32
-static int unlinkat(HANDLE unused, const char *name, int flags)
+#if defined(WIN32) || defined(__QNXNTO__)
+#ifndef PATH_MAX
+#define PATH_MAX MAX_PATH
+#endif
+
+static int unlinkat(int unused, const char *name, int flags)
 {	/* Fake unlinkat. */
-	char path[MAX_PATH];
+	char path[PATH_MAX];
 	snprintf(path, sizeof(path), "%s/%s", index_dir, name);
 	return unlink(path);
 }
+
+#define dirfd(fd) 0
 #endif
 
 void clean_index_dir(void)
