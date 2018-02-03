@@ -85,7 +85,7 @@
 },
 { /* The Other End */
   "url": "http://www.kohney.com",
-  "regexp": "https?://www\\.kohney\\.com/wp-content/uploads/%Y/[0-9]+/[^.]+\\.(jpg|png)",
+  "regexp": "https?://www\\.kohney\\.com/wp-content/uploads/%Y/[0-9]+/TOE[^.]+\\.(jpg|png)",
   /* "regexp": "https?://i[0-9]\\.wp\\.com/www\\.kohney\\.com/wp-content/uploads/%Y/[0-9]+/[^.]+\\.(jpg|png)", */
   "output": "otherend"
 },
