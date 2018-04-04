@@ -334,7 +334,7 @@ int read_config(const char *fname)
 	if (JSON_parse_file(fname ? fname : JSON_FILE, parse, &parse_ctx))
 		exit(1);
 
-	if (gocomics_regexp) free(gocomics_regexp);
+	free(gocomics_regexp);
 
 	return 0;
 }

@@ -17,7 +17,7 @@ MAKEFLAGS += --no-print-directory
 #CFLAGS += -DLOGGING
 
 # Comment in to enable libcurl
-#CFLAGS += -DWANT_CURL
+CFLAGS += -DWANT_CURL
 
 # For curl we do not need ssl/gzip
 ifeq ($(findstring WANT_CURL,$(CFLAGS)),)

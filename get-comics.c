@@ -39,29 +39,24 @@ int threads_set;
 static void sigpipe(int signum) {}
 #endif
 
-static void safe_free(void *mem)
-{
-	if (mem) free(mem);
-}
-
 static void free_comics(void)
 {
 	while (comics) {
 		struct connection *next = comics->next;
 
-		safe_free(comics->url);
-		safe_free(comics->host);
-		safe_free(comics->regexp);
-		safe_free(comics->regfname);
-		safe_free(comics->outname);
-		safe_free(comics->base_href);
-		safe_free(comics->referer);
+		free(comics->url);
+		free(comics->host);
+		free(comics->regexp);
+		free(comics->regfname);
+		free(comics->outname);
+		free(comics->base_href);
+		free(comics->referer);
 
 		free(comics);
 		comics = next;
 	}
 
-	safe_free(comics_dir);
+	free(comics_dir);
 }
 
 /* We have done a chdir to the comics dir */

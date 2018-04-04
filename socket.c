@@ -166,8 +166,7 @@ static void add_cache(char *hostname, struct addrinfo *r)
 	return;
 
 failed:
-	if (new->ai_addr)
-		free(new->ai_addr);
+	free(new->ai_addr);
 	free(new);
 #endif
 }

@@ -766,10 +766,8 @@ static void gzip_free(struct connection *conn)
 		inflateEnd(conn->zs);
 		free(conn->zs);
 		conn->zs = NULL;
-		if (conn->zs_buf) {
-			free(conn->zs_buf);
-			conn->zs_buf = NULL;
-		}
+		free(conn->zs_buf);
+		conn->zs_buf = NULL;
 	}
 }
 #else
