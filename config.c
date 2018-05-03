@@ -4,6 +4,7 @@
 
 static struct tm *today;
 static unsigned wday;
+static char *gocomics_url;
 static char *gocomics_regexp;
 static char *index_dir;
 
@@ -152,12 +153,16 @@ static void add_gocomic(struct connection **conn, char *comic)
 {
 	char url[1024];
 
+	if (!gocomics_url) {
+		puts("ERROR: gocomic entry but gocomics-url not set");
+		exit(1);
+	}
 	if (!gocomics_regexp) {
 		puts("ERROR: gocomic entry but gocomics-regexp not set");
 		exit(1);
 	}
 
-	snprintf(url, sizeof(url), "http://www.gocomics.com/%s/", comic);
+	snprintf(url, sizeof(url), gocomics_url, comic);
 	add_url(conn, url);
 	add_regexp(conn, gocomics_regexp);
 	add_outname(conn, comic);
@@ -186,6 +191,8 @@ static void parse_top_str(char *key, char *val)
 			comics_dir = strdup(val);
 	} else if (strcmp(key, "proxy") == 0)
 		set_proxy(val);
+	else if (strcmp(key, "gocomics-url") == 0)
+		gocomics_url = must_strdup(val);
 	else if (strcmp(key, "gocomics-regexp") == 0)
 		gocomics_regexp = must_strdup(val);
 	else if (strcmp(key, "debug") == 0)
@@ -334,6 +341,7 @@ int read_config(const char *fname)
 	if (JSON_parse_file(fname ? fname : JSON_FILE, parse, &parse_ctx))
 		exit(1);
 
+	free(gocomics_url);
 	free(gocomics_regexp);
 
 	return 0;
