@@ -1,6 +1,6 @@
 {
 "threads": 12,
-"gocomics-url": "http://www.gocomics.com/%s/%%Y/%%m/%%d/",
+"gocomics-url": "https://www.gocomics.com/%s/%%Y/%%m/%%d/",
 "gocomics-regexp": "https?://assets.amuniversal.com/[0-9a-f]{32}",
 "comics": [
 
