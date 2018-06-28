@@ -23,11 +23,13 @@
   "output": "chainsawsuit"
 },
 */
+/*
 { /* Channelate */
   "url": "http://www.channelate.com/",
   "regexp": "wp-content/uploads/.*\\.(png|gif)",
   "output": "channelate"
 },
+*/
 { /* Cyanide & Happiness */
   "url": "http://explosm.net/",
   "regexp":
@@ -86,7 +88,7 @@
 },
 { /* The Other End */
   "url": "http://www.kohney.com",
-  "regexp": "https?://www\\.kohney\\.com/wp-content/uploads/%Y/[0-9]+/[0-9][^.]+\\.(jpg|png)",
+  "regexp": "https?://www\\.kohney\\.com/wp-content/uploads/%Y/[0-9]+/[^.]+\\.(jpg|png)",
   /* "regexp": "https?://i[0-9]\\.wp\\.com/www\\.kohney\\.com/wp-content/uploads/%Y/[0-9]+/[^.]+\\.(jpg|png)", */
   "output": "otherend",
   "days": "XmtwtfX"
@@ -107,7 +109,7 @@
 */
 { /* Questionable Content */
   "url": "http://www.questionablecontent.net",
-  "regexp": "http://www.questionablecontent.net/comics/[0-9]*\\.(png|gif|jpg)",
+  "regexp": "https?://www.questionablecontent.net/comics/[0-9]*\\.(png|gif|jpg)",
   "output": "questionable",
   "days": "XmtwtfX"
 },

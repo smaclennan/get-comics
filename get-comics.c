@@ -222,9 +222,6 @@ int main(int argc, char *argv[])
 	signal(SIGPIPE, sigpipe);
 #endif
 
-	if (links_only)
-		fclose(links_only);
-
 	want_extensions = 1;
 	main_loop();
 
@@ -233,6 +230,9 @@ int main(int argc, char *argv[])
 	printf("Hit return to exit");
 	getchar();
 #endif
+
+	if (links_only)
+		fclose(links_only);
 
 	free_cache(); /* for valgrind */
 	free_comics(); /* for valgrind */
