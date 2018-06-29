@@ -123,41 +123,55 @@ static int fail_redirect(struct connection *conn)
 	return 0;
 }
 
+static void safecat(char *dst, const char *src, int dstsize)
+{
+	static char *cached = NULL;
+	static int left;
+
+	if (src) {
+		if (left <= 0) return;
+
+		while (left-- > 0 && *src)
+			*cached++ = *src++;
+		*cached = 0;
+	} else {
+		int len = strlen(dst);
+		cached = dst + len;
+		left = dstsize - len - 1;
+	}
+}
+
+#define SAFECAT(str) safecat(conn->buf, str, BUFSIZE)
+
 static void add_full_header(struct connection *conn, const char *host)
 {
-	int n = strlen(conn->buf);
+	SAFECAT(NULL); /* reset */
 
 	/* Always need host */
-	n += snprintf(conn->buf + n, BUFSIZE - n, "Host: %s\r\n", host);
+	SAFECAT("Host: "); SAFECAT(host); SAFECAT("\r\n");
 
 	/* Header strings taken from Firefox. ~300 bytes.
 	 * Some comics (e.g. sinfest) require the user agent.
 	 */
-	n += snprintf(conn->buf + n, BUFSIZE - n, "User-Agent: %s\r\n", user_agent);
+	SAFECAT("User-Agent: "); SAFECAT(user_agent); SAFECAT("\r\n");
 
 //#define FULL_HEADER
 #ifdef FULL_HEADER
-	n += snprintf(conn->buf + n, BUFSIZE - n,
-		      "Accept: text/html,application/xhtml+xml,application/"
-		      "xml;q=0.9,*/*;q=0.8\r\n");
-	n += snprintf(conn->buf + n, BUFSIZE - n,
-		      "Accept-Language: en-us,en;q=0.5\r\n");
-	n += snprintf(conn->buf + n, BUFSIZE - n,
-		      "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n");
+	SAFECAT("Accept: text/html,application/xhtml+xml,application/"
+			"xml;q=0.9,*/*;q=0.8\r\n"
+			"Accept-Language: en-us,en;q=0.5\r\n"
+			"Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n");
 #endif
 
 #ifdef WANT_GZIP
-	n += snprintf(conn->buf + n, BUFSIZE - n,
-		      "Accept-Encoding: gzip, deflate\r\n");
+	SAFECAT("Accept-Encoding: gzip, deflate\r\n");
 #endif
 
 #ifdef FULL_HEADER
 	if (proxy)
-		n += snprintf(conn->buf + n, BUFSIZE - n,
-					  "Proxy-Connection: keep-alive\r\n");
+		SAFECAT("Proxy-Connection: keep-alive\r\n");
 	else
-		n += snprintf(conn->buf + n, BUFSIZE - n,
-					  "Connection: keep-alive\r\n");
+		SAFECAT("Connection: keep-alive\r\n");
 #endif
 }
 
@@ -966,6 +980,7 @@ char *fixup_url(char *url, char *tmp, int len)
 	while (*turl && len > 0) {
 		if (*turl & 0x80) {
 			n = snprintf(ttmp, len, "%%%2x", *turl);
+			if (n > len) break;
 			len -= n;
 			++turl;
 			ttmp += 3;
