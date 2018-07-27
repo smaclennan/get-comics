@@ -93,7 +93,7 @@
   "regexp": "https?://www\\.kohney\\.com/wp-content/uploads/%Y/[0-9]+/[0-9]+[^.]+\\.(jpg|png)",
   /* "regexp": "https?://i[0-9]\\.wp\\.com/www\\.kohney\\.com/wp-content/uploads/%Y/[0-9]+/[^.]+\\.(jpg|png)", */
   "output": "otherend",
-  "days": "XmtwtfX"
+  "days": "XmXwXfX"
 },
 { /* Poorly Drawn Lines */
   "url": "http://poorlydrawnlines.com/",
