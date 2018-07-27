@@ -118,7 +118,6 @@ static void usage(int rc)
 	puts("\t-c  clean (remove) images from comics dir before downloading");
 	puts("\t-k  keep index files");
 	puts("\t-v  verbose");
-	puts("\t-C  list supported ciphers (ssl only)");
 	puts("\t-V  verify config but don't download comics");
 	exit(rc);
 }
@@ -128,7 +127,7 @@ int main(int argc, char *argv[])
 	char *env;
 	int i, verify = 0, clean = 0;
 
-	while ((i = getopt(argc, argv, "cd:hi:kl:p:t:vCT:V")) != -1)
+	while ((i = getopt(argc, argv, "cd:hi:kl:p:t:vT:V")) != -1)
 		switch ((char)i) {
 		case 'c':
 			clean = 1;
@@ -161,14 +160,6 @@ int main(int argc, char *argv[])
 		case 'v':
 			verbose++;
 			break;
-		case 'C':
-#ifdef WANT_SSL
-			openssl_list_ciphers();
-#else
-			puts("-C not supported.");
-#endif
-			exit(0);
-
 		case 'T':
 			read_timeout = strtol(optarg, NULL, 0);
 			break;

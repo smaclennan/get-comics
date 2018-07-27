@@ -121,17 +121,4 @@ void openssl_close(struct connection *conn)
 		conn->ssl = NULL;
 	}
 }
-
-void openssl_list_ciphers(void)
-{
-	const int *list = mbedtls_ssl_list_ciphersuites();
-	while (*list) {
-		printf(" %-42s", mbedtls_ssl_get_ciphersuite_name( *list ) );
-		list++;
-		if( !*list )
-		break;
-		printf(" %s\n", mbedtls_ssl_get_ciphersuite_name( *list ) );
-	    list++;
-	}
-}
 #endif

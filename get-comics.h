@@ -247,7 +247,6 @@ int openssl_check_connect(struct connection *conn);
 int openssl_read(struct connection *conn);
 int openssl_write(struct connection *conn);
 void openssl_close(struct connection *conn);
-void openssl_list_ciphers(void);
 
 /* export from get-comics.c */
 int start_next_comic(void);
