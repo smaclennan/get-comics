@@ -83,6 +83,9 @@ int openssl_connect(struct connection *conn)
 	if (!ssl)
 		goto error;
 
+	if (SSL_set_tlsext_host_name(ssl, conn->host) == 0)
+		goto error;
+
 	conn->ssl = ssl;
 
 	if (!SSL_set_fd(ssl, conn->poll->fd))
