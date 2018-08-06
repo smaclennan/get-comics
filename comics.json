@@ -110,7 +110,7 @@
 },
 */
 { /* Questionable Content */
-  "url": "http://www.questionablecontent.net",
+  "url": "https://www.questionablecontent.net",
   "regexp": "https?://www.questionablecontent.net/comics/[0-9]*\\.(png|gif|jpg)",
   "output": "questionable",
   "days": "XmtwtfX"
@@ -135,7 +135,7 @@
 },
 */
 { /* Something Positive */
-  "url": "http://www.somethingpositive.net/",
+  "url": "https://www.somethingpositive.net/",
   "regexp": "sp[0-9]*\\.png",
   "output": "somethingp"
 },
