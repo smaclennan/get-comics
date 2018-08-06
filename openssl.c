@@ -50,8 +50,9 @@ static int openssl_init(void)
 
 int openssl_check_connect(struct connection *conn)
 {
+	errno = 0;
 	int ret = SSL_connect(conn->ssl);
-	if (ret <= 0)
+	if (ret < 0)
 		switch (SSL_get_error(conn->ssl, ret)) {
 		case SSL_ERROR_WANT_READ:
 			set_readable(conn);
@@ -64,6 +65,12 @@ int openssl_check_connect(struct connection *conn)
 			print_errors();
 			return 1;
 		}
+	else if (ret == 0) { /* controlled shut down */
+		printf("%s: handshake failed ssl-error %d errno %d\n",
+			   conn->outname, SSL_get_error(conn->ssl, ret), errno);
+		print_errors();
+		return 1;
+	}
 
 	conn->connected = 1;
 
@@ -115,11 +122,10 @@ int openssl_read(struct connection *conn)
 	if (n < 0)
 		switch (err) {
 		case SSL_ERROR_WANT_READ:
-			return -EAGAIN;
 		case SSL_ERROR_WANT_WRITE:
 			return -EAGAIN;
 		default:
-			printf("Not read or write read %d\n", err);
+			printf("%s: Not read or write read %d\n", conn->outname, err);
 			print_errors();
 			break;
 		}
@@ -140,11 +146,10 @@ int openssl_write(struct connection *conn)
 	if (n < 0)
 		switch (err) {
 		case SSL_ERROR_WANT_READ:
-			return -EAGAIN;
 		case SSL_ERROR_WANT_WRITE:
 			return -EAGAIN;
 		default:
-			printf("Not read or write write %d\n", err);
+			printf("%s: Not read or write write %d\n", conn->outname, err);
 			print_errors();
 			break;
 		}
