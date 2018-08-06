@@ -60,7 +60,8 @@ int openssl_check_connect(struct connection *conn)
 			set_writable(conn);
 			return 0;
 		default:
-			printf("Not read or write\n");
+			printf("Not read or write connect %d\n", ret);
+			print_errors();
 			return 1;
 		}
 
@@ -118,7 +119,8 @@ int openssl_read(struct connection *conn)
 		case SSL_ERROR_WANT_WRITE:
 			return -EAGAIN;
 		default:
-			printf("Not read or write\n");
+			printf("Not read or write read %d\n", err);
+			print_errors();
 			break;
 		}
 
@@ -142,7 +144,8 @@ int openssl_write(struct connection *conn)
 		case SSL_ERROR_WANT_WRITE:
 			return -EAGAIN;
 		default:
-			printf("Not read or write\n");
+			printf("Not read or write write %d\n", err);
+			print_errors();
 			break;
 		}
 
