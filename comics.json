@@ -96,7 +96,7 @@
   "days": "XmXwXfX"
 },
 { /* Poorly Drawn Lines */
-  "url": "http://poorlydrawnlines.com/",
+  "url": "http://www.poorlydrawnlines.com/",
   "regexp": "wp-content/uploads/%Y/%m/[0-9a-zA-Z_-]+.png",
   "output": "pdl",
   "days": "XXtXtXs"
