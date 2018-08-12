@@ -4,6 +4,7 @@
 "gocomics-regexp": "https?://assets.amuniversal.com/[0-9a-f]{32}",
 "comics": [
 
+/* Need scripting
 { /* Bizarro via ArcaMax */
   "url": "https://www.arcamax.com/thefunnies/bizarro/",
   "regexp": "/newspics/[a-z0-9]+/[0-9/]+\\.(jpg|gif)",
@@ -16,6 +17,8 @@
   "output": "bizarro",
   "days": "sXXXXXX"
 },
+*/
+
 /*
 { /* chainsawsuit */
   "url": "http://chainsawsuit.com/comic/",
