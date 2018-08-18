@@ -432,8 +432,8 @@ int read_reply(struct connection *conn)
 			p = strstr(conn->buf, "Content-length:");
 		conn->length = p ? strtol(p + 15, NULL, 10) : 0;
 
-		p = strstr(conn->buf, "Transfer-Encoding:");
-		if (p) {
+		p = conn->buf;
+		while ((p = strstr(p, "Transfer-Encoding:"))) {
 			p += 18;
 			while (isspace(*p))
 				++p;
@@ -441,9 +441,10 @@ int read_reply(struct connection *conn)
 				if (verbose > 1)
 					printf("Chunking\n");
 				chunked = 1;
-			} else
-				printf("OH oh. %s: %s", conn->host, p);
+			} else if (strncmp(p, "binary", 6))
+				printf("TE OH oh. %s: %.30s\n", conn->host, p);
 		}
+
 		p = strstr(conn->buf, "Content-Encoding:");
 		if (p) {
 			p += 17;
@@ -454,8 +455,9 @@ int read_reply(struct connection *conn)
 					printf("GZIP\n");
 				if (gzip_init(conn))
 					return 1;
-			} else
-				printf("OH oh. %s: %s", conn->host, p);
+			}
+			else
+				printf("CE OH oh. %s: %s", conn->host, p);
 		}
 		if (verbose > 1 && conn->length == 0 && !chunked)
 			printf("Warning: No content length for %s\n",
