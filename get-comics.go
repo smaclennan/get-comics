@@ -13,6 +13,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"bytes"
 )
 
 const default_config = "/usr/share/get-comics/comics.json"
@@ -155,8 +156,38 @@ func read_config(configfile string) {
 	}
 
 	// go json does not support comments... strip them
-	re := regexp.MustCompile("/\\*.*\\*/")
-	config = re.ReplaceAll(config, nil)
+	state := 0
+	nested := 0
+	var b bytes.Buffer
+	for i, c := range config {
+		switch c {
+		case '/':
+			if state == 2 {
+				state = 0
+				continue
+			}
+			if config[i + 1] == '*' {
+				state = 1
+				nested += 1
+				continue
+			}
+		case '*':
+			if state == 1 {
+				state = 0
+				continue
+			} else if nested > 0 && config[i + 1] == '/' {
+				state = 2
+				nested -= 1
+				continue
+			}
+		}
+
+		if nested == 0 {
+			b.WriteByte(c)
+		}
+	}
+
+	config = b.Bytes()
 
 	var f interface{}
 	err = json.Unmarshal(config, &f)
@@ -382,6 +413,8 @@ func main() {
 	} else {
 		read_config(default_config)
 	}
+
+	os.Exit(42); // SAM DBG
 
 	os.Chdir(*comics_dir)
 

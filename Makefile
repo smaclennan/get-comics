@@ -43,6 +43,7 @@ endif
 #ifneq ($(GO),)
 #EXTRA+=go-get-comics
 #endif
+GO ?= gccgo
 
 CFILES  := log.c common.c
 
