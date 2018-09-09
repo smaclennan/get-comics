@@ -45,7 +45,7 @@ endif
 #endif
 GO ?= gccgo
 
-CFILES  := log.c common.c
+CFILES  := common.c
 
 # Optionally add openssl
 ifneq ($(findstring WANT_OPENSSL,$(CFLAGS)),)

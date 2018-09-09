@@ -119,7 +119,6 @@ int close_connection(struct connection *conn)
 					time(NULL), conn->id, outstanding);
 	} else
 		printf("Multiple Closes: %s\n", conn->url);
-	log_clear(conn);
 	return release_connection(conn);
 }
 
@@ -136,7 +135,6 @@ int fail_connection(struct connection *conn)
 					time(NULL), conn->id, outstanding);
 	} else
 		printf("Multiple Closes: %s\n", conn->url);
-	log_clear(conn);
 	return release_connection(conn);
 }
 

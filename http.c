@@ -119,7 +119,6 @@ static int fail_redirect(struct connection *conn)
 			printf("Failed redirect %s (%d)\n",
 			       conn->url, outstanding);
 	}
-	log_clear(conn);
 	return 0;
 }
 
