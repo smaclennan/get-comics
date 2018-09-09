@@ -18,9 +18,10 @@ import (
 
 const default_config = "/usr/share/get-comics/comics.json"
 
-var comics_dir = flag.String("d", os.Getenv("PWD"), "Output directory for comics")
+var comics_dir = flag.String("d", "", "Output directory for comics")
 var thread_limit = flag.Int("t", 4, "Maximum number of concurrent gets")
 var gocomics_regexp regexp.Regexp
+var gocomics_url string
 
 var now = time.Now()
 var wday = weekday2int()
@@ -119,7 +120,8 @@ func parse_comic(m map[string]interface{}, id int) {
 					comic.referer = val
 				}
 			case "gocomic":
-				comic.url = "http://www.gocomics.com/" + val + "/"
+				comic.url = fmt.Sprintf(gocomics_url, val)
+				comic.url = strftime(comic.url)
 				comic.host = "http://www.gocomics.com"
 				comic.regexp = gocomics_regexp
 				comic.outname = val
@@ -211,6 +213,8 @@ func read_config(configfile string) {
 				fmt.Println("Warning: proxy not supported.")
 			case "gocomics-regexp":
 				gocomics_regexp = *regexp.MustCompile(vv)
+			case "gocomics-url":
+				gocomics_url = vv
 			default:
 				fmt.Println("Unexpected element ", k)
 			}
@@ -239,6 +243,10 @@ func read_config(configfile string) {
 		default:
 			fmt.Println("Unkown element ", k)
 		}
+	}
+
+	if *comics_dir == "" {
+		*comics_dir = os.Getenv("HOME") + "/comics"
 	}
 }
 
@@ -414,9 +422,11 @@ func main() {
 		read_config(default_config)
 	}
 
-	os.Exit(42); // SAM DBG
-
-	os.Chdir(*comics_dir)
+	err := os.Chdir(*comics_dir)
+	if err != nil {
+		fmt.Println("Unable to change to " + *comics_dir)
+		os.Exit(1)
+	}
 
 	cs := make(chan int)
 
