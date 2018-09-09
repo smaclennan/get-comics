@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, os, re, json, threading, argparse, time, random, signal
+import sys, os, re, json, threading, argparse, time, random, signal, StringIO
 from datetime import date
 
 # You probably don't have requests. First make sure you have pip, if not:
@@ -25,6 +25,7 @@ threads = list()
 
 class Comic:
     gocomics_regexp = None
+    gocomics_url = None
     weekday = 0
     today = 0
     __id = 0
@@ -63,10 +64,12 @@ class Comic:
             self.skip = True
 
     def add_gocomic(self, comic):
-        if self.gocomics_regexp == None:
-            print "PROBLEMS: No gocomics_regexp"
+        if self.gocomics_regexp == None or self.gocomics_url == None:
+            print "PROBLEMS: No gocomics_regexp and/or gcomics_url"
             sys.exit(1)
-        self.url = "http://www.gocomics.com/" + comic + "/"
+        buf = StringIO.StringIO()
+        buf.write(self.gocomics_url % comic)
+        self.url = time.strftime(buf.getvalue(), self.today)
         self.regexp = self.gocomics_regexp
         self.outname = comic
 
@@ -127,6 +130,8 @@ def read_config (fname):
 
     try: Comic.gocomics_regexp = data['gocomics-regexp']
     except: pass
+    try: Comic.gocomics_url = data['gocomics-url']
+    except: pass
 
     # Get the weekday and make Sunday 0
     Comic.today = time.localtime();
@@ -142,7 +147,11 @@ def read_config (fname):
             nthreads = data['threads']
         elif each == 'directory':
             comics_dir = data['directory']
-        elif each != 'gocomics-regexp':
+        elif each == 'gocomics-regexp':
+            continue
+        elif each == 'gocomics-url':
+            continue
+        else:
             print "WARNING: " + str(each)
 
 imgtype = { 'GIF8':             '.gif',
