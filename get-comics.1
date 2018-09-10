@@ -99,6 +99,14 @@ options:
 .B directory
 specifies the directory to put the comics in.
 .TP
+.B gocomics-regexp
+specifics the regular expression to use for gocomics.
+.TP
+.B gocmics-url
+specifies the URL format to use for gocomics. It is run through
+\fIsprintf\fR to add the specific comic. It is also run through
+\fIstrftime\fR like other urls.
+.TP
 .B threads
 specifies the maximum number of threads to create at one time.
 .TP
@@ -108,6 +116,12 @@ specifies the proxy and an optional port.
 .B timeout
 specifies the maximum time to wait for a read in milliseconds
 .SH "Comic Tags"
+.TP
+.B gocomic
+specifies a comic from http://gocomics.com/. Just give the gocomic
+name, the \fBgocomics-url\fR and \fBgocomics-regexp\fR tags are used
+to build the request. The only other tag that makes sense here is
+\fBdays\fR.
 .TP
 .B url
 specifies an URL. Either the comic URL for direct comics, or the index
