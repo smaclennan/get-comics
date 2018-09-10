@@ -1,57 +1,61 @@
 What is it?
 -----------
 
-I read about 30 to 40 comics daily from the net. That is along with
-the comics in the newspaper. I wrote an Emacs lisp program to download
-them all for convenient viewing.
+I read roughly 40 web comics, so I wrote get-comics to conveniently
+download all the comics into one place. It uses a simple json
+configuration file to define how to download the comics. The sample
+one included is the one I use every day.
 
-However, when I went away on vacation, I wanted something to download
-the comics daily and save them. I had problems getting Emacs to
-startup and run reliably, so I quickly wrote the first get-comics.
+It broadly has two modes: it can either download the comics as images
+or create a file of links to the comics. For day-to-day use I
+generally just download the images. But if I am going away and may
+have limited or sporadic internet access, I will run get-comics from
+cron at home and just keep track of the links.
 
+Here is the alias I use to download the comics under Linux:
+get-today='get-comics -cd ~/comics/today -i ~/comics/index'
 
-get-comics 1
+How it works
 ------------
 
-The first get-comics was a multi-threaded app that was driven by an
-xml file to download comics. I wrote it multi-threaded because I
-needed it fast. This was basically a prototype. It worked, but it
-tended to swamp the proxy server I used at the time.
+For all the active comics I read there are two stages. First, we
+download the html page for the comic and scan the page using a
+regular expression to find the image. Then we download the image or
+just put the link in the links file.
 
+Why are there different versions?
+---------------------------------
 
-get-comics 2
-------------
+I use get-comics every day, so it is a good vehicle to test and
+experiment with http clients. As such, I have a raw C version of the
+program. This is the one I use most often to try to keep up with
+changes in how http is used.
 
-The second version of get-comics is a single threaded version. Rather
-than spawning a thread per connection, it handles all the connections
-in a single thread using the `select' call. I find this version much
-more reliable than the multi-threaded version. It also has lower
-resource usage.
+The C version is single threaded with non-blocking I/O... just because
+I can. It also supports persistent connections.
 
-get-comics 3
-------------
+There is also a version using libcurl. It mimics the C version but
+with less code. The curl version can be either single or
+multi-threaded. This is the smarter way to write the code since
+libcurl "just works" and if it doesn't there is an active community
+to fix it.
 
-The third version of get-comics used libcurl. I found that libcurl
-hangs too often. Since the second version has been reliable for years,
-I basically dropped this version in favor of the second version.
+There is a multi-threaded python (get-comics.py) version of
+get-comics. This make even more sense since it needs no compiling and
+is a single, <400 line, file. Note: the python version does need the
+python requests package which you probably do not have. See the
+comment at the top of the get-comics.py file. Unless you have a super
+fast internet connection, the python script is just fine.
 
-get-comics 4
-------------
+And lastly, there is a multi-threaded go version (get-comics.go) of
+the program. This was just for me to experiment with go and is less
+full featured than the other versions. But if you like go, go ahead and
+use it!
 
-I rewrote get-comics in go just because I could ;) I used it
-exclusively for months. But it requires libgo, so I have reverted back
-to the C version.
+OS Agnostic
+-----------
 
-get-comics 5
-------------
-
-It can now use libcurl again. This time around it seems much more
-stable. I still tend to use the non-curl version.
-
-Documentation
--------------
-
-The documentation for get-comics is either in man format
-(get-comics.1) or an HTML version (get-comics.html)
-
-There is a sample JSON file that I use: comics.json.
+I have tried to make all the versions OS agnostic. While Linux is my
+main platform, and therefore the most tested, the C and curl versions
+should work fine under any Unix and Microsoft Windows. The python version
+should work anywhere python is available.
