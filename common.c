@@ -172,6 +172,8 @@ int start_one_comic(struct connection *conn)
 {
 	if (links_only && !conn->regexp) {
 		add_link(conn);
+		conn->gotit = 1;
+		++gotit;
 		return 0;
 	}
 
@@ -382,9 +384,7 @@ int process_html(struct connection *conn)
 
 	if (links_only) {
 		add_link(conn);
-		if (CONN_OPEN)
-			close_connection(conn);
-		--outstanding;
+		close_connection(conn);
 		return 0;
 	}
 

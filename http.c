@@ -914,7 +914,7 @@ void main_loop(void)
 	for (i = 0; i < thread_limit; ++i)
 		ufds[i].fd = -1;
 
-	while (head || outstanding) {
+	while (head || outstanding > 0) {
 		start_next_comic();
 
 		n = poll(ufds, thread_limit, timeout);
