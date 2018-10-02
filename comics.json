@@ -1,5 +1,5 @@
 {
-"threads": 12,
+"threads": 8,
 "gocomics-url": "https://www.gocomics.com/%s/%%Y/%%m/%%d/",
 "gocomics-regexp": "https?://assets.amuniversal.com/[0-9a-f]{32}",
 "comics": [
@@ -93,7 +93,7 @@
 },
 { /* The Other End */
   "url": "http://www.kohney.com",
-  "regexp": "https?://www\\.kohney\\.com/wp-content/uploads/%Y/[0-9]+/(sit|SITELY)[^.]+\\.(jpg|png)",
+  "regexp": "https?://www\\.kohney\\.com/wp-content/uploads/%Y/[0-9]+/(site|SITE)[^.]+\\.(jpg|png)",
   "output": "otherend",
   "days": "XmXwXfX"
 },
