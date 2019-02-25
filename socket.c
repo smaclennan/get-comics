@@ -3,6 +3,7 @@
 
 #ifndef _WIN32
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #endif
@@ -189,6 +190,9 @@ static int try_connect(struct addrinfo *r, int *deferred)
 	int sock = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
 	if (sock < 0)
 		return -1;
+
+	int flags = 1;
+	setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &flags, sizeof(flags));
 
 	if (set_non_blocking(sock)) {
 		closesocket(sock);
