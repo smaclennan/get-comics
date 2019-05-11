@@ -200,6 +200,19 @@ static int hostcmp(char *host1, char *host2)
 	return strcmp(h[0], h[1]);
 }
 
+static int fixup_host(struct connection *conn)
+{	/* We have verified this is http:// or https:// */
+	char *p = strchr(conn->url, ':') + 3;
+	p = strchr(p, '/');
+	if (p) *p = 0;
+	if (hostcmp(conn->host, conn->url)) {
+		free(conn->host);
+		conn->host = strdup(conn->url);
+	}
+	if (p) *p = '/';
+	return conn->host == NULL;
+}
+
 int build_request(struct connection *conn)
 {
 	char *url, *host, *p;
@@ -237,9 +250,12 @@ int build_request(struct connection *conn)
 				printf("New connection for %s\n", host);
 			release_connection(conn);
 		} else if (verbose)
-			printf("Reuse connection for %s\n", conn->host);
+			printf("Reuse connection for %s\n", host);
 	}
 #endif
+
+	if (fixup_host(conn))
+		return 1;
 
 	if (!get_buf(conn)) {
 		free(host);
