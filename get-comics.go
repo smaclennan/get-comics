@@ -209,8 +209,6 @@ func read_config(configfile string) {
 				if *comics_dir == "" {
 					*comics_dir = vv
 				}
-			case "proxy":
-				fmt.Println("Warning: proxy not supported.")
 			case "gocomics-regexp":
 				gocomics_regexp = *regexp.MustCompile(vv)
 			case "gocomics-url":

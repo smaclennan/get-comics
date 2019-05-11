@@ -84,25 +84,21 @@ static int read_link_file(char *fname)
 
 static void usage(int rc)
 {
-	fputs("usage: link-check [-dv] [-p proxy] [-t threads]", stdout);
+	fputs("usage: link-check [-dv] [-t threads]", stdout);
 	puts(" [-T timeout] [link_file ...]");
 	exit(rc);
 }
 
 int main(int argc, char *argv[])
 {
-	char *env;
 	int i;
 
 	method = "HEAD";
 
-	while ((i = getopt(argc, argv, "hp:t:vT:")) != -1)
+	while ((i = getopt(argc, argv, "ht:vT:")) != -1)
 		switch ((char)i) {
 		case 'h':
 			usage(0);
-		case 'p':
-			set_proxy(optarg);
-			break;
 		case 't':
 			thread_limit = strtol(optarg, NULL, 0);
 			break;
@@ -121,11 +117,6 @@ int main(int argc, char *argv[])
 			read_link_file(argv[optind++]);
 	else
 		read_urls(stdin);
-
-	/* set_proxy will not use this if proxy already set */
-	env = getenv("COMICS_PROXY");
-	if (env)
-		set_proxy(env);
 
 	if (thread_limit == 0) {
 		printf("You must allow at least one thread\n");

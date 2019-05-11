@@ -109,7 +109,7 @@ static int read_link_file(char *fname)
 
 static void usage(int rc)
 {
-	fputs("usage: http-get [-v] [-p proxy] [-t threads]", stdout);
+	fputs("usage: http-get [-v] [-t threads]", stdout);
 	puts(" [-T timeout] [link_file ...]");
 	puts("\nIf no link_files are specified, read urls from stdin.");
 	exit(rc);
@@ -118,18 +118,14 @@ static void usage(int rc)
 
 int main(int argc, char *argv[])
 {
-	char *env;
 	int i;
 
-	while ((i = getopt(argc, argv, "hl:p:r:R:t:uUvT:")) != -1)
+	while ((i = getopt(argc, argv, "hl:r:R:t:uUvT:")) != -1)
 		switch ((char)i) {
 		case 'h':
 			usage(0);
 		case 'l':
 			read_link_file(optarg);
-			break;
-		case 'p':
-			set_proxy(optarg);
 			break;
 		case 'r':
 			regexp = optarg;
@@ -160,11 +156,6 @@ int main(int argc, char *argv[])
 
 	while (optind < argc)
 		add_get_url(argv[optind++]);
-
-	/* set_proxy will not use this if proxy already set */
-	env = getenv("COMICS_PROXY");
-	if (env)
-		set_proxy(env);
 
 	if (thread_limit == 0) {
 		printf("You must allow at least one thread\n");

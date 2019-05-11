@@ -7,7 +7,6 @@ get-comics \- download comics from the net
 [\fI-d comics-directory\fR]
 [\fI-i index-directory\fR]
 [\fI-l links_file\fR]
-[\fI-p proxy\fR]
 [\fI-t threads\fR]
 [\fI-T timeout\fR]
 [\fIconfig-file...\fR]
@@ -44,9 +43,6 @@ for debugging. Note: failed comics are always kept.
 \fB\-l links file\fR
 produce a file with links to all the comics. Does not download the
 comics.
-.TP
-\fB\-p proxy[:port]\fR
-proxy and optional port (defaults to 3128). Overrides the json file.
 .TP
 \fB\-t threads\fR
 number of simultaneous download threads
@@ -110,9 +106,6 @@ specifies the URL format to use for gocomics. It is run through
 .B threads
 specifies the maximum number of threads to create at one time.
 .TP
-.B proxy
-specifies the proxy and an optional port.
-.TP
 .B timeout
 specifies the maximum time to wait for a read in milliseconds
 .SH "Comic Tags"
@@ -164,23 +157,6 @@ here. You can also specify \fBurl\fR and the value from the
 If you set insecure to non-zero, then curl will not verify the peer or
 the hostname. This is less secure, but might be needed for some
 comics.
-.SH "A NOTE ABOUT PROXIES"
-.PP
-get-comics supports accessing the comics via a proxy. There are three
-ways to specify the proxy:
-.PP
-1) The \fB\-p\fR command line option.
-.br
-2) The json file \fBproxy\fR tag.
-.br
-3) The \fBCOMICS_PROXY\fR environment variable.
-.PP
-All proxies are specified as an url with an optional port:
-\fB<url>:<port>\fR. The default port is the squid proxy default: 3128.
-.PP
-The three methods above are listed in order of priority. i.e. The
-command line option overrides the proxy tag which overrides the
-environment variable.
 .SH "FILES"
 .BR comics.json
 .SH "SEE ALSO"

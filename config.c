@@ -189,9 +189,7 @@ static void parse_top_str(char *key, char *val)
 		/* Do not override the command line option */
 		if (!comics_dir)
 			comics_dir = strdup(val);
-	} else if (strcmp(key, "proxy") == 0)
-		set_proxy(val);
-	else if (strcmp(key, "gocomics-url") == 0)
+	} else if (strcmp(key, "gocomics-url") == 0)
 		gocomics_url = must_strdup(val);
 	else if (strcmp(key, "gocomics-regexp") == 0)
 		gocomics_regexp = must_strdup(val);

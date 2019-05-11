@@ -167,19 +167,13 @@ static void add_full_header(struct connection *conn, const char *host)
 #endif
 
 #ifdef FULL_HEADER
-	if (proxy)
-		SAFECAT("Proxy-Connection: keep-alive\r\n");
-	else
-		SAFECAT("Connection: keep-alive\r\n");
+	SAFECAT("Connection: keep-alive\r\n");
 #endif
 }
 
 static int open_socket(struct connection *conn, char *host)
 {
 	char *port, *p;
-
-	if (proxy)
-		return connect_socket(conn, proxy, proxy_port);
 
 	p = strchr(host, ':');
 	if (p) {
@@ -260,10 +254,7 @@ int build_request(struct connection *conn)
 			return 1;
 		}
 
-	if (proxy)
-		snprintf(conn->buf, BUFSIZE, "%s http://%s/%s %s\r\n",
-				method, host, url, http);
-	else if (strchr(url, ' ')) {
+	if (strchr(url, ' ')) {
 		/* Some sites cannot handle spaces in the url. */
 		int n = sprintf(conn->buf, "%s ", method);
 		char *in = url, *out = conn->buf + n;
@@ -284,7 +275,7 @@ int build_request(struct connection *conn)
 	free(host);
 
 	if (verbose > 1)
-		printf("%s %s", proxy ? ">P" : ">", conn->buf);
+		printf("> %s", conn->buf);
 
 	if (conn->referer)
 		sprintf(conn->buf + strlen(conn->buf),

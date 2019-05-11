@@ -139,9 +139,6 @@ extern int unlink_index;
 extern FILE *debug_fp;
 extern FILE *links_only;
 
-extern char *proxy;
-extern char *proxy_port;
-
 extern const char *user_agent;
 
 extern int outstanding;
@@ -224,7 +221,6 @@ void add_index_dir(const char *dir);
 void clean_index_dir(void);
 
 /* export from http.c */
-void set_proxy(char *proxystr);
 void write_request(struct connection *conn);
 int read_reply(struct connection *conn);
 int build_request(struct connection *conn);

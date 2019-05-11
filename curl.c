@@ -161,11 +161,6 @@ int build_request(struct connection *conn)
 	curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_LIMIT, 10); /* bps */
 	curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_TIME, read_timeout);
 
-	if (proxy) {
-		curl_easy_setopt(conn->curl, CURLOPT_PROXY, proxy);
-		curl_easy_setopt(conn->curl, CURLOPT_PROXYPORT, strtol(proxy_port, NULL, 10));
-	}
-
 #ifndef MULTI_THREADED
 	if (curl_multi_add_handle(curlm, conn->curl)) {
 		printf("Unable to add handle to multi handle\n");

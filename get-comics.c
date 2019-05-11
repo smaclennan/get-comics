@@ -113,7 +113,7 @@ static void usage(int rc)
 {
 	fputs("usage:  get-comics [-hckvCV] [-d comics_dir]", stdout);
 	puts(" [-i index_dir] [-l links_file]");
-	puts("                   [-p proxy] [-t threads] [-T timeout] [config-file ...]");
+	puts("                   [-t threads] [-T timeout] [config-file ...]");
 	puts("Where:  -h  this help");
 	puts("\t-c  clean (remove) images from comics dir before downloading");
 	puts("\t-k  keep index files");
@@ -124,10 +124,9 @@ static void usage(int rc)
 
 int main(int argc, char *argv[])
 {
-	char *env;
 	int i, verify = 0, clean = 0;
 
-	while ((i = getopt(argc, argv, "cd:hi:kl:p:t:vT:V")) != -1)
+	while ((i = getopt(argc, argv, "cd:hi:kl:t:vT:V")) != -1)
 		switch ((char)i) {
 		case 'c':
 			clean = 1;
@@ -149,9 +148,6 @@ int main(int argc, char *argv[])
 				my_perror(optarg);
 				exit(1);
 			}
-			break;
-		case 'p':
-			set_proxy(optarg);
 			break;
 		case 't':
 			thread_limit = strtol(optarg, NULL, 0);
@@ -189,11 +185,6 @@ int main(int argc, char *argv[])
 			dump_outstanding(0);
 		return 0;
 	}
-
-	/* set_proxy will not use this if proxy already set */
-	env = getenv("COMICS_PROXY");
-	if (env)
-		set_proxy(env);
 
 	if (thread_limit == 0) {
 		printf("You must allow at least one thread\n");

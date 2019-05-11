@@ -21,9 +21,6 @@ struct connection *head;
 FILE *debug_fp;
 FILE *links_only;
 
-char *proxy;
-char *proxy_port = "3128";
-
 const char *user_agent =
 	"Mozilla/5.0 (X11; Linux i686; rv:6.0.2) Gecko/20100101 Firefox/6.0.2";
 
@@ -209,29 +206,6 @@ int start_next_comic(void)
 	}
 
 	return head != NULL;
-}
-
-void set_proxy(char *proxystr)
-{
-	char *p;
-
-	if (proxy) {
-		if (verbose)
-			printf("WARNING: proxy set to %s:%s. Ignoring %s\n",
-				   proxy, proxy_port, proxystr);
-		return;
-	}
-
-	p = strrchr(proxystr, ':');
-	if (p) {
-		*p++ = '\0';
-		proxy_port = must_strdup(p);
-	}
-
-	proxy = must_strdup(proxystr);
-
-	if (verbose)
-		printf("Proxy %s:%s\n", proxy, proxy_port);
 }
 
 void dump_outstanding(int sig)
