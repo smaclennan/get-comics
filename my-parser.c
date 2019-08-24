@@ -1,6 +1,8 @@
 #include "get-comics.h"
 #include "my-parser.h"
 
+// #define DEBUG_CB
+
 enum states {
 	J_START,
 	J_KEY_START,
@@ -213,6 +215,40 @@ failed:
 	return 0;
 }
 
+#ifdef DEBUG_CB
+static JSON_parser_callback real_cb;
+
+static int debug_cb(void* ctx, int type, const struct JSON_value_struct* value)
+{
+	switch (type) {
+	case JSON_T_ARRAY_BEGIN:
+		fputs("Array begin\n", stderr);
+		break;
+    case JSON_T_ARRAY_END:
+		fputs("Array_end\n", stderr);
+		break;
+    case JSON_T_OBJECT_BEGIN:
+		fputs("Obj begin\n", stderr);
+		break;
+    case JSON_T_OBJECT_END:
+		fputs("Obj end\n", stderr);
+		break;
+    case JSON_T_INTEGER:
+		fprintf(stderr, "Int %d\n", value->vu.integer_value);
+		break;
+    case JSON_T_STRING:
+		fprintf(stderr, "Str '%s'\n", value->vu.str.value);
+		break;
+    case JSON_T_KEY:
+		fprintf(stderr, "Key '%s'\n", value->vu.str.value);
+		break;
+	}
+
+	return real_cb(ctx, type, value);
+}
+#endif
+
+
 int JSON_parse_file(const char *fname, JSON_parser_callback callback, void *callback_ctx)
 {
 	if (!callback)
@@ -221,6 +257,11 @@ int JSON_parse_file(const char *fname, JSON_parser_callback callback, void *call
 	memset(&JC, 0, sizeof(JC));
 	JC.callback = callback;
 	JC.callback_ctx = callback_ctx;
+
+#ifdef DEBUG_CB
+	real_cb = callback;
+	JC.callback = debug_cb;
+#endif
 
 	JC.fp = fopen(fname, "r");
 	if (!JC.fp) {
