@@ -1,11 +1,13 @@
 #include "get-comics.h"
 #include "my-parser.h"
+#include <assert.h>
 
-#define DEBUG_CB
+// #define DEBUG_CB
 
 enum states {
 	J_START,
 	J_KEY_START,
+	J_KEY,
 	J_STRING,
 	J_STRING_QUOTE,
 	J_INT,
@@ -25,13 +27,12 @@ typedef struct JSON_parser_struct {
 
 	enum states state;
 
+	char key[256];
+
 	/* JSON_T_STRING only */
 	char string[256], *str;
 	int type;
 	int next_state;
-
-	/* JSON_T_INTEGER only */
-	int integer;
 
 	/* J_COMMENT only */
 	enum states start_state;
@@ -67,12 +68,11 @@ static void new_state(JSON_parser jc, enum states new)
 #define LEAVE_OBJECT(new) do {					\
 		if (jc->in_object == 0) goto failed;		\
 		--jc->in_object;					\
-		jc->callback(jc->callback_ctx, JSON_T_OBJECT_END, NULL);	\
-		new_state(jc, new);				\
+		call_callback(jc, JSON_T_OBJECT_END, new);	\
 	} while (0)
 
 #define STRING_OBJ(typein, next_statein) do {	\
-		new_state(jc, J_STRING);		\
+		new_state(jc, typein);		\
 		jc->str = jc->string;		\
 		jc->type = typein;		\
 		jc->next_state = next_statein;	\
@@ -86,19 +86,47 @@ static void start_comment(JSON_parser jc)
 	jc->nested = 1;
 }
 
+static void call_callback(JSON_parser jc, int type, int next_state)
+{
+	JSON_value value = { 0 };
+
+	switch (type) {
+	case JSON_T_STRING:
+		*jc->str = 0;
+		value.str = jc->string;
+		// fall thru
+
+	case JSON_T_OBJECT_BEGIN:
+	case JSON_T_ARRAY_BEGIN:
+		value.key = jc->key;
+		break;
+
+	case JSON_T_OBJECT_END:
+	case JSON_T_ARRAY_END:
+		break;
+
+	default:
+		assert(0); // programmer error
+	}
+
+	jc->callback(jc->callback_ctx, type, &value);
+	new_state(jc, next_state);
+
+	*jc->key = 0;
+	*jc->string = 0;
+	jc->str = NULL;
+}
+
 static int JSON_parser_char(JSON_parser jc, int next_char)
 {
-	JSON_value value;
-
 	switch (jc->state) {
 	case J_START:
 		if (next_char == '{') {
 			++jc->in_object;
-			jc->callback(jc->callback_ctx, JSON_T_OBJECT_BEGIN, NULL);
-			new_state(jc, J_KEY_START);
+			call_callback(jc, JSON_T_OBJECT_BEGIN, J_KEY_START);
 		} else if (jc->in_array && next_char == ']') {
 			jc->in_array  = 0;
-			jc->callback(jc->callback_ctx, JSON_T_ARRAY_END, NULL);
+			call_callback(jc, JSON_T_ARRAY_END, jc->state);
 		} else if (next_char == '}')
 			LEAVE_OBJECT(J_DONE);
 		else if (next_char == '/' && peek_char(jc) == '*')
@@ -109,7 +137,7 @@ static int JSON_parser_char(JSON_parser jc, int next_char)
 
 	case J_KEY_START:
 		if (next_char == '"')
-			STRING_OBJ(JSON_T_KEY, J_COLON);
+			STRING_OBJ(J_KEY, J_COLON);
 		else if (next_char == '/' && peek_char(jc) == '*')
 			start_comment(jc);
 		else if (next_char == '}') /* empty object allowed */
@@ -118,11 +146,10 @@ static int JSON_parser_char(JSON_parser jc, int next_char)
 			goto failed;
 		break;
 
-	case J_STRING:
+	case J_KEY:
 		if (next_char == '"') {
 			*jc->str = '\0';
-			value.vu.str.value = jc->string;
-			jc->callback(jc->callback_ctx, jc->type, &value);
+			strcpy(jc->key, jc->string);
 			new_state(jc, jc->next_state);
 		} else if (next_char == '\\')
 			new_state(jc, J_STRING_QUOTE);
@@ -130,19 +157,25 @@ static int JSON_parser_char(JSON_parser jc, int next_char)
 			*jc->str++ = next_char;
 		break;
 
+	case J_STRING:
+		if (next_char == '"')
+			call_callback(jc, JSON_T_STRING, jc->next_state);
+		else if (next_char == '\\')
+			new_state(jc, J_STRING_QUOTE);
+		else
+			*jc->str++ = next_char;
+		break;
+
 	case J_STRING_QUOTE:
 		*jc->str++ = next_char;
-		new_state(jc, J_STRING);
+		new_state(jc, jc->type);
 		break;
 
 	case J_INT:
 		if (isdigit(next_char))
 			*jc->str++ = next_char;
 		else {
-			*jc->str = 0;
-			value.vu.str.value = jc->string;
-			jc->callback(jc->callback_ctx, JSON_T_STRING, &value);
-			new_state(jc, J_END);
+			call_callback(jc, JSON_T_STRING, J_END);
 			return JSON_parser_char(jc, next_char);
 		}
 		break;
@@ -170,16 +203,16 @@ static int JSON_parser_char(JSON_parser jc, int next_char)
 			break;
 		switch (next_char) {
 		case '"':
-			STRING_OBJ(JSON_T_STRING, J_END);
+			STRING_OBJ(J_STRING, J_END);
 			break;
 		case '[':
-			jc->callback(jc->callback_ctx, JSON_T_ARRAY_BEGIN, NULL);
 			jc->in_array = 1;
+			call_callback(jc, JSON_T_ARRAY_BEGIN, J_START);
 			new_state(jc, J_START);
 			break;
 		case '0': case '1': case '2': case '3': case '4':
 		case '5': case '6': case '7': case '8': case '9':
-			STRING_OBJ(JSON_T_STRING, J_END);
+			STRING_OBJ(J_STRING, J_END);
 			new_state(jc, J_INT);
 			*jc->str++ = next_char;
 			break;
@@ -220,10 +253,11 @@ failed:
 #ifdef DEBUG_CB
 static JSON_parser_callback real_cb;
 
-static int debug_cb(void* ctx, int type, const struct JSON_value_struct* value)
+static int debug_cb(void* ctx, int type, struct JSON_value_struct* value)
 {
 	switch (type) {
 	case JSON_T_ARRAY_BEGIN:
+		fprintf(stderr, "Key '%s'\n", value->key);
 		fputs("Array begin\n", stderr);
 		break;
     case JSON_T_ARRAY_END:
@@ -236,11 +270,11 @@ static int debug_cb(void* ctx, int type, const struct JSON_value_struct* value)
 		fputs("Obj end\n", stderr);
 		break;
     case JSON_T_STRING:
-		fprintf(stderr, "Str '%s'\n", value->vu.str.value);
+		fprintf(stderr, "Key '%s'\n", value->key);
+		fprintf(stderr, "Str '%s'\n", value->str);
 		break;
-    case JSON_T_KEY:
-		fprintf(stderr, "Key '%s'\n", value->vu.str.value);
-		break;
+	default:
+		assert(0);
 	}
 
 	return real_cb(ctx, type, value);

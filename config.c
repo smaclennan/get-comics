@@ -234,39 +234,28 @@ static void parse_comic_str(struct connection **new, char *key, char *val)
 }
 
 static struct parse_ctx {
-	char s_key[80];
-	int s_iskey;
 	int in_comics;
 	struct connection *new;
 } parse_ctx;
 
-static int parse(void *ctxin, int type, const JSON_value *value)
+static int parse(void *ctxin, int type, JSON_value *value)
 {
 	struct parse_ctx *ctx = ctxin;
 
 	switch (type) {
-	case JSON_T_KEY:
-		if (ctx->s_iskey) {
-			printf("Parse error: Key within key\n");
-			exit(1);
-		}
-		ctx->s_iskey = 1;
-		snprintf(ctx->s_key, sizeof(ctx->s_key), "%s", value->vu.str.value);
-		return 1; /* do not break */
-
 	case JSON_T_STRING:
-		if (!ctx->s_iskey) {
+		if (!value->key) {
 			printf("Parse error: string with no key\n");
 			exit(1);
 		}
 		if (ctx->in_comics)
-			parse_comic_str(&ctx->new, ctx->s_key, (char *)value->vu.str.value);
+			parse_comic_str(&ctx->new, value->key, value->str);
 		else
-			parse_top_str(ctx->s_key, (char *)value->vu.str.value);
+			parse_top_str(value->key, value->str);
 		break;
 
 	case JSON_T_ARRAY_BEGIN:
-		if (ctx->s_iskey && strcmp(ctx->s_key, "comics") == 0)
+		if (strcmp(value->key, "comics") == 0)
 			ctx->in_comics = 1;
 		else {
 			printf("Invalid array\n");
@@ -295,7 +284,6 @@ static int parse(void *ctxin, int type, const JSON_value *value)
 		printf("Unexpected JSON object %d\n", type);
 	}
 
-	ctx->s_iskey = 0;
 	return 1;
 }
 

@@ -215,7 +215,8 @@ static int fixup_host(struct connection *conn)
 
 int build_request(struct connection *conn)
 {
-	char *url, *host, *p;
+	const char *url;
+	char *host, *p;
 
 	url = is_http(conn->url);
 	if (!url) {
@@ -273,7 +274,8 @@ int build_request(struct connection *conn)
 	if (strchr(url, ' ')) {
 		/* Some sites cannot handle spaces in the url. */
 		int n = sprintf(conn->buf, "%s ", method);
-		char *in = url, *out = conn->buf + n;
+		const char *in = url;
+		char *out = conn->buf + n;
 		while (*in)
 			if (*in == ' ') {
 				*out++ = '%';
