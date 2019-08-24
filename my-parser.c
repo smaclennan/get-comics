@@ -1,7 +1,7 @@
 #include "get-comics.h"
 #include "my-parser.h"
 
-// #define DEBUG_CB
+#define DEBUG_CB
 
 enum states {
 	J_START,
@@ -137,10 +137,11 @@ static int JSON_parser_char(JSON_parser jc, int next_char)
 
 	case J_INT:
 		if (isdigit(next_char))
-			jc->integer = jc->integer * 10 + next_char - '0';
+			*jc->str++ = next_char;
 		else {
-			value.vu.integer_value = jc->integer;
-			jc->callback(jc->callback_ctx, JSON_T_INTEGER, &value);
+			*jc->str = 0;
+			value.vu.str.value = jc->string;
+			jc->callback(jc->callback_ctx, JSON_T_STRING, &value);
 			new_state(jc, J_END);
 			return JSON_parser_char(jc, next_char);
 		}
@@ -178,8 +179,9 @@ static int JSON_parser_char(JSON_parser jc, int next_char)
 			break;
 		case '0': case '1': case '2': case '3': case '4':
 		case '5': case '6': case '7': case '8': case '9':
-			jc->integer = next_char - '0';
+			STRING_OBJ(JSON_T_STRING, J_END);
 			new_state(jc, J_INT);
+			*jc->str++ = next_char;
 			break;
 		default:
 			goto failed;
@@ -233,9 +235,6 @@ static int debug_cb(void* ctx, int type, const struct JSON_value_struct* value)
     case JSON_T_OBJECT_END:
 		fputs("Obj end\n", stderr);
 		break;
-    case JSON_T_INTEGER:
-		fprintf(stderr, "Int %d\n", value->vu.integer_value);
-		break;
     case JSON_T_STRING:
 		fprintf(stderr, "Str '%s'\n", value->vu.str.value);
 		break;
@@ -286,4 +285,17 @@ int JSON_parse_file(const char *fname, JSON_parser_callback callback, void *call
 		printf("JSON_parser: parse failed\n");
 
 	return rc;
+}
+
+int JSON_int(const char *str)
+{
+	char *e;
+
+	int n = strtol(str, &e, 0);
+	if (*e) {
+		fprintf(stderr, "Invalid int '%s'\n", str);
+		exit(1);
+	}
+
+	return n;
 }

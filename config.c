@@ -195,20 +195,11 @@ static void parse_top_str(char *key, char *val)
 		gocomics_regexp = must_strdup(val);
 	else if (strcmp(key, "debug") == 0)
 		debug_fp = fopen(val, "w");
-	else
-		printf("Unexpected element '%s'\n", key);
-}
-
-static void parse_top_int(char *key, int val)
-{
-	if (verbose > 2)
-		printf("key '%s' val %d\n", key, val);
-
-	if (strcmp(key, "threads") == 0) {
+	else if (strcmp(key, "threads") == 0) {
 		if (!threads_set)
-			thread_limit = val;
+			thread_limit = JSON_int(val);
 	} else if (strcmp(key, "timeout") == 0)
-		read_timeout = val;
+		read_timeout = JSON_int(val);
 	else
 		printf("Unexpected element '%s'\n", key);
 }
@@ -232,21 +223,12 @@ static void parse_comic_str(struct connection **new, char *key, char *val)
 		add_referer(new, val);
 	else if (strcmp(key, "gocomic") == 0)
 		add_gocomic(new, val);
-	else
-		printf("Unexpected entry %s\n", key);
-}
-
-static void parse_comic_int(struct connection **new, char *key, int val)
-{
-	if (verbose > 2)
-		printf("  key '%s' val %d\n", key, val);
-
-	if (strcmp(key, "regmatch") == 0)
-		add_regmatch(new, val);
+	else if (strcmp(key, "regmatch") == 0)
+		add_regmatch(new, JSON_int(val));
 	else if (strcmp(key, "redirect") == 0)
-		add_redirect_ok(new, val);
+		add_redirect_ok(new, JSON_int(val));
 	else if (strcmp(key, "insecure") == 0)
-		add_insecure(new, val);
+		add_insecure(new, JSON_int(val));
 	else
 		printf("Unexpected entry %s\n", key);
 }
@@ -281,17 +263,6 @@ static int parse(void *ctxin, int type, const JSON_value *value)
 			parse_comic_str(&ctx->new, ctx->s_key, (char *)value->vu.str.value);
 		else
 			parse_top_str(ctx->s_key, (char *)value->vu.str.value);
-		break;
-
-	case JSON_T_INTEGER:
-		if (!ctx->s_iskey) {
-			printf("Parse error: int with no key\n");
-			exit(1);
-		}
-		if (ctx->in_comics)
-			parse_comic_int(&ctx->new, ctx->s_key, value->vu.integer_value);
-		else
-			parse_top_int(ctx->s_key, value->vu.integer_value);
 		break;
 
 	case JSON_T_ARRAY_BEGIN:
