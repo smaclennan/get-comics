@@ -1,6 +1,4 @@
-# get-comics
-
-## What is it?
+# What is it?
 
 I read roughly 40 web comics daily, so I wrote get-comics to
 conveniently download all the comics into one place. It uses a simple
