@@ -12,6 +12,7 @@ have limited or sporadic internet access, I will run get-comics from
 cron at home and just keep track of the links.
 
 Here is the alias I use to download the comics under Linux:
+
     get-today='get-comics -cd ~/comics/today -i ~/comics/index'
 
 ## How it works
