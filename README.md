@@ -1,10 +1,11 @@
-What is it?
------------
+# get-comics
 
-I read roughly 40 web comics, so I wrote get-comics to conveniently
-download all the comics into one place. It uses a simple json
-configuration file to define how to download the comics. The sample
-one included is the one I use every day.
+## What is it?
+
+I read roughly 40 web comics daily, so I wrote get-comics to
+conveniently download all the comics into one place. It uses a simple
+json configuration file to define how to download the comics. The
+sample one included is the one I use every day.
 
 It broadly has two modes: it can either download the comics as images
 or create a file of links to the comics. For day-to-day use I
@@ -13,18 +14,16 @@ have limited or sporadic internet access, I will run get-comics from
 cron at home and just keep track of the links.
 
 Here is the alias I use to download the comics under Linux:
-get-today='get-comics -cd ~/comics/today -i ~/comics/index'
+    get-today='get-comics -cd ~/comics/today -i ~/comics/index'
 
-How it works
-------------
+## How it works
 
 For all the active comics I read there are two stages. First, we
 download the html page for the comic and scan the page using a
 regular expression to find the image. Then we download the image or
 just put the link in the links file.
 
-Why are there different versions?
----------------------------------
+## Why are there different versions?
 
 I use get-comics every day, so it is a good vehicle to test and
 experiment with http clients. As such, I have a raw C version of the
@@ -52,8 +51,7 @@ the program. This was just for me to experiment with go and is less
 full featured than the other versions. But if you like go, go ahead and
 use it!
 
-OS Agnostic
------------
+## OS Agnostic
 
 I have tried to make all the versions OS agnostic. While Linux is my
 main platform, and therefore the most tested, the C and curl versions
