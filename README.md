@@ -39,7 +39,7 @@ libcurl "just works" and if it doesn't there is an active community
 to fix it.
 
 There is a multi-threaded python (get-comics.py) version of
-get-comics. This make even more sense since it needs no compiling and
+get-comics. This makes even more sense since it needs no compiling and
 is a single, <400 line, file. Note: the python version does need the
 python requests package which you probably do not have. See the
 comment at the top of the get-comics.py file. Unless you have a super
