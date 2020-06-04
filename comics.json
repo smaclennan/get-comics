@@ -66,12 +66,6 @@
   "days": "XmXwXfX"
 },
 */
-{ /* The Frumps */
-  "url": "http://www.thefrumps.com",
-  "regexp": "wp-content/uploads/%Y/%m/%Y-%m-%d-[^.]*\\.jpg",
-  "output": "frumps",
-  "days": "XXXXXXX"
-},
 /*
 { /*invisible bread */
   "url": "http://invisiblebread.com/",
@@ -123,22 +117,14 @@
   "output": "redmeat",
   "days": "XXXXXfX"
 },
-/*
-{ /* Sinfest */
-  "url": "http://www.sinfest.net/btphp/comics/%Y-%m-%d.gif",
-  "output": "sinfest"
-},
-*/
-/*
 { /* SMBC */
-  "url": "http://www.smbc-comics.com/",
-  "regexp": "comics/[0-9 ()-]+\.png",
+  "url": "https://www.smbc-comics.com/",
+  "regexp": "comics/[0-9-]+\\.png",
   "output": "smbc"
 },
-*/
 { /* Something Positive */
-  "url": "https://www.somethingpositive.net/",
-  "regexp": "sp[0-9]*\\.png",
+  "url": "https://somethingpositive.net/",
+  "regexp": "wp-content/uploads/[0-9]+/[0-9]+/sp[0-9]*\\.png",
   "output": "somethingp"
 },
 { /* Tinkersons */
@@ -156,6 +142,7 @@
 { "gocomic": "boundandgagged" },
 { "gocomic": "brevity" },
 { "gocomic": "closetohome" },
+{ "gocomic": "culdesac" },
 { "gocomic": "drabble" },
 { "gocomic": "duplex" },
 { "gocomic": "fminus" },
