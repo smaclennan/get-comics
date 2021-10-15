@@ -112,10 +112,12 @@
   "days": "XmtwtfX"
 },
 { /* Red Meat */
-  "url": "http://www.redmeat.com/max-cannon/FreshMeat",
+  "url": "https://www.redmeat.com/max-cannon/FreshMeat",
   "regexp": "https?://[^/]+/redmeat/imager/u/redmeat/[^\"]*",
   "output": "redmeat",
-  "days": "XXXXXfX"
+  "days": "XXXXXfX",
+  /* cert has expired */
+  "insecure": 1
 },
 { /* SMBC */
   "url": "https://www.smbc-comics.com/",
