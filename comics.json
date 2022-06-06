@@ -35,8 +35,7 @@
 */
 { /* Cyanide & Happiness */
   "url": "http://explosm.net/",
-  "regexp":
-   "//files\\.explosm\\.net/comics/(Matt|Kris|Dave|Rob)/[^/]+\\.(png|jpg|gif)",
+  "regexp": "https://static.explosm.net/[0-9/]+[^.]+\\.png",
   "output": "cyanide"
 },
 { /* The Devil's Panties */
@@ -49,7 +48,7 @@
   "url": "http://www.dieselsweeties.com/",
   "regexp": "/h?strips[0-9]*/[^.]+\\.(png|gif)",
   "output": "diesel",
-  "days": "XmtwtfX"
+  "days": "XmXXXXXX"
 },
 /*
 { /* Dilbert via ArcaMax */
@@ -79,12 +78,14 @@
   "output": "kandk"
 },
 */
+/*
 { /* Maximumble */
   "url": "http://maximumble.thebookofbiff.com",
   "regexp": "http://maximumble.thebookofbiff.com/wp-content/uploads/[0-9]+/[0-9]+/[A-F0-9-]+\\.(png|gif)",
   "output": "maxim",
   "days": "XmtwtfX"
 },
+*/
 { /* The Other End */
   "url": "http://www.kohney.com",
   "regexp": "https?://[^/]+/www\\.kohney\\.com/wp-content/uploads/%Y/[0-9]+/[^.]+\\.(jpg|png)",
